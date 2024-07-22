@@ -1,23 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import LyricsEditor from './components/LyricsEditor';
+import LivePreview from './components/LivePreview';
+import { loadSongs } from './store/songSlice';
+import { loadSongsFromLocalStorage } from './utils/localStorage';
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const savedSongs = loadSongsFromLocalStorage();
+    dispatch(loadSongs(savedSongs));
+  }, [dispatch]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="flex flex-col h-screen">
+      <Header />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
+        <main className="flex-1 flex">
+          <LyricsEditor />
+          <LivePreview />
+        </main>
+      </div>
     </div>
   );
 }

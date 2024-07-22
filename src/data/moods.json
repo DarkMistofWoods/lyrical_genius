@@ -1,0 +1,9 @@
+[
+    { "value": "happy", "label": "Happy" },
+    { "value": "sad", "label": "Sad" },
+    { "value": "energetic", "label": "Energetic" },
+    { "value": "mellow", "label": "Mellow" },
+    { "value": "angry", "label": "Angry" },
+    { "value": "romantic", "label": "Romantic" },
+    { "value": "melancholic", "label": "Melancholic" }
+  ]

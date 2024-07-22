@@ -1,0 +1,6 @@
+[
+    { "value": "male", "label": "Male" },
+    { "value": "female", "label": "Female" },
+    { "value": "duet", "label": "Duet" },
+    { "value": "choir", "label": "Choir" }
+  ]

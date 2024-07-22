@@ -1,0 +1,8 @@
+[
+    { "value": "pop", "label": "Pop" },
+    { "value": "rock", "label": "Rock" },
+    { "value": "hiphop", "label": "Hip Hop" },
+    { "value": "country", "label": "Country" },
+    { "value": "jazz", "label": "Jazz" },
+    { "value": "electronic", "label": "Electronic" }
+  ]

@@ -1,0 +1,8 @@
+[
+    { "value": "guitar", "label": "Guitar" },
+    { "value": "piano", "label": "Piano" },
+    { "value": "drums", "label": "Drums" },
+    { "value": "synth", "label": "Synthesizer" },
+    { "value": "bass", "label": "Bass" },
+    { "value": "violin", "label": "Violin" }
+  ]
