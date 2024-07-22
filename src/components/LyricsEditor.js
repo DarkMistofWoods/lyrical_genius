@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateLyrics, updateTitle, updateStyle, updateSong } from '../store/songSlice';
+import { 
+  updateLyrics, 
+  updateTitle, 
+  updateStyle, 
+  updateSong, 
+  saveVersion, 
+  restoreVersion 
+} from '../store/songSlice';
 import { saveSongsToLocalStorage } from '../utils/localStorage';
 import SearchableDropdown from './SearchableDropdown';
 
 function LyricsEditor() {
   const dispatch = useDispatch();
   const { currentSong, songs } = useSelector(state => state.song);
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [styleOptions, setStyleOptions] = useState({
     vocals: [],
     genre: [],
@@ -82,6 +90,34 @@ function LyricsEditor() {
     saveSongsToLocalStorage(updatedSongs);
   };
 
+  const handleSaveVersion = () => {
+    dispatch(saveVersion());
+    saveChanges(currentSong);
+  };
+
+  const handleRestoreVersion = (index) => {
+    dispatch(restoreVersion(index));
+    saveChanges(currentSong);
+  };
+
+  const handleAddSection = (sectionType) => {
+    const sectionText = `\n\n[${sectionType}]\n`;
+    const newLyrics = currentSong.lyrics + sectionText;
+    dispatch(updateLyrics(newLyrics));
+    saveChanges({ ...currentSong, lyrics: newLyrics });
+  };
+
+  const handleCopyLyrics = () => {
+    const formattedLyrics = `${currentSong.title}\n\n${currentSong.lyrics}\n\nStyle: ${Object.entries(currentSong.style)
+      .filter(([_, values]) => values.length > 0)
+      .map(([category, values]) => `${category}: ${values.join(', ')}`)
+      .join(' | ')}`;
+    
+    navigator.clipboard.writeText(formattedLyrics)
+      .then(() => alert('Lyrics copied to clipboard!'))
+      .catch(err => console.error('Failed to copy lyrics: ', err));
+  };
+
   // Ensure all style properties are arrays
   const safeStyle = {
     vocals: [],
@@ -93,21 +129,41 @@ function LyricsEditor() {
   };
 
   return (
-    <div className="flex-1 p-4">
+    <div className={`flex-1 p-4 ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
       <input 
         type="text" 
         placeholder="Song Title" 
-        className="w-full mb-4 p-2 border rounded"
+        className={`w-full mb-4 p-2 border rounded ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-black'}`}
         value={currentSong.title}
         onChange={handleTitleChange}
       />
+      <div className="mb-4">
+        <button 
+          onClick={() => handleAddSection('Verse')}
+          className="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 mr-2"
+        >
+          Add Verse
+        </button>
+        <button 
+          onClick={() => handleAddSection('Chorus')}
+          className="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 mr-2"
+        >
+          Add Chorus
+        </button>
+        <button 
+          onClick={() => handleAddSection('Bridge')}
+          className="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 mr-2"
+        >
+          Add Bridge
+        </button>
+      </div>
       <textarea 
         placeholder="Enter your lyrics here..."
-        className="w-full h-64 p-2 border rounded mb-4"
+        className={`w-full h-64 p-2 border rounded mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-black'}`}
         value={currentSong.lyrics}
         onChange={handleLyricsChange}
       ></textarea>
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {Object.entries(styleOptions).map(([key, options]) => (
           <SearchableDropdown
             key={key}
@@ -115,6 +171,7 @@ function LyricsEditor() {
             options={options}
             selectedValues={safeStyle[key] || []}
             onChange={(selectedValues) => handleStyleChange(key, selectedValues)}
+            isDarkMode={isDarkMode}
           />
         ))}
       </div>
@@ -124,11 +181,11 @@ function LyricsEditor() {
           placeholder="Custom style"
           value={customStyle}
           onChange={handleCustomStyleChange}
-          className="flex-grow p-2 border rounded-l"
+          className={`flex-grow p-2 border rounded-l ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-black'}`}
         />
         <button 
           onClick={addCustomStyle}
-          className="bg-blue-500 text-white p-2 rounded-r"
+          className="bg-blue-500 text-white p-2 rounded-r hover:bg-blue-600"
         >
           Add
         </button>
@@ -138,7 +195,7 @@ function LyricsEditor() {
           (values || []).map(value => (
             <span 
               key={`${category}-${value}`} 
-              className="bg-gray-200 px-2 py-1 rounded flex items-center"
+              className={`px-2 py-1 rounded flex items-center ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}
             >
               {value}
               <button 
@@ -150,6 +207,32 @@ function LyricsEditor() {
             </span>
           ))
         )}
+      </div>
+      <div className="mb-4">
+        <button
+          onClick={handleSaveVersion}
+          className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 mr-2"
+        >
+          Save Version
+        </button>
+        <button
+          onClick={handleCopyLyrics}
+          className="bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600"
+        >
+          Copy Lyrics
+        </button>
+      </div>
+      <div className="mt-4">
+        <h3 className="text-lg font-semibold mb-2">Version History</h3>
+        {currentSong.versions.map((version, index) => (
+          <button
+            key={version.timestamp}
+            onClick={() => handleRestoreVersion(index)}
+            className="bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 mr-2 mb-2"
+          >
+            Restore Version {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import LyricsEditor from './components/LyricsEditor';
@@ -9,6 +9,7 @@ import { loadSongsFromLocalStorage } from './utils/localStorage';
 
 function App() {
   const dispatch = useDispatch();
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   useEffect(() => {
     const savedSongs = loadSongsFromLocalStorage();
@@ -16,7 +17,7 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className={`flex flex-col h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

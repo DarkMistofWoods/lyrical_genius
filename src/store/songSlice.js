@@ -10,7 +10,18 @@ const createNewSong = () => ({
     instruments: [],
     mood: [],
     custom: []
-  }
+  },
+  versions: [{
+    timestamp: Date.now(),
+    lyrics: '',
+    style: {
+      vocals: [],
+      genre: [],
+      instruments: [],
+      mood: [],
+      custom: []
+    }
+  }]
 });
 
 const initialState = {
@@ -24,6 +35,13 @@ export const songSlice = createSlice({
   reducers: {
     setCurrentSong: (state, action) => {
       state.currentSong = action.payload;
+      if (!state.currentSong.versions) {
+        state.currentSong.versions = [{
+          timestamp: Date.now(),
+          lyrics: state.currentSong.lyrics,
+          style: { ...state.currentSong.style }
+        }];
+      }
     },
     updateLyrics: (state, action) => {
       state.currentSong.lyrics = action.payload;
@@ -34,8 +52,8 @@ export const songSlice = createSlice({
     updateStyle: (state, action) => {
       state.currentSong.style = action.payload;
     },
-    addSong: (state, action) => {
-      const newSong = action.payload || createNewSong();
+    addSong: (state) => {
+      const newSong = createNewSong();
       state.songs.push(newSong);
       state.currentSong = newSong;
     },
@@ -59,8 +77,34 @@ export const songSlice = createSlice({
       }
     },
     loadSongs: (state, action) => {
-      state.songs = action.payload.length > 0 ? action.payload : [createNewSong()];
+      state.songs = action.payload.length > 0 ? action.payload.map(song => ({
+        ...song,
+        versions: song.versions || [{
+          timestamp: Date.now(),
+          lyrics: song.lyrics,
+          style: { ...song.style }
+        }]
+      })) : [createNewSong()];
       state.currentSong = state.songs[0];
+    },
+    saveVersion: (state) => {
+      if (!state.currentSong.versions) {
+        state.currentSong.versions = [];
+      }
+      const newVersion = {
+        timestamp: Date.now(),
+        lyrics: state.currentSong.lyrics,
+        style: { ...state.currentSong.style }
+      };
+      state.currentSong.versions.push(newVersion);
+    },
+    restoreVersion: (state, action) => {
+      const versionIndex = action.payload;
+      if (state.currentSong.versions && state.currentSong.versions[versionIndex]) {
+        const version = state.currentSong.versions[versionIndex];
+        state.currentSong.lyrics = version.lyrics;
+        state.currentSong.style = { ...version.style };
+      }
     }
   }
 });
@@ -73,7 +117,9 @@ export const {
   addSong, 
   updateSong, 
   deleteSong, 
-  loadSongs 
+  loadSongs,
+  saveVersion,
+  restoreVersion
 } = songSlice.actions;
 
 export default songSlice.reducer;
