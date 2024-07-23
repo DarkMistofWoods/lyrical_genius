@@ -11,12 +11,22 @@ function Header() {
   return (
     <header className={`bg-[${currentTheme.background}] text-[${currentTheme.text}] p-4 flex justify-between items-center fixed top-0 left-0 right-0 z-50`}>
       <h1 className="text-2xl font-bold">Lyrical Genius (you!)</h1>
-      <button 
-        onClick={() => dispatch(toggleTheme())}
-        className={`bg-[${isDarkMode ? theme.common.white : theme.common.black}] text-[${isDarkMode ? theme.common.black : theme.common.white}] px-4 py-2 rounded-full`}
-      >
-        {isDarkMode ? '☀️' : '🌙'}
-      </button>
+      <div className="flex items-center">
+        <a 
+          href="https://suno.com/@digital_takeover" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="mr-4 hover:underline"
+        >
+          Follow me on Suno: @digital_takeover
+        </a>
+        <button 
+          onClick={() => dispatch(toggleTheme())}
+          className={`bg-[${isDarkMode ? theme.common.white : theme.common.black}] text-[${isDarkMode ? theme.common.black : theme.common.white}] px-4 py-2 rounded-full`}
+        >
+          {isDarkMode ? '☀️' : '🌙'}
+        </button>
+      </div>
     </header>
   );
 }

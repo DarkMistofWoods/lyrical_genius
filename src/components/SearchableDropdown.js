@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import theme from '../theme';
 
-function SearchableDropdown({ label, options, selectedValues, onChange }) {
+function SearchableDropdown({ label, options, selectedValues, onChange, labelColor }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
@@ -31,7 +31,7 @@ function SearchableDropdown({ label, options, selectedValues, onChange }) {
 
   return (
     <div className="mb-4" ref={dropdownRef}>
-      <label className={`block text-sm font-medium mb-1 text-[${theme.common.black}]`}>{label}</label>
+      <label className={`block text-sm font-medium mb-1`} style={{ color: labelColor }}>{label}</label>
       <div className="relative">
         <button
           type="button"

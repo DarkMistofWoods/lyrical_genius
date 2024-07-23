@@ -223,7 +223,6 @@ function LyricsEditor() {
       <div className={`sticky top-[calc(4rem+48px)] z-30 bg-[${theme.common.grey}] rounded-b-lg mt-1`}>
         <div className="px-4 py-2">
           <div className="flex flex-wrap items-center gap-2 mb-2 w-full">
-            <span className="text-sm font-semibold text-[#0D0C0C]">Song Style:</span>
             {Object.entries(styleOptions).map(([key, options]) => (
               <div key={key} className="flex-grow min-w-[120px] max-w-[200px]">
                 <SearchableDropdown
@@ -231,6 +230,7 @@ function LyricsEditor() {
                   options={options}
                   selectedValues={currentSong.style[key] || []}
                   onChange={(selectedValues) => handleStyleChange(key, selectedValues)}
+                  labelColor={theme.common.white}
                 />
               </div>
             ))}
