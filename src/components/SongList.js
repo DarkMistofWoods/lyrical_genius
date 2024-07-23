@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, addSong, deleteSong } from '../store/songSlice';
 import { saveSongsToLocalStorage } from '../utils/localStorage';
+import theme from '../theme';
+import ReactDOM from 'react-dom';
 
 function SongList() {
   const dispatch = useDispatch();
   const { songs, currentSong } = useSelector(state => state.song);
   const [songToDelete, setSongToDelete] = useState(null);
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   const handleSelectSong = (song) => {
     dispatch(setCurrentSong(song));
@@ -33,8 +36,37 @@ function SongList() {
     setSongToDelete(null);
   };
 
+  const DeleteConfirmationDialog = () => {
+    if (!songToDelete) return null;
+
+    return ReactDOM.createPortal(
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+        <div className={`bg-[${theme.common.white}] p-4 rounded shadow-lg max-w-sm w-full`}>
+          <p className={`mb-4 text-center text-[${theme.common.black}]`}>
+            Are you sure you want to delete this song? This action cannot be undone.
+          </p>
+          <div className="flex justify-center">
+            <button
+              onClick={cancelDeleteSong}
+              className={`mr-2 px-4 py-2 bg-[${theme.common.grey}] text-[${theme.common.white}] rounded hover:opacity-80`}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDeleteSong}
+              className={`px-4 py-2 bg-red-500 text-[${theme.common.white}] rounded hover:opacity-80`}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  };
+
   return (
-    <div className="relative">
+    <div className="p-4">
       <h2 className="text-lg font-semibold mb-2">Your Songs</h2>
       <ul className="mb-4">
         {songs.map(song => (
@@ -56,31 +88,11 @@ function SongList() {
       </ul>
       <button
         onClick={handleNewSong}
-        className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+        className={`w-full bg-[${theme.common.brown}] text-[${theme.common.white}] py-2 px-4 rounded hover:opacity-80`}
       >
         New Song
       </button>
-      {songToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded shadow-lg max-w-sm w-full">
-            <p className="mb-4 text-center">Are you sure you want to delete this song? This action cannot be undone.</p>
-            <div className="flex justify-center">
-              <button
-                onClick={cancelDeleteSong}
-                className="mr-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDeleteSong}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationDialog />
     </div>
   );
 }

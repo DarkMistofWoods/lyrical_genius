@@ -1,14 +1,14 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import SongList from './SongList';
+import theme from '../theme';
 
 function Sidebar() {
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   return (
-    <aside className={`w-64 p-4 ${isDarkMode ? 'bg-[#595859] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'}`}>
+    <aside className={`h-full bg-[${theme.common.grey}] text-[${theme.common.white}] rounded-lg mx-4`}>
       <SongList />
-      {/* Add new song and delete song buttons here */}
     </aside>
   );
 }
