@@ -9,27 +9,20 @@ function LivePreview() {
   const parseSections = (lyrics) => {
     const sectionRegex = /\[(.*?)\]([\s\S]*?)(?=\[|$)/g;
     const matches = [...lyrics.matchAll(sectionRegex)];
-    let verseCount = 0;
 
     return matches.map(match => {
-      let type = match[1].trim().toLowerCase();
+      const type = match[1].trim().toLowerCase();
       const content = match[2].trim();
-
-      if (type === 'verse') {
-        verseCount++;
-        type = `verse ${verseCount}`;
-      }
-
       return { type, content };
     });
   };
 
   const parsedSections = parseSections(currentSong.lyrics);
 
-  const styleString = Object.values(currentSong.style)
-    .flat()
-    .filter(Boolean)
-    .join(', ');
+  const styleString = Object.entries(currentSong.style)
+    .filter(([_, values]) => values && values.length > 0)
+    .map(([category, values]) => `${category}: ${values.join(', ')}`)
+    .join(' | ');
 
   const formattedLyrics = `${currentSong.title || 'Untitled'}\n\n${styleString}\n\n${parsedSections.map(section => `[${section.type}]\n${section.content}`).join('\n\n')}`;
 

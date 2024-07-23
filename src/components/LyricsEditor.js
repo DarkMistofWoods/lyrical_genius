@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import theme from '../theme';
 import { 
@@ -11,7 +11,7 @@ import { saveSongsToLocalStorage } from '../utils/localStorage';
 import SearchableDropdown from './SearchableDropdown';
 import DropdownPortal from './DropdownPortal';
 import LivePreview from './LivePreview';
-import { Plus, XCircle, Settings } from 'lucide-react';
+import { Plus, XCircle, Settings, ArrowUp, ArrowDown, Copy, Undo } from 'lucide-react';
 
 // Import style options
 import vocalsOptions from '../data/vocals.json';
@@ -20,6 +20,7 @@ import instrumentsOptions from '../data/instruments.json';
 import moodsOptions from '../data/moods.json';
 
 const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Hook', 'Pre-Hook'];
+const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
 
 function LyricsEditor() {
   const dispatch = useDispatch();
@@ -36,6 +37,7 @@ function LyricsEditor() {
     mood: moodsOptions
   });
   const [customStyle, setCustomStyle] = useState('');
+  const [undoStack, setUndoStack] = useState([]);
 
   useEffect(() => {
     if (currentSong.lyrics) {
@@ -53,40 +55,79 @@ function LyricsEditor() {
 
   const addSection = (type, index) => {
     const newSections = [...sections];
-    newSections.splice(index, 0, { type, content: '' });
-    setSections(newSections);
-    updateLyricsInStore(newSections);
+    const newSection = { type, content: '', verseNumber: type === 'Verse' ? 1 : null };
+    newSections.splice(index, 0, newSection);
+    updateSections(newSections);
     setAddingSectionAt(null);
   };
 
+  const duplicateSection = (index) => {
+    const newSections = [...sections];
+    const duplicatedSection = { ...newSections[index] };
+    newSections.splice(index + 1, 0, duplicatedSection);
+    updateSections(newSections);
+  };
+
+  const changeVerseNumber = (index, number) => {
+    const newSections = [...sections];
+    newSections[index] = { ...newSections[index], verseNumber: number };
+    updateSections(newSections);
+  };
+
   const removeSection = (index) => {
+    const removedSection = sections[index];
     const newSections = sections.filter((_, i) => i !== index);
-    setSections(newSections);
-    updateLyricsInStore(newSections);
+    updateSections(newSections);
+    setUndoStack(prevStack => [...prevStack, { action: 'remove', index, section: removedSection }]);
+  };
+
+  const moveSection = (index, direction) => {
+    const newSections = [...sections];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex >= 0 && newIndex < newSections.length) {
+      [newSections[index], newSections[newIndex]] = [newSections[newIndex], newSections[index]];
+      updateSections(newSections);
+    }
+  };
+
+  const undoLastAction = () => {
+    setUndoStack(prevStack => {
+      if (prevStack.length > 0) {
+        const lastAction = prevStack[prevStack.length - 1];
+        const newSections = [...sections];
+        if (lastAction.action === 'remove') {
+          newSections.splice(lastAction.index, 0, lastAction.section);
+        }
+        updateSections(newSections);
+        return prevStack.slice(0, -1);
+      }
+      return prevStack;
+    });
   };
 
   const changeSectionType = (index, newType) => {
     const newSections = [...sections];
     newSections[index] = { ...newSections[index], type: newType };
-    setSections(newSections);
-    updateLyricsInStore(newSections);
+    updateSections(newSections);
     setEditingSectionAt(null);
   };
 
   const handleSectionChange = (index, content) => {
     const newSections = [...sections];
     newSections[index] = { ...newSections[index], content };
-    setSections(newSections);
-    updateLyricsInStore(newSections);
+    updateSections(newSections);
   };
 
-  const updateLyricsInStore = (newSections) => {
-    let verseCount = 0;
+  const updateSections = useCallback((newSections) => {
+    setSections(newSections);
+    updateLyricsInStore(newSections);
+  }, []);
+
+  const updateLyricsInStore = useCallback((newSections) => {
     const formattedSections = newSections.map(section => {
       let formattedType = section.type;
-      if (formattedType.toLowerCase() === 'verse') {
-        verseCount++;
-        formattedType = `verse ${verseCount}`;
+      if (formattedType === 'Verse' && section.verseNumber) {
+        formattedType = `verse ${section.verseNumber}`;
       }
       return `[${formattedType}]\n${section.content}`;
     });
@@ -94,7 +135,7 @@ function LyricsEditor() {
     const combinedLyrics = formattedSections.join('\n\n');
     dispatch(updateLyrics(combinedLyrics));
     saveChanges({ ...currentSong, lyrics: combinedLyrics });
-  };
+  }, [currentSong, dispatch]);
 
   const handleTitleChange = (e) => {
     dispatch(updateTitle(e.target.value));
@@ -302,13 +343,36 @@ function LyricsEditor() {
             <div className="mb-4 flex items-start relative">
               <div className="flex-grow relative">
                 <div className="flex items-center mb-1">
-                  <span className="font-bold text-sm mr-2">{section.type.charAt(0).toUpperCase() + section.type.slice(1)}</span>
+                  <span className="font-bold text-sm mr-2">{section.type}</span>
                   <button
                     onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
-                    className="text-[#A68477] hover:text-[#595859]"
+                    className="text-[#A68477] hover:text-[#595859] mr-2"
                   >
                     <Settings size={16} />
                   </button>
+                  <button
+                    onClick={() => duplicateSection(index)}
+                    className="text-[#A68477] hover:text-[#595859] mr-2"
+                  >
+                    <Copy size={16} />
+                  </button>
+                  {section.type === 'Verse' && (
+                    <div className="flex items-center">
+                      {verseNumbers.map(num => (
+                        <button
+                          key={num}
+                          onClick={() => changeVerseNumber(index, num)}
+                          className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${
+                            section.verseNumber === num
+                              ? 'bg-[#A68477] text-white'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <textarea
                   placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
@@ -331,12 +395,28 @@ function LyricsEditor() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => removeSection(index)}
-                className="ml-2 text-[#A68477] hover:text-[#595859]"
-              >
-                <XCircle size={20} />
-              </button>
+              <div className="ml-2 flex flex-col justify-center h-full">
+                <button
+                  onClick={() => removeSection(index)}
+                  className="text-[#A68477] hover:text-[#595859] mb-2"
+                >
+                  <XCircle size={20} />
+                </button>
+                <button
+                  onClick={() => moveSection(index, 'up')}
+                  className="text-[#A68477] hover:text-[#595859] mb-2"
+                  disabled={index === 0}
+                >
+                  <ArrowUp size={20} />
+                </button>
+                <button
+                  onClick={() => moveSection(index, 'down')}
+                  className="text-[#A68477] hover:text-[#595859]"
+                  disabled={index === sections.length - 1}
+                >
+                  <ArrowDown size={20} />
+                </button>
+              </div>
             </div>
             <div className="h-8 relative mb-2">
               <AddSectionButton
@@ -349,6 +429,16 @@ function LyricsEditor() {
             </div>
           </React.Fragment>
         ))}
+      </div>
+
+      <div className="fixed bottom-4 right-4">
+        <button
+          onClick={undoLastAction}
+          disabled={undoStack.length === 0}
+          className={`bg-[${theme.common.brown}] text-[${theme.common.white}] py-2 px-4 rounded hover:opacity-80 ${undoStack.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <Undo size={20} />
+        </button>
       </div>
 
       <div className="fixed right-0 top-16 bottom-0 w-96 p-4 overflow-y-auto">

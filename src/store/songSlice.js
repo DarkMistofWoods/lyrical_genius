@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { saveSongsToLocalStorage } from '../utils/localStorage';
 
 const createNewSong = () => ({
   id: Date.now(),
@@ -10,18 +11,7 @@ const createNewSong = () => ({
     instruments: [],
     mood: [],
     custom: []
-  },
-  versions: [{
-    timestamp: Date.now(),
-    lyrics: '',
-    style: {
-      vocals: [],
-      genre: [],
-      instruments: [],
-      mood: [],
-      custom: []
-    }
-  }]
+  }
 });
 
 const initialState = {
@@ -34,28 +24,44 @@ export const songSlice = createSlice({
   initialState,
   reducers: {
     setCurrentSong: (state, action) => {
-      state.currentSong = action.payload;
-      if (!state.currentSong.versions) {
-        state.currentSong.versions = [{
-          timestamp: Date.now(),
-          lyrics: state.currentSong.lyrics,
-          style: { ...state.currentSong.style }
-        }];
+      // Save the current song before switching
+      const currentIndex = state.songs.findIndex(song => song.id === state.currentSong.id);
+      if (currentIndex !== -1) {
+        state.songs[currentIndex] = { ...state.currentSong };
       }
+      
+      state.currentSong = action.payload;
+      saveSongsToLocalStorage(state.songs);
     },
     updateLyrics: (state, action) => {
       state.currentSong.lyrics = action.payload;
+      const index = state.songs.findIndex(song => song.id === state.currentSong.id);
+      if (index !== -1) {
+        state.songs[index] = { ...state.currentSong };
+      }
+      saveSongsToLocalStorage(state.songs);
     },
     updateTitle: (state, action) => {
       state.currentSong.title = action.payload;
+      const index = state.songs.findIndex(song => song.id === state.currentSong.id);
+      if (index !== -1) {
+        state.songs[index] = { ...state.currentSong };
+      }
+      saveSongsToLocalStorage(state.songs);
     },
     updateStyle: (state, action) => {
       state.currentSong.style = action.payload;
+      const index = state.songs.findIndex(song => song.id === state.currentSong.id);
+      if (index !== -1) {
+        state.songs[index] = { ...state.currentSong };
+      }
+      saveSongsToLocalStorage(state.songs);
     },
     addSong: (state) => {
       const newSong = createNewSong();
       state.songs.push(newSong);
       state.currentSong = newSong;
+      saveSongsToLocalStorage(state.songs);
     },
     updateSong: (state, action) => {
       const index = state.songs.findIndex(song => song.id === action.payload.id);
@@ -65,6 +71,7 @@ export const songSlice = createSlice({
           state.currentSong = action.payload;
         }
       }
+      saveSongsToLocalStorage(state.songs);
     },
     deleteSong: (state, action) => {
       state.songs = state.songs.filter(song => song.id !== action.payload);
@@ -75,37 +82,12 @@ export const songSlice = createSlice({
       } else if (state.currentSong.id === action.payload) {
         state.currentSong = state.songs[0];
       }
+      saveSongsToLocalStorage(state.songs);
     },
     loadSongs: (state, action) => {
-      state.songs = action.payload.length > 0 ? action.payload.map(song => ({
-        ...song,
-        versions: song.versions || [{
-          timestamp: Date.now(),
-          lyrics: song.lyrics,
-          style: { ...song.style }
-        }]
-      })) : [createNewSong()];
+      state.songs = action.payload.length > 0 ? action.payload : [createNewSong()];
       state.currentSong = state.songs[0];
     },
-    saveVersion: (state) => {
-      if (!state.currentSong.versions) {
-        state.currentSong.versions = [];
-      }
-      const newVersion = {
-        timestamp: Date.now(),
-        lyrics: state.currentSong.lyrics,
-        style: { ...state.currentSong.style }
-      };
-      state.currentSong.versions.push(newVersion);
-    },
-    restoreVersion: (state, action) => {
-      const versionIndex = action.payload;
-      if (state.currentSong.versions && state.currentSong.versions[versionIndex]) {
-        const version = state.currentSong.versions[versionIndex];
-        state.currentSong.lyrics = version.lyrics;
-        state.currentSong.style = { ...version.style };
-      }
-    }
   }
 });
 
@@ -117,9 +99,7 @@ export const {
   addSong, 
   updateSong, 
   deleteSong, 
-  loadSongs,
-  saveVersion,
-  restoreVersion
+  loadSongs
 } = songSlice.actions;
 
 export default songSlice.reducer;
