@@ -33,18 +33,13 @@ function LyricsEditor() {
   });
   const [customStyle, setCustomStyle] = useState('');
 
-  const wordCount = currentSong.lyrics.split(/\s+/).filter(Boolean).length;
-  const characterCount = currentSong.lyrics.length;
-  const lineCount = currentSong.lyrics.split('\n').filter(Boolean).length;
-
   useEffect(() => {
     if (currentSong.lyrics) {
       const initialSections = currentSong.lyrics.split('\n\n').map(content => {
-        const [type, ...lines] = content.split('\n');
-        return {
-          type: type.replace(/[\[\]]/g, '').trim(),
-          content: lines.join('\n').trim()
-        };
+        const lines = content.split('\n');
+        const type = lines[0].replace(/[\[\]]/g, '').trim();
+        const sectionContent = lines.slice(1).join('\n');
+        return { type, content: sectionContent };
       });
       setSections(initialSections);
     } else {
@@ -193,7 +188,9 @@ function LyricsEditor() {
         onChange={handleTitleChange}
       />
       <div className="text-sm mb-4 text-center">
-        Words: {wordCount} | Characters: {characterCount} | Lines: {lineCount}
+        Words: {currentSong.lyrics.split(/\s+/).filter(Boolean).length} | 
+        Characters: {currentSong.lyrics.length} | 
+        Lines: {currentSong.lyrics.split('\n').filter(Boolean).length}
       </div>
       
       {sections.length === 0 && renderAddSectionButton(0)}
@@ -203,6 +200,15 @@ function LyricsEditor() {
           {index === 0 && renderAddSectionButton(0)}
           <div className="mb-4 flex items-start relative">
             <div className="flex-grow relative">
+              <div className="flex items-center mb-1">
+                <span className="font-bold text-sm mr-2">{section.type.charAt(0).toUpperCase() + section.type.slice(1)}</span>
+                <button
+                  onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <Settings size={16} />
+                </button>
+              </div>
               <textarea 
                 placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
                 className={`w-full p-2 border rounded ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
@@ -210,14 +216,8 @@ function LyricsEditor() {
                 onChange={(e) => handleSectionChange(index, e.target.value)}
                 rows={6}
               ></textarea>
-              <button
-                onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-              >
-                <Settings size={20} />
-              </button>
               {editingSectionAt === index && (
-                <div className={`absolute z-20 top-8 right-2 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border rounded shadow-lg`}>
+                <div className={`absolute z-20 top-6 left-0 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border rounded shadow-lg`}>
                   {sectionTypes.map((type) => (
                     <button
                       key={type}
