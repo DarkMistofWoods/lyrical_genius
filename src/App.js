@@ -17,11 +17,11 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className={`flex flex-col h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
       <Header />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col md:flex-row">
         <Sidebar />
-        <main className="flex-1 flex">
+        <main className="flex-1 flex flex-col md:flex-row overflow-auto">
           <LyricsEditor />
           <LivePreview />
         </main>
