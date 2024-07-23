@@ -1,16 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-function LivePreview() {
+function LivePreview({ onCopyLyrics }) {
   const { currentSong } = useSelector(state => state.song);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
-
-  const sections = currentSong.lyrics.split('\n\n').filter(Boolean);
-
-  const styleString = Object.entries(currentSong.style)
-    .filter(([_, values]) => values.length > 0)
-    .map(([category, values]) => values.join(', '))
-    .join(', ');
 
   const parseSections = (lyrics) => {
     const sectionRegex = /\[(.*?)\]([\s\S]*?)(?=\[|$)/g;
@@ -23,9 +16,22 @@ function LivePreview() {
 
   const parsedSections = parseSections(currentSong.lyrics);
 
+  const styleString = Object.entries(currentSong.style)
+    .filter(([_, values]) => values.length > 0)
+    .map(([category, values]) => values.join(', '))
+    .join(', ');
+
   return (
-    <div className={`flex-1 p-4 overflow-auto ${isDarkMode ? 'bg-dark-background text-dark-text' : 'bg-light-background text-light-text'}`}>
-      <h2 className="text-xl font-bold mb-2">{currentSong.title || 'Untitled'}</h2>
+    <div className={`w-full h-full overflow-auto p-4 ${isDarkMode ? 'bg-dark-background text-dark-text' : 'bg-light-background text-light-text'}`}>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl font-bold">{currentSong.title || 'Untitled'}</h2>
+        <button
+          onClick={onCopyLyrics}
+          className={`${isDarkMode ? 'bg-purple-500' : 'bg-purple-600'} text-white py-1 px-3 rounded text-sm hover:opacity-80`}
+        >
+          Copy Lyrics
+        </button>
+      </div>
       {styleString && (
         <div className="text-sm italic mb-4">{styleString}</div>
       )}
