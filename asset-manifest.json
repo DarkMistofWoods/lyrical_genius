@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/lyrical-genius/static/css/main.ab78bf7f.css",
+    "main.js": "/lyrical-genius/static/js/main.e4314d09.js",
+    "index.html": "/lyrical-genius/index.html",
+    "main.ab78bf7f.css.map": "/lyrical-genius/static/css/main.ab78bf7f.css.map",
+    "main.e4314d09.js.map": "/lyrical-genius/static/js/main.e4314d09.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ab78bf7f.css",
+    "static/js/main.e4314d09.js"
+  ]
+}
