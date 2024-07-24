@@ -272,7 +272,7 @@ function LyricsEditor() {
             maxLength={100}
           />
         </div>
-        <div className="px-4 py-2">
+        <div className="px-4 py-10">
           <div className="flex flex-wrap items-center gap-2 mb-2 w-full">
             {Object.entries(styleOptions).map(([key, options]) => (
               <div key={key} className="flex-grow min-w-[120px] max-w-[200px]">
@@ -325,17 +325,22 @@ function LyricsEditor() {
           </div>
         </div>
       </div>
-  
+
       <button
         onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
-        className={`fixed z-50 right-[calc(24rem+30px)] ${
-          isMetadataCollapsed ? 'top-16' : 'top-[calc(4rem+4.5rem+48px)]'
-        } bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
+        className={`absolute z-50 right-4 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out ${
+          isMetadataCollapsed ? 'top-16' : 'top-[calc(4rem+4.5rem+32px)]'
+        }`}
+        style={{
+          transform: isMetadataCollapsed ? 'translateY(50%)' : 'translateY(50%)',
+        }}
       >
         {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
       </button>
-  
-      <div className={`px-4 ${isMetadataCollapsed ? 'pt-20' : 'pt-4'} pb-20 transition-all duration-300 ease-in-out`}>
+
+      <div className={`px-4 transition-all duration-300 ease-in-out ${
+        isMetadataCollapsed ? 'pt-24' : 'pt-20'
+      } pb-20`}>
         {sections.length === 0 && (
           <div className="h-8 relative">
             <AddSectionButton
@@ -347,11 +352,11 @@ function LyricsEditor() {
             />
           </div>
         )}
-  
+
         {sections.map((section, index) => (
           <React.Fragment key={index}>
             {index === 0 && (
-              <div className="h-8 relative mb-2" style={{ marginTop: '-3rem' }}>
+              <div className="h-8 relative mb-2">
                 <AddSectionButton
                   index={0}
                   isAdding={addingSectionAt === 0}
@@ -451,7 +456,7 @@ function LyricsEditor() {
           </React.Fragment>
         ))}
       </div>
-  
+
       <div className="fixed bottom-4 right-4">
         <button
           onClick={undoLastAction}
@@ -461,7 +466,7 @@ function LyricsEditor() {
           <Undo size={20} />
         </button>
       </div>
-  
+
       <div className="fixed right-0 top-16 bottom-0 w-96 p-4 overflow-y-auto">
         <LivePreview />
       </div>
