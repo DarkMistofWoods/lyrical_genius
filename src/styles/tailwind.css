@@ -1,3 +1,50 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+/* Ensure content doesn't shift when scrollbar appears */
+html {
+  overflow-y: scroll;
+}
+
+body {
+  overflow-y: scroll;
+}
+
+/* Adjust the width of the main content area */
+.ml-96 {
+  margin-left: calc(24rem + 10px); /* 96 * 0.25rem (for Tailwind's default rem size) + scrollbar width */
+}
+
+.pr-96 {
+  padding-right: calc(24rem + 10px);
+}
+
+/* Adjust the width of the fixed sidebars */
+.w-96 {
+  width: calc(24rem + 10px);
+}

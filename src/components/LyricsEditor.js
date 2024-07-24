@@ -11,7 +11,7 @@ import { saveSongsToLocalStorage } from '../utils/localStorage';
 import SearchableDropdown from './SearchableDropdown';
 import DropdownPortal from './DropdownPortal';
 import LivePreview from './LivePreview';
-import { Plus, XCircle, Settings, ArrowUp, ArrowDown, Copy, Undo } from 'lucide-react';
+import { Plus, XCircle, Settings, ArrowUp, ArrowDown, Copy, Undo, ChevronUp, ChevronDown } from 'lucide-react';
 
 // Import style options
 import vocalsOptions from '../data/vocals.json';
@@ -19,13 +19,12 @@ import genreOptions from '../data/genres.json';
 import instrumentsOptions from '../data/instruments.json';
 import moodsOptions from '../data/moods.json';
 
-const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Hook', 'Pre-Hook'];
+const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Hook', 'Pre-Hook', 'Line', 'Dialog', 'Pre-Chorus'];
 const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
 
 function LyricsEditor() {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
-  const currentTheme = isDarkMode ? theme.dark : theme.light;
   const { currentSong, songs } = useSelector(state => state.song);
   const [sections, setSections] = useState([]);
   const [addingSectionAt, setAddingSectionAt] = useState(null);
@@ -38,6 +37,7 @@ function LyricsEditor() {
   });
   const [customStyle, setCustomStyle] = useState('');
   const [undoStack, setUndoStack] = useState([]);
+  const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(false);
 
   useEffect(() => {
     if (currentSong.lyrics) {
@@ -55,7 +55,13 @@ function LyricsEditor() {
 
   const addSection = (type, index) => {
     const newSections = [...sections];
-    const newSection = { type, content: '', verseNumber: type === 'Verse' ? 1 : null };
+    const newSection = { 
+      type, 
+      content: '', 
+      verseNumber: type === 'Verse' ? 1 : null,
+      // Add a flag to determine if the section type should be shown in the preview
+      showTypeInPreview: type !== 'Line'
+    };
     newSections.splice(index, 0, newSection);
     updateSections(newSections);
     setAddingSectionAt(null);
@@ -203,7 +209,6 @@ function LyricsEditor() {
 
   const AddSectionButton = ({ index, isAdding, setAddingSectionAt, addSection, isDarkMode }) => {
     const buttonRef = React.useRef(null);
-    const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Hook', 'Pre-Hook'];
 
     return (
       <div className="relative">
@@ -247,21 +252,26 @@ function LyricsEditor() {
   };
 
   return (
-    <div className="flex-1 overflow-auto">
-      <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] rounded-t-lg border-t border-[${theme.common.grey}]`}>
+    <div className="flex-1 overflow-auto relative">
+      <div 
+        className={`sticky top-16 z-40 bg-[${theme.common.grey}] rounded-lg transition-all duration-300 ease-in-out overflow-hidden ${
+          isMetadataCollapsed ? 'max-h-0' : 'max-h-[1000px]'
+        }`}
+      >
         <div className="px-4 py-2">
           <input
             type="text"
             placeholder="Song Title"
-            className={`w-full p-2 text-sm border rounded ${isDarkMode ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]` : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`}`}
+            className={`w-full p-2 text-sm border rounded ${
+              isDarkMode 
+                ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]` 
+                : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
+            }`}
             value={currentSong.title}
             onChange={handleTitleChange}
             maxLength={100}
           />
         </div>
-      </div>
-
-      <div className={`sticky top-[calc(4rem+48px)] z-30 bg-[${theme.common.grey}] rounded-b-lg mt-1`}>
         <div className="px-4 py-2">
           <div className="flex flex-wrap items-center gap-2 mb-2 w-full">
             {Object.entries(styleOptions).map(([key, options]) => (
@@ -276,14 +286,16 @@ function LyricsEditor() {
               </div>
             ))}
           </div>
-
+  
           <div className="flex mb-2 w-full">
             <input
               type="text"
               placeholder="Custom style"
               value={customStyle}
               onChange={(e) => setCustomStyle(e.target.value)}
-              className={`flex-grow p-1 text-sm border rounded-l border-[#403E3F] ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'}`}
+              className={`flex-grow p-1 text-sm border rounded-l border-[#403E3F] ${
+                isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'
+              }`}
             />
             <button
               onClick={addCustomStyle}
@@ -292,7 +304,7 @@ function LyricsEditor() {
               Add
             </button>
           </div>
-
+  
           <div className="flex flex-wrap gap-1 justify-center">
             {Object.entries(currentSong.style).flatMap(([category, values]) =>
               (values || []).map(value => (
@@ -313,8 +325,17 @@ function LyricsEditor() {
           </div>
         </div>
       </div>
-
-      <div className="px-4 pt-36 pb-20">
+  
+      <button
+        onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
+        className={`fixed z-50 right-[calc(24rem+30px)] ${
+          isMetadataCollapsed ? 'top-16' : 'top-[calc(4rem+4.5rem+48px)]'
+        } bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
+      >
+        {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+      </button>
+  
+      <div className={`px-4 ${isMetadataCollapsed ? 'pt-20' : 'pt-4'} pb-20 transition-all duration-300 ease-in-out`}>
         {sections.length === 0 && (
           <div className="h-8 relative">
             <AddSectionButton
@@ -326,7 +347,7 @@ function LyricsEditor() {
             />
           </div>
         )}
-
+  
         {sections.map((section, index) => (
           <React.Fragment key={index}>
             {index === 0 && (
@@ -375,11 +396,11 @@ function LyricsEditor() {
                   )}
                 </div>
                 <textarea
-                  placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
+                  placeholder={`Enter your ${section.type.toLowerCase()}${section.type === 'Line' ? '' : ' lyrics'} here...`}
                   className={`w-full p-2 border rounded ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'}`}
                   value={section.content}
                   onChange={(e) => handleSectionChange(index, e.target.value)}
-                  rows={6}
+                  rows={section.type === 'Line' ? 1 : 6}
                 ></textarea>
                 {editingSectionAt === index && (
                   <div className={`absolute z-50 top-6 left-0 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}>
@@ -430,7 +451,7 @@ function LyricsEditor() {
           </React.Fragment>
         ))}
       </div>
-
+  
       <div className="fixed bottom-4 right-4">
         <button
           onClick={undoLastAction}
@@ -440,7 +461,7 @@ function LyricsEditor() {
           <Undo size={20} />
         </button>
       </div>
-
+  
       <div className="fixed right-0 top-16 bottom-0 w-96 p-4 overflow-y-auto">
         <LivePreview />
       </div>

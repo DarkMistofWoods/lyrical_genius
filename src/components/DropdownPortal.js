@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 const DropdownPortal = ({ children, buttonRef, isOpen, onClose }) => {
   const dropdownRef = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -19,13 +20,15 @@ const DropdownPortal = ({ children, buttonRef, isOpen, onClose }) => {
 
       let top;
       if (spaceBelow >= dropdownHeight || spaceBelow > spaceAbove) {
-        top = buttonRect.bottom + window.scrollY;
+        top = buttonRect.bottom;
       } else {
-        top = buttonRect.top - dropdownHeight + window.scrollY;
+        top = buttonRect.top - dropdownHeight;
       }
 
-      dropdown.style.top = `${top}px`;
-      dropdown.style.left = `${buttonRect.left + window.scrollX}px`;
+      setPosition({
+        top: top,
+        left: buttonRect.left,
+      });
     };
 
     updatePosition();
@@ -53,7 +56,11 @@ const DropdownPortal = ({ children, buttonRef, isOpen, onClose }) => {
     <div
       ref={dropdownRef}
       className="fixed z-50"
-      style={{ minWidth: buttonRef.current ? buttonRef.current.offsetWidth : 'auto' }}
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+        minWidth: buttonRef.current ? buttonRef.current.offsetWidth : 'auto'
+      }}
     >
       {children}
     </div>,

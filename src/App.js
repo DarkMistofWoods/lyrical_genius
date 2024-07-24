@@ -18,11 +18,18 @@ function App() {
     dispatch(loadSongs(savedSongs));
   }, [dispatch]);
 
+  useEffect(() => {
+    // Add a class to the body to always show scrollbar
+    document.body.classList.add('overflow-y-scroll');
+    
+    // Clean up function to remove the class when component unmounts
+    return () => {
+      document.body.classList.remove('overflow-y-scroll');
+    };
+  }, []);
+
   const handleCopyLyrics = () => {
-    const formattedLyrics = `${currentSong.title}\n\n${currentSong.lyrics}\n\nStyle: ${Object.entries(currentSong.style)
-      .filter(([_, values]) => values.length > 0)
-      .map(([category, values]) => `${category}: ${values.join(', ')}`)
-      .join(' | ')}`;
+    const formattedLyrics = `${currentSong.title}\n\n${currentSong.lyrics}\n\nStyle: ${Object.values(currentSong.style).flat().filter(Boolean).join(', ')}`;
     
     navigator.clipboard.writeText(formattedLyrics)
       .then(() => alert('Lyrics copied to clipboard!'))

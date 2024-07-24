@@ -19,12 +19,16 @@ function LivePreview() {
 
   const parsedSections = parseSections(currentSong.lyrics);
 
-  const styleString = Object.entries(currentSong.style)
-    .filter(([_, values]) => values && values.length > 0)
-    .map(([category, values]) => `${category}: ${values.join(', ')}`)
-    .join(' | ');
+  const styleString = Object.values(currentSong.style)
+    .flat()
+    .filter(Boolean)
+    .join(', ');
 
-  const formattedLyrics = `${currentSong.title || 'Untitled'}\n\n${styleString}\n\n${parsedSections.map(section => `[${section.type}]\n${section.content}`).join('\n\n')}`;
+  const formattedLyrics = `${currentSong.title || 'Untitled'}\n\n${styleString}\n\n${parsedSections.map(section => 
+    section.type === 'line' ? section.content : 
+    section.type === 'dialog' ? `[dialog]\n${section.content}` :
+    `[${section.type}]\n${section.content}`
+  ).join('\n\n')}`;
 
   const wordCount = currentSong.lyrics.split(/\s+/).filter(Boolean).length;
   const charCount = currentSong.lyrics.length;
@@ -47,7 +51,11 @@ function LivePreview() {
       <div className="whitespace-pre-wrap mb-4">
         {parsedSections.map((section, index) => (
           <div key={index} className="mb-4">
-            <div className="font-bold text-sm">[{section.type}]</div>
+            {section.type !== 'line' && (
+              <div className="font-bold text-sm">
+                {section.type === 'dialog' ? '[dialog]' : `[${section.type}]`}
+              </div>
+            )}
             <div>{section.content}</div>
           </div>
         ))}

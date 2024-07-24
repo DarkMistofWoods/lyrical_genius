@@ -68,18 +68,25 @@ function SongList() {
   return (
     <div className="p-4">
       <h2 className="text-lg font-semibold mb-2">Your Songs</h2>
-      <ul className="mb-4">
+      <ul className="mb-4 space-y-2">
         {songs.map(song => (
-          <li key={song.id} className="flex justify-between items-center mb-2">
+          <li 
+            key={song.id} 
+            className={`flex justify-between items-center p-2 rounded transition-colors duration-200 ${
+              currentSong.id === song.id 
+                ? 'bg-[#595859]' 
+                : 'bg-[#403E3F] hover:bg-[#4a4849]'
+            }`}
+          >
             <button
               onClick={() => handleSelectSong(song)}
-              className={`text-left truncate ${currentSong.id === song.id ? 'font-bold' : ''}`}
+              className={`text-left truncate flex-grow ${currentSong.id === song.id ? 'font-bold' : ''}`}
             >
               {song.title || 'Untitled'}
             </button>
             <button
               onClick={() => handleDeleteSong(song.id)}
-              className="text-red-500 hover:text-red-700"
+              className="text-red-500 hover:text-red-700 ml-2"
             >
               Delete
             </button>
