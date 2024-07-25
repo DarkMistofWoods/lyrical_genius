@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import theme from '../theme';
-import { 
-  updateLyrics, 
-  updateTitle, 
-  updateStyle, 
+import {
+  updateLyrics,
+  updateTitle,
+  updateStyle,
   updateSong
 } from '../store/songSlice';
 import { saveSongsToLocalStorage } from '../utils/localStorage';
@@ -55,9 +55,9 @@ function LyricsEditor() {
 
   const addSection = (type, index) => {
     const newSections = [...sections];
-    const newSection = { 
-      type, 
-      content: '', 
+    const newSection = {
+      type,
+      content: '',
       verseNumber: type === 'Verse' ? 1 : null,
       // Add a flag to determine if the section type should be shown in the preview
       showTypeInPreview: type !== 'Line'
@@ -253,26 +253,36 @@ function LyricsEditor() {
 
   return (
     <div className="flex-1 overflow-auto relative">
-      <div 
-        className={`sticky top-16 z-40 bg-[${theme.common.grey}] rounded-lg transition-all duration-300 ease-in-out overflow-hidden ${
-          isMetadataCollapsed ? 'max-h-0' : 'max-h-[1000px]'
+      {/* Fixed header for title input */}
+    <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
+      <input
+        type="text"
+        placeholder="Song Title"
+        className={`w-full p-2 text-sm border rounded ${
+          isDarkMode 
+            ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]` 
+            : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
         }`}
-      >
-        <div className="px-4 py-2">
-          <input
-            type="text"
-            placeholder="Song Title"
-            className={`w-full p-2 text-sm border rounded ${
-              isDarkMode 
-                ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]` 
-                : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
-            }`}
-            value={currentSong.title}
-            onChange={handleTitleChange}
-            maxLength={100}
-          />
-        </div>
-        <div className="px-4 py-10">
+        value={currentSong.title}
+        onChange={handleTitleChange}
+        maxLength={100}
+      />
+    </div>
+
+{/* Gap between sections */}
+<div className="h-16"></div>
+
+      {/* Collapsible metadata section */}
+    <div 
+      className={`bg-[${theme.common.grey}] transition-all duration-300 ease-in-out overflow-hidden rounded-lg`}
+      style={{ 
+        maxHeight: isMetadataCollapsed ? '0' : '1000px',
+        opacity: isMetadataCollapsed ? 0 : 1,
+        marginTop: isMetadataCollapsed ? '1rem' : '0', // Pull up slightly when collapsed
+      }}
+    >
+        <div className="p-4">
+          {/* Style options */}
           <div className="flex flex-wrap items-center gap-2 mb-2 w-full">
             {Object.entries(styleOptions).map(([key, options]) => (
               <div key={key} className="flex-grow min-w-[120px] max-w-[200px]">
@@ -286,16 +296,16 @@ function LyricsEditor() {
               </div>
             ))}
           </div>
-  
+
+          {/* Custom style input */}
           <div className="flex mb-2 w-full">
             <input
               type="text"
               placeholder="Custom style"
               value={customStyle}
               onChange={(e) => setCustomStyle(e.target.value)}
-              className={`flex-grow p-1 text-sm border rounded-l border-[#403E3F] ${
-                isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'
-              }`}
+              className={`flex-grow p-1 text-sm border rounded-l border-[#403E3F] ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'
+                }`}
             />
             <button
               onClick={addCustomStyle}
@@ -304,10 +314,11 @@ function LyricsEditor() {
               Add
             </button>
           </div>
-  
+
+          {/* Display selected styles */}
           <div className="flex flex-wrap gap-1 justify-center">
-            {Object.entries(currentSong.style).flatMap(([category, values]) =>
-              (values || []).map(value => (
+            {Object.entries(safeStyle).flatMap(([category, values]) =>
+              values.map(value => (
                 <span
                   key={`${category}-${value}`}
                   className={`px-2 py-0.5 text-xs rounded flex items-center bg-[#403E3F] text-[${theme.common.white}]`}
@@ -326,21 +337,18 @@ function LyricsEditor() {
         </div>
       </div>
 
+      {/* Chevron button for collapsing/expanding */}
       <button
         onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
-        className={`absolute z-50 right-4 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out ${
-          isMetadataCollapsed ? 'top-16' : 'top-[calc(4rem+4.5rem+32px)]'
-        }`}
-        style={{
-          transform: isMetadataCollapsed ? 'translateY(50%)' : 'translateY(50%)',
-        }}
+        className={`sticky z-50 left-1/2 transform -translate-x-1/2 -mt-3 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
+        style={{ top: 'auto' }}
       >
         {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
       </button>
 
-      <div className={`px-4 transition-all duration-300 ease-in-out ${
-        isMetadataCollapsed ? 'pt-24' : 'pt-20'
-      } pb-20`}>
+      {/* Main content area */}
+      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isMetadataCollapsed ? 'mt-12' : 'mt-4'
+        }`}>
         {sections.length === 0 && (
           <div className="h-8 relative">
             <AddSectionButton
@@ -388,11 +396,10 @@ function LyricsEditor() {
                         <button
                           key={num}
                           onClick={() => changeVerseNumber(index, num)}
-                          className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${
-                            section.verseNumber === num
+                          className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${section.verseNumber === num
                               ? 'bg-[#A68477] text-white'
                               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          }`}
+                            }`}
                         >
                           {num}
                         </button>
