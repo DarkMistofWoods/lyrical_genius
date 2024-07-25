@@ -9,7 +9,7 @@ const categories = [
   },
   {
     name: 'Structure Modifiers',
-    items: ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Bass Drop', 'Beat Drop']
+    items: ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop']
   },
   // Uncomment when ready to implement Vocal Modifiers
   // {

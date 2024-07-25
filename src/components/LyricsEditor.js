@@ -21,7 +21,7 @@ import instrumentsOptions from '../data/instruments.json';
 import moodsOptions from '../data/moods.json';
 
 const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Pre-Hook', 'Line', 'Dialog', 'Pre-Chorus'];
-const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Bass Drop', 'Beat Drop'];
+const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
 const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
 
 function LyricsEditor() {
