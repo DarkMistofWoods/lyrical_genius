@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import theme from '../theme';
 import {
@@ -39,17 +39,11 @@ function LyricsEditor() {
   const [undoStack, setUndoStack] = useState([]);
   const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(false);
 
-  useEffect(() => {
-    if (currentSong.lyrics) {
-      const parsedSections = parseLyrics(currentSong.lyrics);
-      setSections(parsedSections);
-    } else {
-      setSections([]);
-    }
-  }, [currentSong.id, currentSong.lyrics]);
+  const updateTimeoutRef = useRef(null);
+  const previousSectionsRef = useRef([]);
 
-  const parseLyrics = (lyrics) => {
-    const sectionRegex = /\[(.*?)\]\n([\s\S]*?)(?=\[|$)/g;
+  const parseLyrics = useCallback((lyrics) => {
+    const sectionRegex = /\[(.*?)\]([^[]*)/g;
     const parsedSections = [];
     let match;
 
@@ -58,14 +52,14 @@ function LyricsEditor() {
       const [sectionType, verseNumber] = type.split(' ');
       parsedSections.push({
         type: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
-        content: content.trim(),
+        content: content.trimStart(),  // Only trim start to preserve trailing newlines
         verseNumber: verseNumber ? parseInt(verseNumber) : null,
         showTypeInPreview: sectionType !== 'line'
       });
     }
 
     return parsedSections;
-  };
+  }, []);
 
   const updateLyricsInStore = useCallback((newSections) => {
     const formattedSections = newSections.map(section => {
@@ -73,12 +67,18 @@ function LyricsEditor() {
       if (formattedType === 'verse' && section.verseNumber) {
         formattedType = `verse ${section.verseNumber}`;
       }
-      return `[${formattedType}]\n${section.content}`;
+      // Preserve all whitespace, including trailing newlines
+      return `[${formattedType}]${section.content}`;
     });
 
-    const combinedLyrics = formattedSections.join('\n\n');
-    dispatch(updateLyrics(combinedLyrics));
-    saveChanges({ ...currentSong, lyrics: combinedLyrics });
+    const combinedLyrics = formattedSections.join('\n');
+    
+    // Only update if the sections have actually changed
+    if (JSON.stringify(newSections) !== JSON.stringify(previousSectionsRef.current)) {
+      dispatch(updateLyrics(combinedLyrics));
+      saveChanges({ ...currentSong, lyrics: combinedLyrics });
+      previousSectionsRef.current = newSections;
+    }
   }, [currentSong, dispatch]);
 
   const addSection = (type, index) => {
@@ -149,7 +149,15 @@ function LyricsEditor() {
   const handleSectionChange = (index, content) => {
     const newSections = [...sections];
     newSections[index] = { ...newSections[index], content };
-    updateSections(newSections);
+    setSections(newSections);
+    
+    // Debounce the update to the store
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+    updateTimeoutRef.current = setTimeout(() => {
+      updateLyricsInStore(newSections);
+    }, 300);
   };
 
   const updateSections = useCallback((newSections) => {
@@ -223,6 +231,16 @@ function LyricsEditor() {
 
   const AddSectionButton = ({ index, isAdding, setAddingSectionAt, addSection, isDarkMode }) => {
     const buttonRef = React.useRef(null);
+    const [showDropdown, setShowDropdown] = useState(false);
+
+    useEffect(() => {
+      if (isAdding) {
+        const timer = setTimeout(() => setShowDropdown(true), 50);
+        return () => clearTimeout(timer);
+      } else {
+        setShowDropdown(false);
+      }
+    }, [isAdding]);
 
     return (
       <div className="relative">
@@ -234,23 +252,25 @@ function LyricsEditor() {
         >
           <Plus size={16} className={`text-[${theme.common.white}]`} />
         </button>
-        <DropdownPortal
-          isOpen={isAdding}
-          buttonRef={buttonRef}
-          onClose={() => setAddingSectionAt(null)}
-        >
-          <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border rounded shadow-lg`}>
-            {sectionTypes.map((type) => (
-              <button
-                key={type}
-                onClick={() => addSection(type, index)}
-                className={`block w-full text-left px-4 py-2 hover:bg-[${theme.common.brown}] text-[${isDarkMode ? theme.common.white : theme.common.black}]`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-        </DropdownPortal>
+        {showDropdown && (
+          <DropdownPortal
+            isOpen={isAdding}
+            buttonRef={buttonRef}
+            onClose={() => setAddingSectionAt(null)}
+          >
+            <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border rounded shadow-lg`}>
+              {sectionTypes.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => addSection(type, index)}
+                  className={`block w-full text-left px-4 py-2 hover:bg-[${theme.common.brown}] text-[${isDarkMode ? theme.common.white : theme.common.black}]`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </DropdownPortal>
+        )}
       </div>
     );
   };
@@ -264,6 +284,17 @@ function LyricsEditor() {
     custom: [],
     ...currentSong.style
   };
+
+  useEffect(() => {
+    if (currentSong.lyrics) {
+      const parsedSections = parseLyrics(currentSong.lyrics);
+      setSections(parsedSections);
+      previousSectionsRef.current = parsedSections;
+    } else {
+      setSections([]);
+      previousSectionsRef.current = [];
+    }
+  }, [currentSong.id, currentSong.lyrics, parseLyrics]);
 
   return (
     <div className="flex-1 overflow-auto relative">
@@ -287,7 +318,7 @@ function LyricsEditor() {
 
       {/* Collapsible metadata section */}
       <div
-        className={`bg-[${theme.common.grey}] transition-all duration-300 ease-in-out overflow-hidden rounded-lg`}
+        className={`bg-[${theme.common.grey}] transition-all duration-300 ease-in-out overflow-visible rounded-lg`}
         style={{
           maxHeight: isMetadataCollapsed ? '0' : '1000px',
           opacity: isMetadataCollapsed ? 0 : 1,

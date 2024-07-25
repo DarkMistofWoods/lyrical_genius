@@ -43,7 +43,7 @@ function SearchableDropdown({ label, options, selectedValues, onChange, labelCol
             : 'Select options'}
         </button>
         {isOpen && (
-          <div className={`absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm`}>
+          <div className={`absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm`}>
             <input
               type="text"
               className={`block w-full px-4 py-2 border-b text-[${theme.common.black}]`}
