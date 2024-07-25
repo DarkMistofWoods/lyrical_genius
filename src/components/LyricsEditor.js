@@ -11,7 +11,7 @@ import { saveSongsToLocalStorage } from '../utils/localStorage';
 import SearchableDropdown from './SearchableDropdown';
 import DropdownPortal from './DropdownPortal';
 import LivePreview from './LivePreview';
-import { Plus, XCircle, Settings, ArrowUp, ArrowDown, Copy, Undo, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, XCircle, Settings, ArrowUp, ArrowDown, Copy, ChevronUp, ChevronDown } from 'lucide-react';
 
 // Import style options
 import vocalsOptions from '../data/vocals.json';
@@ -36,7 +36,6 @@ function LyricsEditor() {
     mood: moodsOptions
   });
   const [customStyle, setCustomStyle] = useState('');
-  const [undoStack, setUndoStack] = useState([]);
   const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(false);
 
   const updateTimeoutRef = useRef(null);
@@ -112,7 +111,6 @@ function LyricsEditor() {
     const removedSection = sections[index];
     const newSections = sections.filter((_, i) => i !== index);
     updateSections(newSections);
-    setUndoStack(prevStack => [...prevStack, { action: 'remove', index, section: removedSection }]);
   };
 
   const moveSection = (index, direction) => {
@@ -122,21 +120,6 @@ function LyricsEditor() {
       [newSections[index], newSections[newIndex]] = [newSections[newIndex], newSections[index]];
       updateSections(newSections);
     }
-  };
-
-  const undoLastAction = () => {
-    setUndoStack(prevStack => {
-      if (prevStack.length > 0) {
-        const lastAction = prevStack[prevStack.length - 1];
-        const newSections = [...sections];
-        if (lastAction.action === 'remove') {
-          newSections.splice(lastAction.index, 0, lastAction.section);
-        }
-        updateSections(newSections);
-        return prevStack.slice(0, -1);
-      }
-      return prevStack;
-    });
   };
 
   const changeSectionType = (index, newType) => {
@@ -506,20 +489,6 @@ function LyricsEditor() {
             </div>
           </React.Fragment>
         ))}
-      </div>
-
-      <div className="fixed bottom-4 right-4">
-        <button
-          onClick={undoLastAction}
-          disabled={undoStack.length === 0}
-          className={`bg-[${theme.common.brown}] text-[${theme.common.white}] py-2 px-4 rounded hover:opacity-80 ${undoStack.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <Undo size={20} />
-        </button>
-      </div>
-
-      <div className="fixed right-0 top-16 bottom-0 w-96 p-4 overflow-y-auto">
-        <LivePreview />
       </div>
     </div>
   );
