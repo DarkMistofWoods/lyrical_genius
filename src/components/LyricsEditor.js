@@ -41,17 +41,45 @@ function LyricsEditor() {
 
   useEffect(() => {
     if (currentSong.lyrics) {
-      const initialSections = currentSong.lyrics.split('\n\n').map(content => {
-        const lines = content.split('\n');
-        const type = lines[0].replace(/[\[\]]/g, '').trim();
-        const sectionContent = lines.slice(1).join('\n');
-        return { type, content: sectionContent };
-      });
-      setSections(initialSections);
+      const parsedSections = parseLyrics(currentSong.lyrics);
+      setSections(parsedSections);
     } else {
       setSections([]);
     }
-  }, [currentSong.id]);
+  }, [currentSong.id, currentSong.lyrics]);
+
+  const parseLyrics = (lyrics) => {
+    const sectionRegex = /\[(.*?)\]\n([\s\S]*?)(?=\[|$)/g;
+    const parsedSections = [];
+    let match;
+
+    while ((match = sectionRegex.exec(lyrics)) !== null) {
+      const [, type, content] = match;
+      const [sectionType, verseNumber] = type.split(' ');
+      parsedSections.push({
+        type: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
+        content: content.trim(),
+        verseNumber: verseNumber ? parseInt(verseNumber) : null,
+        showTypeInPreview: sectionType !== 'line'
+      });
+    }
+
+    return parsedSections;
+  };
+
+  const updateLyricsInStore = useCallback((newSections) => {
+    const formattedSections = newSections.map(section => {
+      let formattedType = section.type.toLowerCase();
+      if (formattedType === 'verse' && section.verseNumber) {
+        formattedType = `verse ${section.verseNumber}`;
+      }
+      return `[${formattedType}]\n${section.content}`;
+    });
+
+    const combinedLyrics = formattedSections.join('\n\n');
+    dispatch(updateLyrics(combinedLyrics));
+    saveChanges({ ...currentSong, lyrics: combinedLyrics });
+  }, [currentSong, dispatch]);
 
   const addSection = (type, index) => {
     const newSections = [...sections];
@@ -128,20 +156,6 @@ function LyricsEditor() {
     setSections(newSections);
     updateLyricsInStore(newSections);
   }, []);
-
-  const updateLyricsInStore = useCallback((newSections) => {
-    const formattedSections = newSections.map(section => {
-      let formattedType = section.type;
-      if (formattedType === 'Verse' && section.verseNumber) {
-        formattedType = `verse ${section.verseNumber}`;
-      }
-      return `[${formattedType}]\n${section.content}`;
-    });
-
-    const combinedLyrics = formattedSections.join('\n\n');
-    dispatch(updateLyrics(combinedLyrics));
-    saveChanges({ ...currentSong, lyrics: combinedLyrics });
-  }, [currentSong, dispatch]);
 
   const handleTitleChange = (e) => {
     dispatch(updateTitle(e.target.value));
@@ -254,33 +268,32 @@ function LyricsEditor() {
   return (
     <div className="flex-1 overflow-auto relative">
       {/* Fixed header for title input */}
-    <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
-      <input
-        type="text"
-        placeholder="Song Title"
-        className={`w-full p-2 text-sm border rounded ${
-          isDarkMode 
-            ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]` 
-            : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
-        }`}
-        value={currentSong.title}
-        onChange={handleTitleChange}
-        maxLength={100}
-      />
-    </div>
+      <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
+        <input
+          type="text"
+          placeholder="Song Title"
+          className={`w-full p-2 text-sm border rounded ${isDarkMode
+              ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
+              : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
+            }`}
+          value={currentSong.title}
+          onChange={handleTitleChange}
+          maxLength={100}
+        />
+      </div>
 
-{/* Gap between sections */}
-<div className="h-16"></div>
+      {/* Gap between sections */}
+      <div className="h-16"></div>
 
       {/* Collapsible metadata section */}
-    <div 
-      className={`bg-[${theme.common.grey}] transition-all duration-300 ease-in-out overflow-hidden rounded-lg`}
-      style={{ 
-        maxHeight: isMetadataCollapsed ? '0' : '1000px',
-        opacity: isMetadataCollapsed ? 0 : 1,
-        marginTop: isMetadataCollapsed ? '1rem' : '0', // Pull up slightly when collapsed
-      }}
-    >
+      <div
+        className={`bg-[${theme.common.grey}] transition-all duration-300 ease-in-out overflow-hidden rounded-lg`}
+        style={{
+          maxHeight: isMetadataCollapsed ? '0' : '1000px',
+          opacity: isMetadataCollapsed ? 0 : 1,
+          marginTop: isMetadataCollapsed ? '1rem' : '0', // Pull up slightly when collapsed
+        }}
+      >
         <div className="p-4">
           {/* Style options */}
           <div className="flex flex-wrap items-center gap-2 mb-2 w-full">
@@ -397,8 +410,8 @@ function LyricsEditor() {
                           key={num}
                           onClick={() => changeVerseNumber(index, num)}
                           className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${section.verseNumber === num
-                              ? 'bg-[#A68477] text-white'
-                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-[#A68477] text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
                           {num}
