@@ -7,12 +7,12 @@ function LivePreview() {
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   const parseSections = (lyrics) => {
-    const sectionRegex = /\[(.*?)\]([\s\S]*?)(?=\[|$)/g;
+    const sectionRegex = /\[(.*?)\](?:\|\|\|([\s\S]*?))?(?=\n\n\[|$)/g;
     const matches = [...lyrics.matchAll(sectionRegex)];
-
+  
     return matches.map(match => {
       const type = match[1].trim().toLowerCase();
-      const content = match[2].trim();
+      const content = match[2] || '';
       return { type, content };
     });
   };
@@ -49,9 +49,11 @@ function LivePreview() {
       <div className="whitespace-pre-wrap mb-4">
         {parsedSections.map((section, index) => (
           <div key={index} className="mb-4">
-            <div className="font-bold text-sm">
-              [{section.type}]
-            </div>
+            {section.type !== 'line' && (
+              <div className="font-bold text-sm">
+                [{section.type}]
+              </div>
+            )}
             {section.content && <div>{section.content}</div>}
           </div>
         ))}

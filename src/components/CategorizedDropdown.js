@@ -5,11 +5,11 @@ import theme from '../theme';
 const categories = [
   {
     name: 'Lyric Sections',
-    items: ['Verse', 'Chorus', 'Bridge', 'Pre-Chorus', 'Hook', 'Line', 'Dialog']
+    items: ['Verse', 'Chorus', 'Bridge', 'Pre-Chorus', 'Line', 'Dialog']
   },
   {
     name: 'Structure Modifiers',
-    items: ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End']
+    items: ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Bass Drop', 'Beat Drop']
   },
   // Uncomment when ready to implement Vocal Modifiers
   // {

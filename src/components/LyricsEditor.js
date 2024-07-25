@@ -20,8 +20,8 @@ import genreOptions from '../data/genres.json';
 import instrumentsOptions from '../data/instruments.json';
 import moodsOptions from '../data/moods.json';
 
-const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Hook', 'Pre-Hook', 'Line', 'Dialog', 'Pre-Chorus'];
-const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End'];
+const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Pre-Hook', 'Line', 'Dialog', 'Pre-Chorus'];
+const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Bass Drop', 'Beat Drop'];
 const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
 
 function LyricsEditor() {
@@ -44,16 +44,16 @@ function LyricsEditor() {
   const previousSectionsRef = useRef([]);
 
   const parseLyrics = useCallback((lyrics) => {
-    const sectionRegex = /\[(.*?)\]([^[]*)/g;
+    const sectionRegex = /\[(.*?)\](?:\|\|\|([\s\S]*?))?(?=\n\n\[|$)/g;
     const parsedSections = [];
     let match;
-
+  
     while ((match = sectionRegex.exec(lyrics)) !== null) {
       const [, type, content] = match;
       const [sectionType, verseNumber] = type.split(' ');
       const lowercaseType = sectionType.toLowerCase();
-
-      if (structureModifiers.map(m => m.toLowerCase()).includes(lowercaseType)) {
+  
+      if (structureModifiers.map(m => m.toLowerCase()).includes(lowercaseType) && !content) {
         parsedSections.push({
           type: 'StructureModifier',
           content: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
@@ -61,13 +61,13 @@ function LyricsEditor() {
       } else {
         parsedSections.push({
           type: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
-          content: content.trimStart(),
+          content: content || '',
           verseNumber: verseNumber ? parseInt(verseNumber) : null,
           showTypeInPreview: lowercaseType !== 'line'
         });
       }
     }
-
+  
     return parsedSections;
   }, []);
 
@@ -80,10 +80,10 @@ function LyricsEditor() {
       if (formattedType === 'verse' && section.verseNumber) {
         formattedType = `verse ${section.verseNumber}`;
       }
-      return `[${formattedType}]${section.content}`;
+      return `[${formattedType}]|||${section.content}`;
     });
-
-    const combinedLyrics = formattedSections.join('\n');
+  
+    const combinedLyrics = formattedSections.join('\n\n');
     
     if (JSON.stringify(newSections) !== JSON.stringify(previousSectionsRef.current)) {
       dispatch(updateLyrics(combinedLyrics));
@@ -95,7 +95,7 @@ function LyricsEditor() {
   const addSection = (category, type, index) => {
     const newSections = [...sections];
     let newSection;
-
+  
     if (category === 'Lyric Sections') {
       newSection = {
         type,
@@ -108,7 +108,7 @@ function LyricsEditor() {
         content: type,
       };
     }
-
+  
     newSections.splice(index, 0, newSection);
     updateSections(newSections);
     setAddingSectionAt(null);
