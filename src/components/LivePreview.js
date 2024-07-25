@@ -25,9 +25,7 @@ function LivePreview() {
     .join(', ');
 
   const formattedLyrics = `${currentSong.title || 'Untitled'}\n\n${styleString}\n\n${parsedSections.map(section => 
-    section.type === 'line' ? section.content : 
-    section.type === 'dialog' ? `[dialog]\n${section.content}` :
-    `[${section.type}]\n${section.content}`
+    `[${section.type}]${section.content ? '\n' + section.content : ''}`
   ).join('\n\n')}`;
 
   const wordCount = currentSong.lyrics.split(/\s+/).filter(Boolean).length;
@@ -51,12 +49,10 @@ function LivePreview() {
       <div className="whitespace-pre-wrap mb-4">
         {parsedSections.map((section, index) => (
           <div key={index} className="mb-4">
-            {section.type !== 'line' && (
-              <div className="font-bold text-sm">
-                {section.type === 'dialog' ? '[dialog]' : `[${section.type}]`}
-              </div>
-            )}
-            <div>{section.content}</div>
+            <div className="font-bold text-sm">
+              [{section.type}]
+            </div>
+            {section.content && <div>{section.content}</div>}
           </div>
         ))}
       </div>

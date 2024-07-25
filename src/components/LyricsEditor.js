@@ -11,6 +11,7 @@ import { saveSongsToLocalStorage } from '../utils/localStorage';
 import SearchableDropdown from './SearchableDropdown';
 import DropdownPortal from './DropdownPortal';
 import LivePreview from './LivePreview';
+import CategorizedDropdown from './CategorizedDropdown';
 import { Plus, XCircle, Settings, ArrowUp, ArrowDown, Copy, ChevronUp, ChevronDown } from 'lucide-react';
 
 // Import style options
@@ -20,6 +21,7 @@ import instrumentsOptions from '../data/instruments.json';
 import moodsOptions from '../data/moods.json';
 
 const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Hook', 'Pre-Hook', 'Line', 'Dialog', 'Pre-Chorus'];
+const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End'];
 const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
 
 function LyricsEditor() {
@@ -49,12 +51,21 @@ function LyricsEditor() {
     while ((match = sectionRegex.exec(lyrics)) !== null) {
       const [, type, content] = match;
       const [sectionType, verseNumber] = type.split(' ');
-      parsedSections.push({
-        type: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
-        content: content.trimStart(),  // Only trim start to preserve trailing newlines
-        verseNumber: verseNumber ? parseInt(verseNumber) : null,
-        showTypeInPreview: sectionType !== 'line'
-      });
+      const lowercaseType = sectionType.toLowerCase();
+
+      if (structureModifiers.map(m => m.toLowerCase()).includes(lowercaseType)) {
+        parsedSections.push({
+          type: 'StructureModifier',
+          content: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
+        });
+      } else {
+        parsedSections.push({
+          type: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
+          content: content.trimStart(),
+          verseNumber: verseNumber ? parseInt(verseNumber) : null,
+          showTypeInPreview: lowercaseType !== 'line'
+        });
+      }
     }
 
     return parsedSections;
@@ -62,17 +73,18 @@ function LyricsEditor() {
 
   const updateLyricsInStore = useCallback((newSections) => {
     const formattedSections = newSections.map(section => {
+      if (section.type === 'StructureModifier') {
+        return `[${section.content.toLowerCase()}]`;
+      }
       let formattedType = section.type.toLowerCase();
       if (formattedType === 'verse' && section.verseNumber) {
         formattedType = `verse ${section.verseNumber}`;
       }
-      // Preserve all whitespace, including trailing newlines
       return `[${formattedType}]${section.content}`;
     });
 
     const combinedLyrics = formattedSections.join('\n');
     
-    // Only update if the sections have actually changed
     if (JSON.stringify(newSections) !== JSON.stringify(previousSectionsRef.current)) {
       dispatch(updateLyrics(combinedLyrics));
       saveChanges({ ...currentSong, lyrics: combinedLyrics });
@@ -80,18 +92,142 @@ function LyricsEditor() {
     }
   }, [currentSong, dispatch]);
 
-  const addSection = (type, index) => {
+  const addSection = (category, type, index) => {
     const newSections = [...sections];
-    const newSection = {
-      type,
-      content: '',
-      verseNumber: type === 'Verse' ? 1 : null,
-      // Add a flag to determine if the section type should be shown in the preview
-      showTypeInPreview: type !== 'Line'
-    };
+    let newSection;
+
+    if (category === 'Lyric Sections') {
+      newSection = {
+        type,
+        content: '',
+        verseNumber: type === 'Verse' ? 1 : null,
+      };
+    } else if (category === 'Structure Modifiers') {
+      newSection = {
+        type: 'StructureModifier',
+        content: type,
+      };
+    }
+
     newSections.splice(index, 0, newSection);
     updateSections(newSections);
     setAddingSectionAt(null);
+  };
+
+  const renderSection = (section, index) => {
+    if (section.type === 'StructureModifier') {
+      return (
+        <div className={`p-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] flex justify-between items-center w-full mb-4 relative z-10`}>
+          <span>{section.content}</span>
+          <div className="flex">
+            <button
+              onClick={() => moveSection(index, 'up')}
+              className={`text-[#F2F2F2] hover:text-[#0D0C0C] mr-2 ${index === 0 ? 'opacity-50' : ''}`}
+              style={{ pointerEvents: 'auto' }}
+            >
+              <ArrowUp size={16} />
+            </button>
+            <button
+              onClick={() => moveSection(index, 'down')}
+              className={`text-[#F2F2F2] hover:text-[#0D0C0C] mr-2 ${index === sections.length - 1 ? 'opacity-50' : ''}`}
+              style={{ pointerEvents: 'auto' }}
+            >
+              <ArrowDown size={16} />
+            </button>
+            <button
+              onClick={() => removeSection(index)}
+              className="text-[#F2F2F2] hover:text-[#0D0C0C]"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <XCircle size={16} />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mb-4 flex items-start relative">
+        <div className="flex-grow relative">
+          <div className="flex items-center mb-1">
+            <span className="font-bold text-sm mr-2">{section.type}</span>
+            <button
+              onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
+              className="text-[#A68477] hover:text-[#595859] mr-2"
+            >
+              <Settings size={16} />
+            </button>
+            <button
+              onClick={() => duplicateSection(index)}
+              className="text-[#A68477] hover:text-[#595859] mr-2"
+            >
+              <Copy size={16} />
+            </button>
+            {section.type === 'Verse' && (
+              <div className="flex items-center">
+                {verseNumbers.map(num => (
+                  <button
+                    key={num}
+                    onClick={() => changeVerseNumber(index, num)}
+                    className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${
+                      section.verseNumber === num
+                        ? 'bg-[#A68477] text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <textarea
+            placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
+            className={`w-full p-2 border rounded ${
+              isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
+            }`}
+            value={section.content}
+            onChange={(e) => handleSectionChange(index, e.target.value)}
+            rows={6}
+          ></textarea>
+          {editingSectionAt === index && (
+            <div className={`absolute z-50 top-6 left-0 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}>
+              {sectionTypes.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => changeSectionType(index, type)}
+                  className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="ml-2 flex flex-col justify-center h-full">
+          <button
+            onClick={() => removeSection(index)}
+            className="text-[#A68477] hover:text-[#595859] mb-2"
+          >
+            <XCircle size={20} />
+          </button>
+          <button
+            onClick={() => moveSection(index, 'up')}
+            className="text-[#A68477] hover:text-[#595859] mb-2"
+            disabled={index === 0}
+          >
+            <ArrowUp size={20} />
+          </button>
+          <button
+            onClick={() => moveSection(index, 'down')}
+            className="text-[#A68477] hover:text-[#595859]"
+            disabled={index === sections.length - 1}
+          >
+            <ArrowDown size={20} />
+          </button>
+        </div>
+      </div>
+    );
   };
 
   const duplicateSection = (index) => {
@@ -108,7 +244,6 @@ function LyricsEditor() {
   };
 
   const removeSection = (index) => {
-    const removedSection = sections[index];
     const newSections = sections.filter((_, i) => i !== index);
     updateSections(newSections);
   };
@@ -146,7 +281,7 @@ function LyricsEditor() {
   const updateSections = useCallback((newSections) => {
     setSections(newSections);
     updateLyricsInStore(newSections);
-  }, []);
+  }, [updateLyricsInStore]);
 
   const handleTitleChange = (e) => {
     dispatch(updateTitle(e.target.value));
@@ -241,17 +376,10 @@ function LyricsEditor() {
             buttonRef={buttonRef}
             onClose={() => setAddingSectionAt(null)}
           >
-            <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border rounded shadow-lg`}>
-              {sectionTypes.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => addSection(type, index)}
-                  className={`block w-full text-left px-4 py-2 hover:bg-[${theme.common.brown}] text-[${isDarkMode ? theme.common.white : theme.common.black}]`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
+            <CategorizedDropdown
+              onSelect={(category, item) => addSection(category, item, index)}
+              isDarkMode={isDarkMode}
+            />
           </DropdownPortal>
         )}
       </div>
@@ -286,19 +414,20 @@ function LyricsEditor() {
         <input
           type="text"
           placeholder="Song Title"
-          className={`w-full p-2 text-sm border rounded ${isDarkMode
+          className={`w-full p-2 text-sm border rounded ${
+            isDarkMode
               ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
               : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
-            }`}
+          }`}
           value={currentSong.title}
           onChange={handleTitleChange}
           maxLength={100}
         />
       </div>
-
+  
       {/* Gap between sections */}
       <div className="h-16"></div>
-
+  
       {/* Collapsible metadata section */}
       <div
         className={`bg-[${theme.common.grey}] transition-all duration-300 ease-in-out overflow-visible rounded-lg`}
@@ -323,7 +452,7 @@ function LyricsEditor() {
               </div>
             ))}
           </div>
-
+  
           {/* Custom style input */}
           <div className="flex mb-2 w-full">
             <input
@@ -331,8 +460,9 @@ function LyricsEditor() {
               placeholder="Custom style"
               value={customStyle}
               onChange={(e) => setCustomStyle(e.target.value)}
-              className={`flex-grow p-1 text-sm border rounded-l border-[#403E3F] ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'
-                }`}
+              className={`flex-grow p-1 text-sm border rounded-l border-[#403E3F] ${
+                isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'
+              }`}
             />
             <button
               onClick={addCustomStyle}
@@ -341,7 +471,7 @@ function LyricsEditor() {
               Add
             </button>
           </div>
-
+  
           {/* Display selected styles */}
           <div className="flex flex-wrap gap-1 justify-center">
             {Object.entries(safeStyle).flatMap(([category, values]) =>
@@ -363,7 +493,7 @@ function LyricsEditor() {
           </div>
         </div>
       </div>
-
+  
       {/* Chevron button for collapsing/expanding */}
       <button
         onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
@@ -372,10 +502,11 @@ function LyricsEditor() {
       >
         {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
       </button>
-
+  
       {/* Main content area */}
-      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isMetadataCollapsed ? 'mt-12' : 'mt-4'
-        }`}>
+      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${
+        isMetadataCollapsed ? 'mt-12' : 'mt-4'
+      }`}>
         {sections.length === 0 && (
           <div className="h-8 relative">
             <AddSectionButton
@@ -401,83 +532,7 @@ function LyricsEditor() {
                 />
               </div>
             )}
-            <div className="mb-4 flex items-start relative">
-              <div className="flex-grow relative">
-                <div className="flex items-center mb-1">
-                  <span className="font-bold text-sm mr-2">{section.type}</span>
-                  <button
-                    onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
-                    className="text-[#A68477] hover:text-[#595859] mr-2"
-                  >
-                    <Settings size={16} />
-                  </button>
-                  <button
-                    onClick={() => duplicateSection(index)}
-                    className="text-[#A68477] hover:text-[#595859] mr-2"
-                  >
-                    <Copy size={16} />
-                  </button>
-                  {section.type === 'Verse' && (
-                    <div className="flex items-center">
-                      {verseNumbers.map(num => (
-                        <button
-                          key={num}
-                          onClick={() => changeVerseNumber(index, num)}
-                          className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${section.verseNumber === num
-                            ? 'bg-[#A68477] text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <textarea
-                  placeholder={`Enter your ${section.type.toLowerCase()}${section.type === 'Line' ? '' : ' lyrics'} here...`}
-                  className={`w-full p-2 border rounded ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'}`}
-                  value={section.content}
-                  onChange={(e) => handleSectionChange(index, e.target.value)}
-                  rows={section.type === 'Line' ? 1 : 6}
-                ></textarea>
-                {editingSectionAt === index && (
-                  <div className={`absolute z-50 top-6 left-0 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}>
-                    {sectionTypes.map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => changeSectionType(index, type)}
-                        className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="ml-2 flex flex-col justify-center h-full">
-                <button
-                  onClick={() => removeSection(index)}
-                  className="text-[#A68477] hover:text-[#595859] mb-2"
-                >
-                  <XCircle size={20} />
-                </button>
-                <button
-                  onClick={() => moveSection(index, 'up')}
-                  className="text-[#A68477] hover:text-[#595859] mb-2"
-                  disabled={index === 0}
-                >
-                  <ArrowUp size={20} />
-                </button>
-                <button
-                  onClick={() => moveSection(index, 'down')}
-                  className="text-[#A68477] hover:text-[#595859]"
-                  disabled={index === sections.length - 1}
-                >
-                  <ArrowDown size={20} />
-                </button>
-              </div>
-            </div>
+            {renderSection(section, index)}
             <div className="h-8 relative mb-2">
               <AddSectionButton
                 index={index + 1}
