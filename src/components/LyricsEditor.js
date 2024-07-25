@@ -183,8 +183,8 @@ function LyricsEditor() {
           type="text"
           placeholder="Song Title"
           className={`w-full p-2 text-sm border rounded ${isDarkMode
-              ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
-              : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
+            ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
+            : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
             }`}
           value={currentSong.title}
           onChange={handleTitleChange}
