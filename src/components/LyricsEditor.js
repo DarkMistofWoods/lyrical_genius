@@ -35,20 +35,34 @@ function LyricsEditor() {
 
     while ((match = sectionRegex.exec(lyrics)) !== null) {
       const [, type, content] = match;
-      const [sectionType, verseNumber] = type.split(' ');
-      const lowercaseType = sectionType.toLowerCase();
+      const parts = type.trim().split(' ');
+      const lastPart = parts[parts.length - 1].toLowerCase();
 
-      if (structureModifiers.map(m => m.toLowerCase()).includes(lowercaseType) && !content) {
+      if (structureModifiers.map(m => m.toLowerCase()).includes(lastPart)) {
         parsedSections.push({
           type: 'StructureModifier',
-          content: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
+          content: lastPart.charAt(0).toUpperCase() + lastPart.slice(1),
+          modifier: parts.length > 1 ? parts.slice(0, -1).join(' ') : null
         });
       } else {
+        let sectionType, verseNumber, modifier;
+
+        if (parts[parts.length - 2]?.toLowerCase() === 'verse' && !isNaN(parts[parts.length - 1])) {
+          sectionType = 'Verse';
+          verseNumber = parseInt(parts[parts.length - 1]);
+          modifier = parts.length > 2 ? parts.slice(0, -2).join(' ') : null;
+        } else {
+          sectionType = parts[parts.length - 1].charAt(0).toUpperCase() + parts[parts.length - 1].slice(1);
+          verseNumber = null;
+          modifier = parts.length > 1 ? parts.slice(0, -1).join(' ') : null;
+        }
+
         parsedSections.push({
-          type: sectionType.charAt(0).toUpperCase() + sectionType.slice(1),
+          type: sectionType,
           content: content || '',
-          verseNumber: verseNumber ? parseInt(verseNumber) : null,
-          showTypeInPreview: lowercaseType !== 'line'
+          verseNumber: verseNumber,
+          showTypeInPreview: lastPart !== 'line',
+          modifier: modifier
         });
       }
     }
@@ -59,11 +73,15 @@ function LyricsEditor() {
   const updateLyricsInStore = useCallback((newSections) => {
     const formattedSections = newSections.map(section => {
       if (section.type === 'StructureModifier') {
-        return `[${section.content.toLowerCase()}]`;
+        const modifiedContent = section.modifier ? `${section.modifier} ${section.content}` : section.content;
+        return `[${modifiedContent.toLowerCase()}]`;
       }
       let formattedType = section.type.toLowerCase();
       if (formattedType === 'verse' && section.verseNumber) {
         formattedType = `verse ${section.verseNumber}`;
+      }
+      if (section.modifier) {
+        formattedType = `${section.modifier.toLowerCase()} ${formattedType}`;
       }
       return `[${formattedType}]|||${section.content}`;
     });
@@ -86,11 +104,13 @@ function LyricsEditor() {
         type,
         content: '',
         verseNumber: type === 'Verse' ? 1 : null,
+        modifier: null
       };
     } else if (category === 'Structure Modifiers') {
       newSection = {
         type: 'StructureModifier',
         content: type,
+        modifier: null
       };
     }
 
@@ -108,7 +128,11 @@ function LyricsEditor() {
 
   const changeSectionType = (index, newType) => {
     const newSections = [...sections];
-    newSections[index] = { ...newSections[index], type: newType };
+    newSections[index] = { 
+      ...newSections[index], 
+      type: newType,
+      verseNumber: newType === 'Verse' ? 1 : null
+    };
     updateSections(newSections);
   };
 
@@ -137,13 +161,24 @@ function LyricsEditor() {
     newSections[index] = { ...newSections[index], content };
     setSections(newSections);
 
-    // Debounce the update to the store
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current);
     }
     updateTimeoutRef.current = setTimeout(() => {
       updateLyricsInStore(newSections);
     }, 300);
+  };
+
+  const addModifier = (index, modifier) => {
+    const newSections = [...sections];
+    newSections[index] = { ...newSections[index], modifier };
+    updateSections(newSections);
+  };
+
+  const removeModifier = (index) => {
+    const newSections = [...sections];
+    newSections[index] = { ...newSections[index], modifier: null };
+    updateSections(newSections);
   };
 
   const updateSections = useCallback((newSections) => {
@@ -177,15 +212,16 @@ function LyricsEditor() {
 
   return (
     <div className="flex-1 overflow-auto relative">
-      {/* Fixed header for title input */}
+      {/* Title input */}
       <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
         <input
           type="text"
           placeholder="Song Title"
-          className={`w-full p-2 text-sm border rounded ${isDarkMode
-            ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
-            : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
-            }`}
+          className={`w-full p-2 text-sm border rounded ${
+            isDarkMode
+              ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
+              : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
+          }`}
           value={currentSong.title}
           onChange={handleTitleChange}
           maxLength={100}
@@ -217,8 +253,7 @@ function LyricsEditor() {
       </button>
 
       {/* Main content area */}
-      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isMetadataCollapsed ? 'mt-12' : 'mt-4'
-        }`}>
+      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isMetadataCollapsed ? 'mt-12' : 'mt-4'}`}>
         {sections.length === 0 && (
           <div className="h-8 relative">
             <AddSectionButton
@@ -254,6 +289,8 @@ function LyricsEditor() {
               handleSectionChange={handleSectionChange}
               sectionsLength={sections.length}
               changeSectionType={changeSectionType}
+              addModifier={addModifier}
+              removeModifier={removeModifier}
             />
             <div className="h-8 relative mb-2">
               <AddSectionButton
