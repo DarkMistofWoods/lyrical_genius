@@ -14,9 +14,13 @@ const createNewSong = () => ({
   }
 });
 
+const MAX_HISTORY_LENGTH = 20;
+
 const initialState = {
   songs: [createNewSong()],
-  currentSong: createNewSong()
+  currentSong: createNewSong(),
+  history: [],
+  historyIndex: -1
 };
 
 export const songSlice = createSlice({
@@ -24,43 +28,64 @@ export const songSlice = createSlice({
   initialState,
   reducers: {
     setCurrentSong: (state, action) => {
-      // Save the current song before switching
       const currentIndex = state.songs.findIndex(song => song.id === state.currentSong.id);
       if (currentIndex !== -1) {
         state.songs[currentIndex] = { ...state.currentSong };
       }
       
       state.currentSong = action.payload;
+      state.history = [state.currentSong];
+      state.historyIndex = 0;
       saveSongsToLocalStorage(state.songs);
     },
     updateLyrics: (state, action) => {
-      state.currentSong.lyrics = action.payload;
+      const newSong = { ...state.currentSong, lyrics: action.payload };
+      state.currentSong = newSong;
       const index = state.songs.findIndex(song => song.id === state.currentSong.id);
       if (index !== -1) {
-        state.songs[index] = { ...state.currentSong };
+        state.songs[index] = newSong;
       }
+      
+      // Add to history
+      state.history = [...state.history.slice(0, state.historyIndex + 1), newSong].slice(-MAX_HISTORY_LENGTH);
+      state.historyIndex = state.history.length - 1;
+      
       saveSongsToLocalStorage(state.songs);
     },
     updateTitle: (state, action) => {
-      state.currentSong.title = action.payload;
+      const newSong = { ...state.currentSong, title: action.payload };
+      state.currentSong = newSong;
       const index = state.songs.findIndex(song => song.id === state.currentSong.id);
       if (index !== -1) {
-        state.songs[index] = { ...state.currentSong };
+        state.songs[index] = newSong;
       }
+      
+      // Add to history
+      state.history = [...state.history.slice(0, state.historyIndex + 1), newSong].slice(-MAX_HISTORY_LENGTH);
+      state.historyIndex = state.history.length - 1;
+      
       saveSongsToLocalStorage(state.songs);
     },
     updateStyle: (state, action) => {
-      state.currentSong.style = action.payload;
+      const newSong = { ...state.currentSong, style: action.payload };
+      state.currentSong = newSong;
       const index = state.songs.findIndex(song => song.id === state.currentSong.id);
       if (index !== -1) {
-        state.songs[index] = { ...state.currentSong };
+        state.songs[index] = newSong;
       }
+      
+      // Add to history
+      state.history = [...state.history.slice(0, state.historyIndex + 1), newSong].slice(-MAX_HISTORY_LENGTH);
+      state.historyIndex = state.history.length - 1;
+      
       saveSongsToLocalStorage(state.songs);
     },
     addSong: (state) => {
       const newSong = createNewSong();
       state.songs.push(newSong);
       state.currentSong = newSong;
+      state.history = [newSong];
+      state.historyIndex = 0;
       saveSongsToLocalStorage(state.songs);
     },
     updateSong: (state, action) => {
@@ -69,6 +94,9 @@ export const songSlice = createSlice({
         state.songs[index] = action.payload;
         if (state.currentSong.id === action.payload.id) {
           state.currentSong = action.payload;
+          // Add to history
+          state.history = [...state.history.slice(0, state.historyIndex + 1), action.payload].slice(-MAX_HISTORY_LENGTH);
+          state.historyIndex = state.history.length - 1;
         }
       }
       saveSongsToLocalStorage(state.songs);
@@ -82,11 +110,26 @@ export const songSlice = createSlice({
       } else if (state.currentSong.id === action.payload) {
         state.currentSong = state.songs[0];
       }
+      state.history = [state.currentSong];
+      state.historyIndex = 0;
       saveSongsToLocalStorage(state.songs);
     },
     loadSongs: (state, action) => {
       state.songs = action.payload.length > 0 ? action.payload : [createNewSong()];
       state.currentSong = state.songs[0];
+      state.history = [state.currentSong];
+      state.historyIndex = 0;
+    },
+    undo: (state) => {
+      if (state.historyIndex > 0) {
+        state.historyIndex--;
+        state.currentSong = state.history[state.historyIndex];
+        const index = state.songs.findIndex(song => song.id === state.currentSong.id);
+        if (index !== -1) {
+          state.songs[index] = state.currentSong;
+        }
+        saveSongsToLocalStorage(state.songs);
+      }
     },
   }
 });
@@ -99,7 +142,8 @@ export const {
   addSong, 
   updateSong, 
   deleteSong, 
-  loadSongs
+  loadSongs,
+  undo
 } = songSlice.actions;
 
 export default songSlice.reducer;

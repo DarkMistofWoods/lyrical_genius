@@ -93,7 +93,7 @@ function App() {
           </div>
         </div>
       </div>
-      <Toolbar onUndo={handleUndo} />
+      <Toolbar />
     </div>
   );
 }
