@@ -13,7 +13,7 @@ import MetadataSection from './MetadataSection';
 import AddSectionButton from './AddSectionButton';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
-const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Pre-Hook', 'Line', 'Dialog', 'Pre-Chorus'];
+const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
 
 function LyricsEditor() {

@@ -5,7 +5,7 @@ import theme from '../theme';
 const categories = [
   {
     name: 'Lyric Sections',
-    items: ['Verse', 'Chorus', 'Bridge', 'Pre-Chorus', 'Line', 'Dialog']
+    items: ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog']
   },
   {
     name: 'Structure Modifiers',

@@ -5,7 +5,7 @@ import { Settings, Copy, XCircle, ArrowUp, ArrowDown, Tag } from 'lucide-react';
 import theme from '../theme';
 
 const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
-const sectionTypes = ['Verse', 'Chorus', 'Bridge', 'Pre-Hook', 'Dialog', 'Pre-Chorus'];
+const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const modifiers = ['Sad', 'Happy', 'Angry', 'Fast', 'Slow'];
 
 function Section({ 
