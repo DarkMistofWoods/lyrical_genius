@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import theme from '../theme';
+import ConfirmationPopup from './ConfirmationPopup';
 
 function LivePreview() {
   const { currentSong } = useSelector(state => state.song);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const parseSections = (lyrics) => {
     const sectionRegex = /\[(.*?)\](?:\|\|\|([\s\S]*?))?(?=\n\n\[|$)/g;
@@ -28,13 +30,17 @@ function LivePreview() {
     `[${section.type}]${section.content ? '\n' + section.content : ''}`
   ).join('\n\n')}`;
 
+  const lyricsOnlyForCopy = parsedSections.map(section => 
+    `[${section.type}]${section.content ? '\n' + section.content : ''}`
+  ).join('\n\n');
+
   const wordCount = currentSong.lyrics.split(/\s+/).filter(Boolean).length;
   const charCount = currentSong.lyrics.length;
   const lineCount = currentSong.lyrics.split('\n').filter(Boolean).length;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(formattedLyrics)
-      .then(() => alert('Lyrics copied to clipboard!'))
+    navigator.clipboard.writeText(lyricsOnlyForCopy)
+      .then(() => setShowConfirmation(true))
       .catch(err => console.error('Failed to copy lyrics: ', err));
   };
   
@@ -67,6 +73,13 @@ function LivePreview() {
       >
         Copy Lyrics
       </button>
+      {showConfirmation && (
+        <ConfirmationPopup
+          message="Your masterpiece has been copied to your clipboard.
+          Best of luck with your generation(s)!"
+          onClose={() => setShowConfirmation(false)}
+        />
+      )}
     </div>
   );
 }
