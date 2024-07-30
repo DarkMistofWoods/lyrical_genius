@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image } from 'lucide-react';
+import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image, Edit, Eye, RefreshCw, Copy, Plus } from 'lucide-react';
 import theme from '../theme';
 import { undo } from '../store/songSlice';
 
@@ -11,7 +11,9 @@ function Toolbar() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isFocusModeOn, setIsFocusModeOn] = useState(false);
   const [isVersionControlOpen, setIsVersionControlOpen] = useState(false);
-  const [isMoodBoardActive, setIsMoodBoardActive] = useState(false);
+  const [isMoodBoardOpen, setIsMoodBoardOpen] = useState(false);
+  const [isEditingMoodBoard, setIsEditingMoodBoard] = useState(false);
+  const [isMoodBoardVisible, setIsMoodBoardVisible] = useState(true);
 
   const handleUndo = () => {
     dispatch(undo());
@@ -19,27 +21,47 @@ function Toolbar() {
 
   const handleToolsClick = () => {
     setIsToolsOpen(!isToolsOpen);
-    // TODO: Implement tools functionality
   };
 
   const handleFeedbackClick = () => {
     setIsFeedbackOpen(!isFeedbackOpen);
-    // TODO: Implement feedback panel functionality
   };
 
   const handleFocusModeClick = () => {
     setIsFocusModeOn(!isFocusModeOn);
-    // TODO: Implement focus mode functionality
   };
 
   const handleVersionControlClick = () => {
     setIsVersionControlOpen(!isVersionControlOpen);
-    // TODO: Implement version control functionality
   };
 
   const handleMoodBoardClick = () => {
-    setIsMoodBoardActive(!isMoodBoardActive);
-    // TODO: Implement mood board functionality
+    setIsMoodBoardOpen(!isMoodBoardOpen);
+  };
+
+  const handleEditMoodBoard = () => {
+    setIsEditingMoodBoard(!isEditingMoodBoard);
+    // TODO: Implement editing mode functionality
+  };
+
+  const handleToggleMoodBoardVisibility = () => {
+    setIsMoodBoardVisible(!isMoodBoardVisible);
+    // TODO: Implement visibility toggle functionality
+  };
+
+  const handleResetMoodBoard = () => {
+    // TODO: Implement reset functionality
+    console.log('Reset mood board');
+  };
+
+  const handleCopyMoodBoard = () => {
+    // TODO: Implement copy functionality
+    console.log('Copy mood board');
+  };
+
+  const handleAddToMoodBoard = () => {
+    // TODO: Implement add functionality
+    console.log('Add to mood board');
   };
 
   return (
@@ -82,7 +104,7 @@ function Toolbar() {
         </button>
         <button
           onClick={handleMoodBoardClick}
-          className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isMoodBoardActive ? 'opacity-60' : ''}`}
+          className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isMoodBoardOpen ? 'opacity-60' : ''}`}
           title="Mood Board"
         >
           <Image size={20} />
@@ -101,6 +123,47 @@ function Toolbar() {
       {isVersionControlOpen && (
         <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
           <p className="text-center">Version Control panel (to be implemented)</p>
+        </div>
+      )}
+      {isMoodBoardOpen && (
+        <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={handleEditMoodBoard}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isEditingMoodBoard ? 'opacity-60' : ''}`}
+              title={isEditingMoodBoard ? "Exit Editing Mode" : "Enter Editing Mode"}
+            >
+              <Edit size={20} />
+            </button>
+            <button
+              onClick={handleToggleMoodBoardVisibility}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${!isMoodBoardVisible ? 'opacity-60' : ''}`}
+              title={isMoodBoardVisible ? "Hide Mood Board" : "Show Mood Board"}
+            >
+              <Eye size={20} />
+            </button>
+            <button
+              onClick={handleResetMoodBoard}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Reset Mood Board"
+            >
+              <RefreshCw size={20} />
+            </button>
+            <button
+              onClick={handleCopyMoodBoard}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Copy Mood Board"
+            >
+              <Copy size={20} />
+            </button>
+            <button
+              onClick={handleAddToMoodBoard}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Add to Mood Board"
+            >
+              <Plus size={20} />
+            </button>
+          </div>
         </div>
       )}
     </div>
