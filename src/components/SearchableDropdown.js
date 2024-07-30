@@ -6,10 +6,10 @@ function SearchableDropdown({ label, options, selectedValues, onChange, labelCol
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
 
-  const sortedOptions = [...options].sort((a, b) => a.label.localeCompare(b.label));
+  const sortedOptions = [...options].sort((a, b) => a.value.localeCompare(b.value));
 
   const filteredOptions = sortedOptions.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    option.value.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const toggleOption = (value) => {
@@ -28,6 +28,10 @@ function SearchableDropdown({ label, options, selectedValues, onChange, labelCol
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
+
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
 
   return (
     <div className="mb-4" ref={dropdownRef}>
@@ -59,7 +63,7 @@ function SearchableDropdown({ label, options, selectedValues, onChange, labelCol
                 } cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-blue-50 text-[${theme.common.black}]`}
                 onClick={() => toggleOption(option.value)}
               >
-                {option.label}
+                {capitalizeFirstLetter(option.value)}
               </div>
             ))}
           </div>

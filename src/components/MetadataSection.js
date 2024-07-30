@@ -67,6 +67,10 @@ function MetadataSection({ currentSong, saveChanges }) {
     saveChanges({ ...currentSong, style: newStyle });
   };
 
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   // Ensure all style properties are arrays
   const safeStyle = {
     vocals: [],
@@ -84,7 +88,7 @@ function MetadataSection({ currentSong, saveChanges }) {
         {Object.entries(styleOptions).map(([key, options]) => (
           <div key={key} className="flex-grow min-w-[120px] max-w-[200px]">
             <SearchableDropdown
-              label={key.charAt(0).toUpperCase() + key.slice(1)}
+              label={capitalizeFirstLetter(key)}
               options={options}
               selectedValues={currentSong.style[key] || []}
               onChange={(selectedValues) => handleStyleChange(key, selectedValues)}
@@ -121,7 +125,7 @@ function MetadataSection({ currentSong, saveChanges }) {
               key={`${category}-${value}`}
               className={`px-2 py-0.5 text-xs rounded flex items-center bg-[#403E3F] text-[${theme.common.white}]`}
             >
-              {value}
+              {capitalizeFirstLetter(value)}
               <button
                 onClick={() => removeStyle(category, value)}
                 className="ml-1 text-[#F2F2F2] hover:text-[#0D0C0C]"
