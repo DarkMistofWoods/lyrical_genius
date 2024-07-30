@@ -1,28 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentSong, addSong, deleteSong } from '../store/songSlice';
+import { setCurrentSong, addSong, deleteSong, addCategory, deleteCategory, renameCategory, assignSongToCategory, unassignSongFromCategory } from '../store/songSlice';
 import { saveSongsToLocalStorage } from '../utils/localStorage';
 import theme from '../theme';
 import ReactDOM from 'react-dom';
-import { Search, X } from 'lucide-react';
+import { Search, X, Plus, Edit2, Trash2 } from 'lucide-react';
 
 function SongList() {
   const dispatch = useDispatch();
-  const { songs, currentSong } = useSelector(state => state.song);
+  const { songs, currentSong, categories } = useSelector(state => state.song);
   const [songToDelete, setSongToDelete] = useState(null);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredSongs, setFilteredSongs] = useState(songs);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [activeSongForCategory, setActiveSongForCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
     const filtered = songs.filter(song => 
-      song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       Object.values(song.style).flat().some(style => 
         style.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      ) ||
+      song.categories.some(category => 
+        category.toLowerCase().includes(searchTerm.toLowerCase())
+      )) &&
+      (selectedCategory ? song.categories.includes(selectedCategory) : true)
     );
     setFilteredSongs(filtered);
-  }, [searchTerm, songs]);
+  }, [searchTerm, songs, selectedCategory]);
 
   const handleSelectSong = (song) => {
     dispatch(setCurrentSong(song));
@@ -53,10 +62,53 @@ function SongList() {
     event.preventDefault();
     event.stopPropagation();
     setSearchTerm(style);
+    setSelectedCategory(null);
+  };
+
+  const handleCategoryClick = (category, event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setSelectedCategory(category === selectedCategory ? null : category);
+    setSearchTerm('');
   };
 
   const clearSearch = () => {
     setSearchTerm('');
+    setSelectedCategory(null);
+  };
+
+  const handleAddCategory = () => {
+    if (newCategoryName.trim()) {
+      dispatch(addCategory(newCategoryName.trim()));
+      setNewCategoryName('');
+    }
+  };
+
+  const handleDeleteCategory = (category) => {
+    dispatch(deleteCategory(category));
+    if (selectedCategory === category) {
+      setSelectedCategory(null);
+    }
+  };
+
+  const handleRenameCategory = (oldName, newName) => {
+    if (newName.trim() && oldName !== newName.trim()) {
+      dispatch(renameCategory({ oldName, newName: newName.trim() }));
+      setEditingCategory(null);
+      if (selectedCategory === oldName) {
+        setSelectedCategory(newName.trim());
+      }
+    }
+  };
+
+  const handleAssignCategory = (songId, category) => {
+    dispatch(assignSongToCategory({ songId, category }));
+    setShowCategoryDropdown(false);
+    setActiveSongForCategory(null);
+  };
+
+  const handleUnassignCategory = (songId, category) => {
+    dispatch(unassignSongFromCategory({ songId, category }));
   };
 
   const DeleteConfirmationDialog = () => {
@@ -88,6 +140,27 @@ function SongList() {
     );
   };
 
+  const CategoryDropdown = ({ songId }) => {
+    if (!showCategoryDropdown || activeSongForCategory !== songId) return null;
+
+    return (
+      <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[${isDarkMode ? theme.dark.background : theme.light.background}] ring-1 ring-black ring-opacity-5 z-50`}>
+        <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => handleAssignCategory(songId, category)}
+              className={`block px-4 py-2 text-sm text-[${isDarkMode ? theme.common.white : theme.common.black}] hover:bg-[${theme.common.grey}] w-full text-left`}
+              role="menuitem"
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-lg font-semibold mb-2">Your Songs</h2>
@@ -104,7 +177,7 @@ function SongList() {
           }`}
         />
         <Search className="absolute left-2 top-2.5 text-gray-400" size={16} />
-        {searchTerm && (
+        {(searchTerm || selectedCategory) && (
           <button
             onClick={clearSearch}
             className="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600"
@@ -113,14 +186,68 @@ function SongList() {
           </button>
         )}
       </div>
-      <ul className="mb-4 space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold mb-2">Categories</h3>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <div key={category} className={`flex items-center bg-[${theme.common.brown}] rounded px-2 py-1 ${selectedCategory === category ? 'ring-2 ring-[#F2F2F2]' : ''}`}>
+              {editingCategory === category ? (
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  onBlur={() => handleRenameCategory(category, newCategoryName)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleRenameCategory(category, newCategoryName)}
+                  className="bg-transparent border-b border-[#595859] focus:outline-none text-sm text-[#F2F2F2]"
+                  autoFocus
+                />
+              ) : (
+                <button
+                  className="text-sm text-[#F2F2F2]"
+                  onClick={(e) => handleCategoryClick(category, e)}
+                >
+                  {category}
+                </button>
+              )}
+              <button
+                onClick={() => setEditingCategory(category)}
+                className="ml-2 text-[#F2F2F2] hover:text-[#0D0C0C]"
+              >
+                <Edit2 size={12} />
+              </button>
+              <button
+                onClick={() => handleDeleteCategory(category)}
+                className="ml-2 text-[#F2F2F2] hover:text-[#0D0C0C]"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))}
+          <div className="flex items-center">
+            <input
+              type="text"
+              placeholder="New category"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              className={`bg-transparent border-b border-[${theme.common.brown}] focus:outline-none text-sm mr-2`}
+            />
+            <button
+              onClick={handleAddCategory}
+              className={`text-[${theme.common.white}] hover:text-[${theme.common.grey}]`}
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+      <ul className="mb-4 space-y-2 max-h-[calc(100vh-350px)] overflow-y-auto">
         {filteredSongs.map(song => (
           <li 
             key={song.id} 
             className={`p-2 rounded transition-colors duration-200 ${
               currentSong.id === song.id 
-                ? 'bg-[#595859]' 
-                : 'bg-[#403E3F] hover:bg-[#4a4849]'
+                ? `bg-[#595859] border border-[${theme.common.brown}]`
+                : `bg-[#403E3F] hover:bg-[#4a4849] border border-[${theme.common.grey}]`
             }`}
           >
             <div className="flex justify-between items-center mb-1">
@@ -130,14 +257,45 @@ function SongList() {
               >
                 {song.title || 'Untitled'}
               </button>
-              <button
-                onClick={() => handleDeleteSong(song.id)}
-                className="text-red-500 hover:text-red-700 ml-2"
-              >
-                Delete
-              </button>
+              <div className="flex items-center">
+                <button
+                  onClick={() => {
+                    setShowCategoryDropdown(!showCategoryDropdown);
+                    setActiveSongForCategory(song.id);
+                  }}
+                  className="text-gray-400 hover:text-gray-200 mr-2"
+                >
+                  <Plus size={16} />
+                </button>
+                <button
+                  onClick={() => handleDeleteSong(song.id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="text-xs text-gray-400 italic">
+            <div className="flex flex-wrap gap-1 mt-1">
+              {song.categories.map((category) => (
+                <span
+                  key={category}
+                  className={`text-xs bg-[${theme.common.brown}] text-[${theme.common.white}] rounded px-1 py-0.5 flex items-center cursor-pointer`}
+                  onClick={(e) => handleCategoryClick(category, e)}
+                >
+                  {category}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUnassignCategory(song.id, category);
+                    }}
+                    className="ml-1 text-[#F2F2F2] hover:text-[#0D0C0C]"
+                  >
+                    <X size={10} />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="text-xs text-gray-400 italic mt-1">
               {Object.values(song.style).flat().filter(Boolean).map((style, index, array) => (
                 <React.Fragment key={index}>
                   <button
@@ -150,6 +308,7 @@ function SongList() {
                 </React.Fragment>
               ))}
             </div>
+            <CategoryDropdown songId={song.id} />
           </li>
         ))}
       </ul>
