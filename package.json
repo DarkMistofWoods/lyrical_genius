@@ -2,7 +2,7 @@
   "name": "lyrical_genius",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://darkmistofwoods.github.io/lyrical_genius",
+  "homepage": "https://darkmistofwoods.github.io/lyrical_genius/",
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.6",
     "@testing-library/jest-dom": "^5.17.0",
