@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/lyrical_genius/static/css/main.851c1643.css",
-    "main.js": "/lyrical_genius/static/js/main.c7ad749a.js",
+    "main.css": "/lyrical_genius/static/css/main.87655a20.css",
+    "main.js": "/lyrical_genius/static/js/main.d0909a3e.js",
     "index.html": "/lyrical_genius/index.html",
-    "main.851c1643.css.map": "/lyrical_genius/static/css/main.851c1643.css.map",
-    "main.c7ad749a.js.map": "/lyrical_genius/static/js/main.c7ad749a.js.map"
+    "main.87655a20.css.map": "/lyrical_genius/static/css/main.87655a20.css.map",
+    "main.d0909a3e.js.map": "/lyrical_genius/static/js/main.d0909a3e.js.map"
   },
   "entrypoints": [
-    "static/css/main.851c1643.css",
-    "static/js/main.c7ad749a.js"
+    "static/css/main.87655a20.css",
+    "static/js/main.d0909a3e.js"
   ]
 }
