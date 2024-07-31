@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateStyle } from '../store/songSlice';
 import theme from '../theme';
-import { ChevronDown, ChevronUp, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, X, Plus } from 'lucide-react';
 
 // Import style options
 import vocalsOptions from '../data/vocals.json';
@@ -23,6 +23,7 @@ function MetadataSection({ currentSong, saveChanges }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [customStyle, setCustomStyle] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -36,37 +37,32 @@ function MetadataSection({ currentSong, saveChanges }) {
   }, []);
 
   const handleStyleChange = (category, value) => {
-    const newStyle = { ...currentSong.style };
+    const newStyle = JSON.parse(JSON.stringify(currentSong.style)); // Deep clone
     const categoryArray = newStyle[category.toLowerCase()] || [];
-    const valueIndex = categoryArray.indexOf(value);
-
-    if (valueIndex === -1) {
+    
+    if (!categoryArray.includes(value)) {
       categoryArray.push(value);
-    } else {
-      categoryArray.splice(valueIndex, 1);
-    }
+      newStyle[category.toLowerCase()] = categoryArray;
 
-    newStyle[category.toLowerCase()] = categoryArray;
+      const totalLength = Object.values(newStyle)
+        .flat()
+        .join(', ')
+        .length;
 
-    const totalLength = Object.values(newStyle)
-      .flat()
-      .join(', ')
-      .length;
-
-    if (totalLength <= 120) {
-      dispatch(updateStyle(newStyle));
-      saveChanges({ ...currentSong, style: newStyle });
-    } else {
-      alert("Total length of selected styles cannot exceed 120 characters.");
+      if (totalLength <= 120) {
+        dispatch(updateStyle(newStyle));
+        saveChanges({ ...currentSong, style: newStyle });
+      } else {
+        alert("Total length of selected styles cannot exceed 120 characters.");
+      }
     }
   };
 
   const addCustomStyle = () => {
     if (customStyle.trim()) {
-      const newStyle = {
-        ...currentSong.style,
-        custom: [...(currentSong.style.custom || []), customStyle.trim()]
-      };
+      const newStyle = JSON.parse(JSON.stringify(currentSong.style)); // Deep clone
+      newStyle.custom = [...(newStyle.custom || []), customStyle.trim()];
+      
       const totalLength = Object.values(newStyle)
         .flat()
         .join(', ')
@@ -83,96 +79,26 @@ function MetadataSection({ currentSong, saveChanges }) {
   };
 
   const removeStyle = (category, value) => {
-    const newStyle = {
-      ...currentSong.style,
-      [category]: currentSong.style[category].filter(v => v !== value)
-    };
+    const newStyle = JSON.parse(JSON.stringify(currentSong.style)); // Deep clone
+    newStyle[category] = newStyle[category].filter(v => v !== value);
     dispatch(updateStyle(newStyle));
     saveChanges({ ...currentSong, style: newStyle });
   };
 
-  const filteredOptions = allOptions.map(categoryGroup => {
-    return {
+  const filteredOptions = allOptions
+    .filter(categoryGroup => selectedCategory === 'All' || categoryGroup.category === selectedCategory)
+    .map(categoryGroup => ({
       ...categoryGroup,
-      options: categoryGroup.options.filter(option => {
-        const shouldInclude = option && option.value && option.value.toLowerCase().includes(searchTerm.toLowerCase());
-        return shouldInclude;
-      })
-    };
-  }).filter(categoryGroup => {
-    return categoryGroup.options.length > 0;
-  });
+      options: categoryGroup.options.filter(option =>
+        option.value.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }))
+    .filter(categoryGroup => categoryGroup.options.length > 0);
 
   return (
-    <div className={`bg-[${theme.common.grey}] p-4 rounded-lg`}>
-      <div className="relative" ref={dropdownRef}>
-        <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className={`w-full p-2 text-left bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] border border-[${theme.common.grey}] rounded flex justify-between items-center`}
-        >
-          <span>Select styles</span>
-          {isDropdownOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-        </button>
-        {isDropdownOpen && (
-          <div className={`absolute z-10 w-full mt-1 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border border-[${theme.common.grey}] rounded shadow-lg`}>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search styles..."
-              className={`w-full p-2 bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] border-b border-[${theme.common.grey}]`}
-            />
-            <div className="max-h-60 overflow-y-auto">
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((categoryGroup, index) => (
-                  <div key={index}>
-                    <h3 className={`p-2 font-bold bg-[${theme.common.brown}] text-[${theme.common.white}]`}>
-                      {categoryGroup.category}
-                    </h3>
-                    {categoryGroup.options.map((option) => (
-                      <div
-                        key={option.value}
-                        className={`p-2 cursor-pointer hover:bg-[${isDarkMode ? theme.dark.background : theme.light.background}]`}
-                        onClick={() => handleStyleChange(categoryGroup.category, option.value)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={currentSong.style[categoryGroup.category.toLowerCase()]?.includes(option.value) || false}
-                          onChange={() => {}}
-                          className="mr-2"
-                        />
-                        {option.value}
-                      </div>
-                    ))}
-                  </div>
-                ))
-              ) : (
-                <div className="p-2">No matching options found</div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Custom style input */}
-      <div className="flex mt-4">
-        <input
-          type="text"
-          placeholder="Custom style"
-          value={customStyle}
-          onChange={(e) => setCustomStyle(e.target.value)}
-          className={`flex-grow p-2 text-sm border rounded-l border-[${theme.common.grey}] bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}
-        />
-        <button
-          onClick={addCustomStyle}
-          className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 text-sm rounded-r hover:opacity-80`}
-        >
-          Add
-        </button>
-      </div>
-
+    <div className={`bg-[${theme.common.grey}] p-4 rounded-lg relative`}>
       {/* Display selected styles */}
-      <div className="flex flex-wrap gap-1 mt-2">
+      <div className="flex flex-wrap gap-1 mb-3">
         {Object.entries(currentSong.style).flatMap(([category, values]) =>
           values.map(value => (
             <span
@@ -188,6 +114,72 @@ function MetadataSection({ currentSong, saveChanges }) {
               </button>
             </span>
           ))
+        )}
+      </div>
+
+      <div ref={dropdownRef} className="relative">
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className={`w-full p-2 text-left bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] border border-[${theme.common.grey}] rounded flex justify-between items-center`}
+        >
+          <span>Select styles</span>
+          {isDropdownOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </button>
+        {isDropdownOpen && (
+          <div className={`fixed left-1/2 transform -translate-x-1/2 z-[9999] mt-1 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border border-[${theme.common.grey}] rounded shadow-lg`} style={{width: 'calc(100% - 2rem)', maxWidth: '600px', maxHeight: '60vh', overflowY: 'auto'}}>
+            <div className="p-2 border-b border-[${theme.common.grey}]">
+              <div className="flex items-center mb-2">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search styles..."
+                  className={`flex-grow p-2 bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] rounded mr-2`}
+                />
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className={`p-2 bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] rounded`}
+                >
+                  <option value="All">All</option>
+                  {allOptions.map(category => (
+                    <option key={category.category} value={category.category}>{category.category}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  placeholder="Add custom style"
+                  value={customStyle}
+                  onChange={(e) => setCustomStyle(e.target.value)}
+                  className={`flex-grow p-2 text-sm bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] rounded-l border-r border-[${theme.common.grey}]`}
+                />
+                <button
+                  onClick={addCustomStyle}
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-r hover:opacity-80 flex items-center justify-center`}
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
+            </div>
+            {filteredOptions.map((categoryGroup, index) => (
+              <div key={index}>
+                <h3 className={`p-2 font-bold bg-[${theme.common.brown}] text-[${theme.common.white}]`}>
+                  {categoryGroup.category}
+                </h3>
+                {categoryGroup.options.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`p-2 cursor-pointer hover:bg-[${isDarkMode ? theme.dark.background : theme.light.background}]`}
+                    onClick={() => handleStyleChange(categoryGroup.category, option.value)}
+                  >
+                    {option.value}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
