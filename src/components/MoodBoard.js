@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateElementPosition, removeElement, updateElementSize, updateElementContent } from '../store/moodBoardSlice';
+import { updateElementPosition, removeElement, updateElementSize, updateElementContent, updateElementRotation } from '../store/moodBoardSlice';
 import theme from '../theme';
-import { Maximize2, X, Edit2, Bold, Italic, Underline } from 'lucide-react';
+import { Maximize2, X, RotateCw, Edit2, Bold, Italic, Underline } from 'lucide-react';
 
-const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
+const MoodBoardElement = ({ element, isEditing, onStartEditing, isSelected, onSelect }) => {
   const dispatch = useDispatch();
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
   const [initialMousePos, setInitialMousePos] = useState({ x: 0, y: 0 });
@@ -18,7 +20,7 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (isDragging && isEditing) {
+      if (isDragging && isEditing && isSelected) {
         dispatch(updateElementPosition({
           id: element.id,
           position: {
@@ -26,7 +28,7 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
             y: e.clientY - dragOffset.y,
           },
         }));
-      } else if (isResizing && isEditing) {
+      } else if (isResizing && isEditing && isSelected) {
         const dx = e.clientX - initialMousePos.x;
         const dy = e.clientY - initialMousePos.y;
         let newWidth, newHeight;
@@ -47,15 +49,28 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
             height: Math.max(newHeight, 20),
           },
         }));
+      } else if (isRotating && isEditing && isSelected) {
+        const elementRect = elementRef.current.getBoundingClientRect();
+        const elementCenterX = elementRect.left + elementRect.width / 2;
+        const elementCenterY = elementRect.top + elementRect.height / 2;
+        
+        const angle = Math.atan2(e.clientY - elementCenterY, e.clientX - elementCenterX);
+        const degrees = angle * (180 / Math.PI);
+        
+        dispatch(updateElementRotation({
+          id: element.id,
+          rotation: degrees,
+        }));
       }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
+      setIsRotating(false);
     };
 
-    if (isDragging || isResizing) {
+    if (isDragging || isResizing || isRotating) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     }
@@ -64,7 +79,7 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, dispatch, dragOffset, element.id, isEditing, initialMousePos, initialSize]);
+  }, [isDragging, isResizing, isRotating, dispatch, dragOffset, element.id, isEditing, initialMousePos, initialSize, isSelected]);
 
   const handleMouseDown = (e) => {
     if (isEditing && !isEditingText) {
@@ -73,18 +88,26 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
         x: e.clientX - element.position.x,
         y: e.clientY - element.position.y,
       });
+      onSelect(element.id);
     }
   };
 
   const handleResizeStart = (e) => {
     e.stopPropagation();
-    if (isEditing) {
+    if (isEditing && isSelected) {
       setIsResizing(true);
       setInitialMousePos({ x: e.clientX, y: e.clientY });
       setInitialSize({
         width: elementRef.current.offsetWidth,
         height: elementRef.current.offsetHeight,
       });
+    }
+  };
+
+  const handleRotateStart = (e) => {
+    e.stopPropagation();
+    if (isEditing && isSelected) {
+      setIsRotating(true);
     }
   };
 
@@ -128,12 +151,13 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
   return (
     <div
       ref={elementRef}
-      className={`absolute ${isEditing ? 'cursor-move' : 'cursor-default'} select-none`}
+      className={`absolute ${isEditing ? 'cursor-move' : 'cursor-default'} select-none ${isSelected ? 'border-2 border-blue-500' : ''}`}
       style={{
         left: `${element.position.x}px`,
         top: `${element.position.y}px`,
         width: element.size?.width || 'auto',
         height: element.size?.height || 'auto',
+        transform: `rotate(${element.rotation || 0}deg)`,
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
@@ -163,19 +187,25 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
           className="w-full h-full object-cover"
         />
       )}
-      {isEditing && (
+      {isEditing && isSelected && (
         <>
           <button
             onClick={handleRemove}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+            className={`absolute -top-2 -right-2 bg-[${theme.common.brown}] text-[${theme.common.white}] rounded-full w-6 h-6 flex items-center justify-center hover:bg-[${isDarkMode ? theme.dark.background : theme.light.background}] hover:text-[${theme.common.brown}] transition-colors`}
           >
             <X size={16} />
           </button>
           <div
-            className="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 cursor-se-resize"
+            className={`absolute -bottom-2 -right-2 bg-[${theme.common.brown}] rounded-full w-6 h-6 cursor-se-resize flex items-center justify-center`}
             onMouseDown={handleResizeStart}
           >
-            <Maximize2 size={16} className="text-white" />
+            <Maximize2 size={16} className={`text-[${theme.common.white}]`} />
+          </div>
+          <div
+            className={`absolute -top-2 -left-2 bg-[${theme.common.brown}] rounded-full w-6 h-6 cursor-pointer flex items-center justify-center`}
+            onMouseDown={handleRotateStart}
+          >
+            <RotateCw size={16} className={`text-[${theme.common.white}]`} />
           </div>
         </>
       )}
@@ -184,39 +214,46 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
 };
 
 const MoodBoard = ({ isVisible, isEditing }) => {
-    const isDarkMode = useSelector(state => state.theme.isDarkMode);
-    const { moodBoards, currentMoodBoardId } = useSelector(state => state.moodBoard);
-    const [editingElement, setEditingElement] = useState(null);
-  
-    const currentMoodBoard = moodBoards.find(board => board.id === currentMoodBoardId);
-  
-    const handleStartEditing = (element) => {
-      setEditingElement(element);
-    };
-  
-    if (!isVisible || !currentMoodBoard) return null;
-  
-    return (
-      <div 
-        className={`fixed inset-0 ${isEditing ? 'z-40' : 'z-0'} transition-opacity duration-300`}
-        style={{
-          backgroundColor: isDarkMode ? theme.dark.background : theme.light.background,
-          opacity: isEditing ? 1 : 0.1,
-        }}
-      >
-        <h2 className={`text-2xl font-bold m-4 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
-          {currentMoodBoard.name}
-        </h2>
-        {currentMoodBoard.elements.map(element => (
-          <MoodBoardElement 
-            key={element.id} 
-            element={element} 
-            isEditing={isEditing} 
-            onStartEditing={handleStartEditing}
-          />
-        ))}
-      </div>
-    );
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
+  const { moodBoards, currentMoodBoardId } = useSelector(state => state.moodBoard);
+  const [editingElement, setEditingElement] = useState(null);
+  const [selectedElementId, setSelectedElementId] = useState(null);
+
+  const currentMoodBoard = moodBoards.find(board => board.id === currentMoodBoardId);
+
+  const handleStartEditing = (element) => {
+    setEditingElement(element);
   };
+
+  const handleSelectElement = (elementId) => {
+    setSelectedElementId(elementId);
+  };
+
+  if (!isVisible || !currentMoodBoard) return null;
+
+  return (
+    <div 
+      className={`fixed inset-0 ${isEditing ? 'z-40' : 'z-0'} transition-opacity duration-300`}
+      style={{
+        backgroundColor: isDarkMode ? theme.dark.background : theme.light.background,
+        opacity: isEditing ? 1 : 0.1,
+      }}
+    >
+      <h2 className={`text-2xl font-bold m-4 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
+        {currentMoodBoard.name}
+      </h2>
+      {currentMoodBoard.elements.map(element => (
+        <MoodBoardElement 
+          key={element.id} 
+          element={element} 
+          isEditing={isEditing} 
+          onStartEditing={handleStartEditing}
+          isSelected={selectedElementId === element.id}
+          onSelect={handleSelectElement}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default MoodBoard;

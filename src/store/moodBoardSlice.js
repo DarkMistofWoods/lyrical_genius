@@ -130,6 +130,18 @@ export const moodBoardSlice = createSlice({
       state.currentMoodBoardId = newMoodBoard.id;
       saveMoodBoardsToLocalStorage(state);
     },
+
+    updateElementRotation: (state, action) => {
+      const { id, rotation } = action.payload;
+      const currentBoard = state.moodBoards.find(board => board.id === state.currentMoodBoardId);
+      if (currentBoard) {
+        const element = currentBoard.elements.find(el => el.id === id);
+        if (element) {
+          element.rotation = rotation;
+        }
+      }
+      saveMoodBoardsToLocalStorage(state);
+    },
   },
 });
 
@@ -144,7 +156,8 @@ export const {
   updateElementSize, 
   updateElementContent, 
   resetCurrentMoodBoard,
-  createNewMoodBoard
+  createNewMoodBoard,
+  updateElementRotation
 } = moodBoardSlice.actions;
 
 export default moodBoardSlice.reducer;
