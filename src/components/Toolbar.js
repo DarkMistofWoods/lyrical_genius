@@ -38,8 +38,19 @@ function Toolbar({
   const currentMoodBoard = moodBoards.find(board => board.id === currentMoodBoardId);
   const isCurrentMoodBoardEmpty = currentMoodBoard && currentMoodBoard.elements.length === 0;
 
+  // New state to track which panel is open
+  const [openPanel, setOpenPanel] = useState(null);
+
   const handleUndo = () => {
     dispatch(undo());
+  };
+
+  const handlePanelClick = (panelName) => {
+    if (openPanel === panelName) {
+      setOpenPanel(null);
+    } else {
+      setOpenPanel(panelName);
+    }
   };
 
   const handleToolsClick = () => {
@@ -192,15 +203,15 @@ function Toolbar({
             <Undo size={20} />
           </button>
           <button
-            onClick={handleToolsClick}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isToolsOpen ? 'opacity-60' : ''}`}
+            onClick={() => handlePanelClick('tools')}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'tools' ? 'opacity-60' : ''}`}
             title="Tools"
           >
             <Wrench size={20} />
           </button>
           <button
-            onClick={handleFeedbackClick}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isFeedbackOpen ? 'opacity-60' : ''}`}
+            onClick={() => handlePanelClick('feedback')}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'feedback' ? 'opacity-60' : ''}`}
             title="Feedback"
           >
             <MessageSquare size={20} />
@@ -213,31 +224,31 @@ function Toolbar({
             <Sparkle size={20} />
           </button>
           <button
-            onClick={handleVersionControlClick}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isVersionControlOpen ? 'opacity-60' : ''}`}
+            onClick={() => handlePanelClick('versionControl')}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'versionControl' ? 'opacity-60' : ''}`}
             title="Version Control"
           >
             <GitBranch size={20} />
           </button>
           <button
-            onClick={handleMoodBoardClick}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isMoodBoardOpen ? 'opacity-60' : ''}`}
+            onClick={() => handlePanelClick('moodBoard')}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'moodBoard' ? 'opacity-60' : ''}`}
             title="Mood Board"
           >
             <Image size={20} />
           </button>
         </div>
-        {isToolsOpen && (
+        {openPanel === 'tools' && (
           <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
             <p className="text-center">Tools panel (to be implemented)</p>
           </div>
         )}
-        {isFeedbackOpen && (
+        {openPanel === 'feedback' && (
           <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
             <p className="text-center">Feedback panel (to be implemented)</p>
           </div>
         )}
-        {isVersionControlOpen && (
+        {openPanel === 'versionControl' && (
           <div
             className={`fixed bottom-[52px] left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] shadow-lg z-40`}
             style={{ height: '200px' }} // Fixed height for consistency
@@ -282,7 +293,7 @@ function Toolbar({
             </div>
           </div>
         )}
-        {isMoodBoardOpen && (
+        {openPanel === 'moodBoard' && (
           <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
             <div className="flex justify-center space-x-4">
               <button
