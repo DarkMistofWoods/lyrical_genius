@@ -112,5 +112,15 @@
   { "value": "glass harmonica" },
   { "value": "crystal flute" },
   { "value": "glitchsynth" },
-  { "value": "glitchbass" }
+  { "value": "glitchbass" },
+  { "value": "bass" },
+  { "value": "doublebass" },
+  { "value": "electricbass" },
+  { "value": "fingerstyle guitar" },
+  { "value": "percussion" },
+  { "value": "glitch" },
+  { "value": "glissando trombone" },
+  { "value": "legato cello" },
+  { "value": "spiccato violins" },
+  { "value": "staccato viola" }
 ]
