@@ -240,7 +240,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     }
 
     return (
-      <div className="relative">
+      <div className="relative mt-20">
         <Section
           section={sections[focusedSectionIndex]}
           index={focusedSectionIndex}
