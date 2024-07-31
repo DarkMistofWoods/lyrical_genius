@@ -21,7 +21,8 @@ function Section({
   sectionsLength,
   changeSectionType,
   addModifier,
-  removeModifier
+  removeModifier,
+  isFocusMode
 }) {
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [showModifierDropdown, setShowModifierDropdown] = useState(false);
@@ -140,35 +141,37 @@ function Section({
     return (
       <div className={`p-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] flex justify-between items-center w-full mb-4 relative z-10`}>
         <span>{displayLabel()}</span>
-        <div className="flex">
-          <button
-            ref={modifierButtonRef}
-            onClick={() => setShowModifierDropdown(!showModifierDropdown)}
-            className="text-[#F2F2F2] hover:text-[#0D0C0C] mr-2"
-          >
-            <Tag size={16} />
-          </button>
-          <button
-            onClick={() => moveSection(index, 'up')}
-            className={`text-[#F2F2F2] hover:text-[#0D0C0C] mr-2 ${index === 0 ? 'opacity-50' : ''}`}
-            disabled={index === 0}
-          >
-            <ArrowUp size={16} />
-          </button>
-          <button
-            onClick={() => moveSection(index, 'down')}
-            className={`text-[#F2F2F2] hover:text-[#0D0C0C] mr-2 ${index === sectionsLength - 1 ? 'opacity-50' : ''}`}
-            disabled={index === sectionsLength - 1}
-          >
-            <ArrowDown size={16} />
-          </button>
-          <button
-            onClick={() => removeSection(index)}
-            className="text-[#F2F2F2] hover:text-[#0D0C0C]"
-          >
-            <XCircle size={16} />
-          </button>
-        </div>
+        {!isFocusMode && (
+          <div className="flex">
+            <button
+              ref={modifierButtonRef}
+              onClick={() => setShowModifierDropdown(!showModifierDropdown)}
+              className="text-[#F2F2F2] hover:text-[#0D0C0C] mr-2"
+            >
+              <Tag size={16} />
+            </button>
+            <button
+              onClick={() => moveSection(index, 'up')}
+              className={`text-[#F2F2F2] hover:text-[#0D0C0C] mr-2 ${index === 0 ? 'opacity-50' : ''}`}
+              disabled={index === 0}
+            >
+              <ArrowUp size={16} />
+            </button>
+            <button
+              onClick={() => moveSection(index, 'down')}
+              className={`text-[#F2F2F2] hover:text-[#0D0C0C] mr-2 ${index === sectionsLength - 1 ? 'opacity-50' : ''}`}
+              disabled={index === sectionsLength - 1}
+            >
+              <ArrowDown size={16} />
+            </button>
+            <button
+              onClick={() => removeSection(index)}
+              className="text-[#F2F2F2] hover:text-[#0D0C0C]"
+            >
+              <XCircle size={16} />
+            </button>
+          </div>
+        )}
         {showModifierDropdown && renderModifierDropdown()}
       </div>
     );
@@ -179,43 +182,47 @@ function Section({
       <div className="flex-grow relative">
         <div className="flex items-center mb-1">
           <span className="font-bold text-sm mr-2">{displayLabel()}</span>
-          <button
-            onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
-            className="text-[#A68477] hover:text-[#595859] mr-2"
-          >
-            <Settings size={16} />
-          </button>
-          <button
-            onClick={() => duplicateSection(index)}
-            className="text-[#A68477] hover:text-[#595859] mr-2"
-          >
-            <Copy size={16} />
-          </button>
-          {section.type !== 'Line' && (
-            <button
-              ref={modifierButtonRef}
-              onClick={() => setShowModifierDropdown(!showModifierDropdown)}
-              className="text-[#A68477] hover:text-[#595859] mr-2"
-            >
-              <Tag size={16} />
-            </button>
-          )}
-          {section.type === 'Verse' && (
-            <div className="flex items-center">
-              {verseNumbers.map(num => (
+          {!isFocusMode && (
+            <>
+              <button
+                onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
+                className="text-[#A68477] hover:text-[#595859] mr-2"
+              >
+                <Settings size={16} />
+              </button>
+              <button
+                onClick={() => duplicateSection(index)}
+                className="text-[#A68477] hover:text-[#595859] mr-2"
+              >
+                <Copy size={16} />
+              </button>
+              {section.type !== 'Line' && (
                 <button
-                  key={num}
-                  onClick={() => changeVerseNumber(index, num)}
-                  className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${
-                    section.verseNumber === num
-                      ? 'bg-[#A68477] text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  ref={modifierButtonRef}
+                  onClick={() => setShowModifierDropdown(!showModifierDropdown)}
+                  className="text-[#A68477] hover:text-[#595859] mr-2"
                 >
-                  {num}
+                  <Tag size={16} />
                 </button>
-              ))}
-            </div>
+              )}
+              {section.type === 'Verse' && (
+                <div className="flex items-center">
+                  {verseNumbers.map(num => (
+                    <button
+                      key={num}
+                      onClick={() => changeVerseNumber(index, num)}
+                      className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${
+                        section.verseNumber === num
+                          ? 'bg-[#A68477] text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
         <textarea
@@ -245,28 +252,30 @@ function Section({
         )}
         {showModifierDropdown && renderModifierDropdown()}
       </div>
-      <div className="ml-2 flex flex-col justify-center h-full">
-        <button
-          onClick={() => removeSection(index)}
-          className="text-[#A68477] hover:text-[#595859] mb-2"
-        >
-          <XCircle size={20} />
-        </button>
-        <button
-          onClick={() => moveSection(index, 'up')}
-          className="text-[#A68477] hover:text-[#595859] mb-2"
-          disabled={index === 0}
-        >
-          <ArrowUp size={20} />
-        </button>
-        <button
-          onClick={() => moveSection(index, 'down')}
-          className="text-[#A68477] hover:text-[#595859]"
-          disabled={index === sectionsLength - 1}
-        >
-          <ArrowDown size={20} />
-        </button>
-      </div>
+      {!isFocusMode && (
+        <div className="ml-2 flex flex-col justify-center h-full">
+          <button
+            onClick={() => removeSection(index)}
+            className="text-[#A68477] hover:text-[#595859] mb-2"
+          >
+            <XCircle size={20} />
+          </button>
+          <button
+            onClick={() => moveSection(index, 'up')}
+            className="text-[#A68477] hover:text-[#595859] mb-2"
+            disabled={index === 0}
+          >
+            <ArrowUp size={20} />
+          </button>
+          <button
+            onClick={() => moveSection(index, 'down')}
+            className="text-[#A68477] hover:text-[#595859]"
+            disabled={index === sectionsLength - 1}
+          >
+            <ArrowDown size={20} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

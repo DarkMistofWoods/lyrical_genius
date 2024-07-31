@@ -11,12 +11,12 @@ import LivePreview from './LivePreview';
 import Section from './Section';
 import MetadataSection from './MetadataSection';
 import AddSectionButton from './AddSectionButton';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
 
-function LyricsEditor({ isEditingMoodBoard }) {
+function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const { currentSong, songs } = useSelector(state => state.song);
@@ -24,6 +24,7 @@ function LyricsEditor({ isEditingMoodBoard }) {
   const [addingSectionAt, setAddingSectionAt] = useState(null);
   const [editingSectionAt, setEditingSectionAt] = useState(null);
   const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(false);
+  const [focusedSectionIndex, setFocusedSectionIndex] = useState(0);
 
   const updateTimeoutRef = useRef(null);
   const previousSectionsRef = useRef([]);
@@ -169,6 +170,14 @@ function LyricsEditor({ isEditingMoodBoard }) {
     }, 300);
   };
 
+  const navigateToSection = (direction) => {
+    if (direction === 'next' && focusedSectionIndex < sections.length - 1) {
+      setFocusedSectionIndex(focusedSectionIndex + 1);
+    } else if (direction === 'prev' && focusedSectionIndex > 0) {
+      setFocusedSectionIndex(focusedSectionIndex - 1);
+    }
+  };
+
   const addModifier = (index, modifier) => {
     const newSections = [...sections];
     newSections[index] = { ...newSections[index], modifier };
@@ -210,9 +219,69 @@ function LyricsEditor({ isEditingMoodBoard }) {
     }
   }, [currentSong.id, currentSong.lyrics, parseLyrics]);
 
+  // Reset focused section index when entering/exiting focus mode
+  useEffect(() => {
+    setFocusedSectionIndex(0);
+  }, [isFocusModeActive]);
+
+  const renderFocusMode = () => {
+    if (sections.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p>No sections available. Add a section to start editing.</p>
+          <button
+            onClick={() => addSection('Lyric Sections', 'Verse', 0)}
+            className={`mt-4 bg-[${theme.common.brown}] text-[${theme.common.white}] px-4 py-2 rounded hover:opacity-80`}
+          >
+            Add Verse
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="relative">
+        <Section
+          section={sections[focusedSectionIndex]}
+          index={focusedSectionIndex}
+          editingSectionAt={editingSectionAt}
+          setEditingSectionAt={setEditingSectionAt}
+          duplicateSection={duplicateSection}
+          changeVerseNumber={changeVerseNumber}
+          removeSection={removeSection}
+          moveSection={moveSection}
+          handleSectionChange={handleSectionChange}
+          sectionsLength={sections.length}
+          changeSectionType={changeSectionType}
+          addModifier={addModifier}
+          removeModifier={removeModifier}
+          isFocusMode={true}
+        />
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={() => navigateToSection('prev')}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-3 py-1 rounded text-sm flex items-center ${focusedSectionIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
+            disabled={focusedSectionIndex === 0}
+          >
+            <ChevronLeft size={16} className="mr-1" />
+            <span className="whitespace-nowrap">Previous Section</span>
+          </button>
+          <button
+            onClick={() => navigateToSection('next')}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-3 py-1 rounded text-sm flex items-center ${focusedSectionIndex === sections.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
+            disabled={focusedSectionIndex === sections.length - 1}
+          >
+            <span className="whitespace-nowrap">Next Section</span>
+            <ChevronRight size={16} className="ml-1" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex-1 overflow-auto relative">
-      {!isEditingMoodBoard && (
+      {!isEditingMoodBoard && !isFocusModeActive && (
         <>
           {/* Title input */}
           <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
@@ -260,21 +329,12 @@ function LyricsEditor({ isEditingMoodBoard }) {
       <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${
         isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
       }`}>
-        {sections.length === 0 && (
-          <div className="h-8 relative">
-            <AddSectionButton
-              index={0}
-              isAdding={addingSectionAt === 0}
-              setAddingSectionAt={setAddingSectionAt}
-              addSection={addSection}
-            />
-          </div>
-        )}
-
-        {sections.map((section, index) => (
-          <React.Fragment key={index}>
-            {index === 0 && (
-              <div className="h-8 relative mb-2">
+        {isFocusModeActive ? (
+          renderFocusMode()
+        ) : (
+          <>
+            {sections.length === 0 && (
+              <div className="h-8 relative">
                 <AddSectionButton
                   index={0}
                   isAdding={addingSectionAt === 0}
@@ -283,31 +343,45 @@ function LyricsEditor({ isEditingMoodBoard }) {
                 />
               </div>
             )}
-            <Section
-              section={section}
-              index={index}
-              editingSectionAt={editingSectionAt}
-              setEditingSectionAt={setEditingSectionAt}
-              duplicateSection={duplicateSection}
-              changeVerseNumber={changeVerseNumber}
-              removeSection={removeSection}
-              moveSection={moveSection}
-              handleSectionChange={handleSectionChange}
-              sectionsLength={sections.length}
-              changeSectionType={changeSectionType}
-              addModifier={addModifier}
-              removeModifier={removeModifier}
-            />
-            <div className="h-8 relative mb-2">
-              <AddSectionButton
-                index={index + 1}
-                isAdding={addingSectionAt === index + 1}
-                setAddingSectionAt={setAddingSectionAt}
-                addSection={addSection}
-              />
-            </div>
-          </React.Fragment>
-        ))}
+            {sections.map((section, index) => (
+              <React.Fragment key={index}>
+                {index === 0 && (
+                  <div className="h-8 relative mb-2">
+                    <AddSectionButton
+                      index={0}
+                      isAdding={addingSectionAt === 0}
+                      setAddingSectionAt={setAddingSectionAt}
+                      addSection={addSection}
+                    />
+                  </div>
+                )}
+                <Section
+                  section={section}
+                  index={index}
+                  editingSectionAt={editingSectionAt}
+                  setEditingSectionAt={setEditingSectionAt}
+                  duplicateSection={duplicateSection}
+                  changeVerseNumber={changeVerseNumber}
+                  removeSection={removeSection}
+                  moveSection={moveSection}
+                  handleSectionChange={handleSectionChange}
+                  sectionsLength={sections.length}
+                  changeSectionType={changeSectionType}
+                  addModifier={addModifier}
+                  removeModifier={removeModifier}
+                />
+                <div className="h-8 relative mb-2">
+                  <AddSectionButton
+                    index={index + 1}
+                    isAdding={addingSectionAt === index + 1}
+                    setAddingSectionAt={setAddingSectionAt}
+                    addSection={addSection}
+                  />
+                </div>
+              </React.Fragment>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );

@@ -5,13 +5,19 @@ import theme from '../theme';
 import { undo } from '../store/songSlice';
 import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
 
-function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard, setIsEditingMoodBoard }) {
+function Toolbar({ 
+  isMoodBoardVisible, 
+  setIsMoodBoardVisible, 
+  isEditingMoodBoard, 
+  setIsEditingMoodBoard,
+  isFocusModeActive,
+  toggleFocusMode
+}) {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const { moodBoards, currentMoodBoardId } = useSelector(state => state.moodBoard);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const [isFocusModeOn, setIsFocusModeOn] = useState(false);
   const [isVersionControlOpen, setIsVersionControlOpen] = useState(false);
   const [isMoodBoardOpen, setIsMoodBoardOpen] = useState(false);
   const [showAddElementModal, setShowAddElementModal] = useState(false);
@@ -41,10 +47,6 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
 
   const handleFeedbackClick = () => {
     setIsFeedbackOpen(!isFeedbackOpen);
-  };
-
-  const handleFocusModeClick = () => {
-    setIsFocusModeOn(!isFocusModeOn);
   };
 
   const handleVersionControlClick = () => {
@@ -94,17 +96,14 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
   };
 
   const handleRenameMoodBoard = (id) => {
-    const currentName = moodBoards.find(board => board.id === id).name;
-    if (editingMoodBoardName.trim() && editingMoodBoardName !== currentName) {
-      dispatch(renameMoodBoard({ id, newName: editingMoodBoardName.trim() }));
+    if (editingMoodBoardName.trim() && id === editingMoodBoardId) {
+      const currentName = moodBoards.find(board => board.id === id).name;
+      if (editingMoodBoardName.trim() !== currentName) {
+        dispatch(renameMoodBoard({ id, newName: editingMoodBoardName.trim() }));
+      }
+      setEditingMoodBoardId(null);
+      setEditingMoodBoardName('');
     }
-    setEditingMoodBoardId(null);
-    setEditingMoodBoardName('');
-  };
-
-  const handleCancelEdit = () => {
-    setEditingMoodBoardId(null);
-    setEditingMoodBoardName('');
   };
 
   const handleSwitchMoodBoard = (id) => {
@@ -194,9 +193,9 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
             <MessageSquare size={20} />
           </button>
           <button
-            onClick={handleFocusModeClick}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isFocusModeOn ? 'opacity-60' : ''}`}
-            title="Focus Mode"
+            onClick={toggleFocusMode}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isFocusModeActive ? 'opacity-60' : ''}`}
+            title={isFocusModeActive ? "Exit Focus Mode" : "Enter Focus Mode"}
           >
             <Sparkle size={20} />
           </button>
@@ -230,25 +229,25 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
             <p className="text-center">Version Control panel (to be implemented)</p>
           </div>
         )}
-        {isMoodBoardOpen && (
+        {isMoodBoardOpen && !isFocusModeActive && (
           <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
             <div className="flex justify-center space-x-4">
               <button
-                onClick={handleEditMoodBoard}
+                onClick={() => setIsEditingMoodBoard(!isEditingMoodBoard)}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isEditingMoodBoard ? 'opacity-60' : ''}`}
                 title={isEditingMoodBoard ? "Exit Editing Mode" : "Enter Editing Mode"}
               >
                 <Edit size={20} />
               </button>
               <button
-                onClick={handleToggleMoodBoardVisibility}
+                onClick={() => setIsMoodBoardVisible(!isMoodBoardVisible)}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${!isMoodBoardVisible ? 'opacity-60' : ''}`}
                 title={isMoodBoardVisible ? "Hide Mood Board" : "Show Mood Board"}
               >
                 <Eye size={20} />
               </button>
               <button
-                onClick={handleResetMoodBoard}
+                onClick={() => setShowResetConfirmation(true)}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isCurrentMoodBoardEmpty ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title="Reset Mood Board"
                 disabled={isCurrentMoodBoardEmpty}
@@ -256,14 +255,14 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
                 <RefreshCw size={20} />
               </button>
               <button
-                onClick={handleChangeMoodBoard}
+                onClick={() => setShowMoodBoardModal(true)}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Change Mood Board"
               >
                 <SwitchCamera size={20} />
               </button>
               <button
-                onClick={handleAddToMoodBoard}
+                onClick={() => setShowAddElementModal(true)}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Add to Mood Board"
               >
@@ -446,7 +445,7 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
                       type="text"
                       value={editingMoodBoardName}
                       onChange={(e) => setEditingMoodBoardName(e.target.value)}
-                      onBlur={handleCancelEdit}
+                      onBlur={() => handleRenameMoodBoard(board.id)}
                       onKeyPress={(e) => e.key === 'Enter' && handleRenameMoodBoard(board.id)}
                       className={`flex-grow p-2 rounded bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}
                       autoFocus
@@ -456,7 +455,7 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
                       {board.name}
                     </span>
                   )}
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-3">
                     {editingMoodBoardId === board.id ? (
                       <>
                         <button
@@ -464,12 +463,6 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
                           className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] hover:text-[${theme.common.brown}]`}
                         >
                           <Check size={20} />
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] hover:text-red-500`}
-                        >
-                          <X size={20} />
                         </button>
                       </>
                     ) : (
