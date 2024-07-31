@@ -6,7 +6,11 @@ const MOOD_BOARDS_STORAGE_KEY = 'lyrical_genius_mood_boards';
 
 export const saveSongsToLocalStorage = (songs) => {
   try {
-    const serializedSongs = JSON.stringify(songs);
+    const songsToSave = songs.map(song => ({
+      ...song,
+      versions: song.versions.slice(0, 5) // Only save the 5 most recent versions
+    }));
+    const serializedSongs = JSON.stringify(songsToSave);
     localStorage.setItem(SONGS_STORAGE_KEY, serializedSongs);
   } catch (error) {
     console.error('Error saving songs to localStorage:', error);
@@ -19,7 +23,11 @@ export const loadSongsFromLocalStorage = () => {
     if (serializedSongs === null) {
       return [];
     }
-    return JSON.parse(serializedSongs);
+    const songs = JSON.parse(serializedSongs);
+    return songs.map(song => ({
+      ...song,
+      versions: song.versions || []
+    }));
   } catch (error) {
     console.error('Error loading songs from localStorage:', error);
     return [];

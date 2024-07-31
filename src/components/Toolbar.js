@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X } from 'lucide-react';
 import theme from '../theme';
-import { undo } from '../store/songSlice';
+import { undo, saveCurrentVersion, removeVersion, revertToVersion } from '../store/songSlice';
 import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
 
 function Toolbar({ 
@@ -15,6 +15,7 @@ function Toolbar({
 }) {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
+  const { currentSong } = useSelector(state => state.song);
   const { moodBoards, currentMoodBoardId } = useSelector(state => state.moodBoard);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -167,6 +168,18 @@ function Toolbar({
     setTextStyle(prev => ({ ...prev, [style]: !prev[style] }));
   };
 
+  const handleSaveVersion = () => {
+    dispatch(saveCurrentVersion());
+  };
+
+  const handleRemoveVersion = (versionIndex) => {
+    dispatch(removeVersion({ songId: currentSong.id, versionIndex }));
+  };
+
+  const handleRevertToVersion = (versionIndex) => {
+    dispatch(revertToVersion({ songId: currentSong.id, versionIndex }));
+  };
+
   return (
     <>
       <div className={`fixed bottom-0 left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-2 flex justify-center items-center z-50`}>
@@ -225,10 +238,50 @@ function Toolbar({
           </div>
         )}
         {isVersionControlOpen && (
-          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
-            <p className="text-center">Version Control panel (to be implemented)</p>
+        <div 
+          className={`fixed bottom-[52px] left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] shadow-lg z-40`}
+          style={{ height: '200px' }} // Fixed height for consistency
+        >
+          <div className="h-full flex flex-col p-4">
+            <h3 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-lg font-bold mb-2`}>Version Control</h3>
+            <button
+              onClick={handleSaveVersion}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-4 py-2 rounded hover:opacity-80 mb-2`}
+            >
+              Save Current Version
+            </button>
+            <div className="flex-grow overflow-y-auto">
+              {currentSong.versions.length > 0 ? (
+                <ul className="space-y-2">
+                  {currentSong.versions.map((version, index) => (
+                    <li key={version.timestamp} className="flex items-center justify-between">
+                      <span className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-sm`}>
+                        {new Date(version.timestamp).toLocaleString()} - {version.title}
+                      </span>
+                      <div>
+                        <button
+                          onClick={() => handleRevertToVersion(index)}
+                          className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-2 py-1 rounded hover:opacity-80 mr-2 text-xs`}
+                        >
+                          Revert
+                        </button>
+                        <button
+                          onClick={() => handleRemoveVersion(index)}
+                          className={`bg-red-500 text-white px-2 py-1 rounded hover:opacity-80 text-xs`}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>No versions saved yet.</p>
+              )}
+            </div>
           </div>
-        )}
+        </div>
+      )}
         {isMoodBoardOpen && !isFocusModeActive && (
           <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
             <div className="flex justify-center space-x-4">

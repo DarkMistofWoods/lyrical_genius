@@ -10,6 +10,7 @@ import { loadSongs } from './store/songSlice';
 import { loadSongsFromLocalStorage } from './utils/localStorage';
 import theme from './theme';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { saveVersion } from './store/songSlice';
 
 function App() {
   const dispatch = useDispatch();
@@ -32,6 +33,28 @@ function App() {
       document.body.classList.remove('overflow-hidden');
     };
   }, []);
+
+  useEffect(() => {
+    let prevSong = currentSong;
+    return () => {
+      if (prevSong.id !== currentSong.id) {
+        const hasChanges = prevSong.lyrics !== prevSong.versions[0]?.lyrics ||
+                           prevSong.title !== prevSong.versions[0]?.title ||
+                           JSON.stringify(prevSong.style) !== JSON.stringify(prevSong.versions[0]?.style);
+        if (hasChanges) {
+          dispatch(saveVersion({
+            songId: prevSong.id,
+            version: {
+              title: prevSong.title,
+              lyrics: prevSong.lyrics,
+              style: prevSong.style,
+              timestamp: Date.now()
+            }
+          }));
+        }
+      }
+    };
+  }, [currentSong, dispatch]);
 
   const handleCopyLyrics = () => {
     const formattedLyrics = `${currentSong.title}\n\n${currentSong.lyrics}\n\nStyle: ${Object.values(currentSong.style).flat().filter(Boolean).join(', ')}`;
