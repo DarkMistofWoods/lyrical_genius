@@ -259,9 +259,6 @@ const MoodBoard = ({ isVisible, isEditing }) => {
       }}
       onClick={handleBoardClick}
     >
-      <h2 className={`text-2xl font-bold m-4 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
-        {currentMoodBoard.name}
-      </h2>
       {currentMoodBoard.elements.map(element => (
         <MoodBoardElement 
           key={element.id} 
