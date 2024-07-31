@@ -102,7 +102,7 @@ function App() {
             {!isFocusModeActive && (
               <button
                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className={`absolute top-1/2 -right-4 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
+                className={`absolute top-1/2 -right-12 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
               >
                 {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
               </button>
@@ -134,7 +134,7 @@ function App() {
             {!isFocusModeActive && (
               <button
                 onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
-                className={`absolute top-1/2 -left-4 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
+                className={`absolute top-1/2 -left-12 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
               >
                 {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
               </button>
