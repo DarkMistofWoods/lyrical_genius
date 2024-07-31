@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X } from 'lucide-react';
 import theme from '../theme';
 import { undo } from '../store/songSlice';
-import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
+import { addElement, resetToNewMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
 
 function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard, setIsEditingMoodBoard }) {
   const dispatch = useDispatch();
@@ -60,8 +60,12 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
   };
 
   const handleResetMoodBoard = () => {
-    dispatch(resetCurrentMoodBoard());
+    dispatch(resetToNewMoodBoard());
   };
+
+  const currentMoodBoard = moodBoards.find(board => board.id === currentMoodBoardId);
+  const isCurrentMoodBoardEmpty = currentMoodBoard && currentMoodBoard.elements.length === 0;
+
 
   const handleAddToMoodBoard = () => {
     setShowAddElementModal(true);
@@ -238,8 +242,9 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
               </button>
               <button
                 onClick={handleResetMoodBoard}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isCurrentMoodBoardEmpty ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title="Reset Mood Board"
+                disabled={isCurrentMoodBoardEmpty}
               >
                 <RefreshCw size={20} />
               </button>

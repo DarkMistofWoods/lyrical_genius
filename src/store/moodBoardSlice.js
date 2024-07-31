@@ -98,6 +98,17 @@ export const moodBoardSlice = createSlice({
       }
       saveMoodBoardsToLocalStorage(state);
     },
+
+    resetToNewMoodBoard: (state) => {
+      const newMoodBoard = {
+        id: Date.now(),
+        name: `Mood Board ${state.moodBoards.length + 1}`,
+        elements: [],
+      };
+      state.moodBoards.push(newMoodBoard);
+      state.currentMoodBoardId = newMoodBoard.id;
+      saveMoodBoardsToLocalStorage(state);
+    },
   },
 });
 
@@ -111,7 +122,8 @@ export const {
   updateElementPosition, 
   updateElementSize, 
   updateElementContent, 
-  resetCurrentMoodBoard 
+  resetCurrentMoodBoard,
+  resetToNewMoodBoard 
 } = moodBoardSlice.actions;
 
 export default moodBoardSlice.reducer;
