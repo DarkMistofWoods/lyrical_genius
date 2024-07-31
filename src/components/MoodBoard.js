@@ -99,6 +99,14 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
     }
   };
 
+  const textStyle = {
+    fontWeight: element.style?.bold ? 'bold' : 'normal',
+    fontStyle: element.style?.italic ? 'italic' : 'normal',
+    textDecoration: element.style?.underline ? 'underline' : 'none',
+    color: element.style?.color || '#000000',
+    fontSize: `${element.style?.fontSize || 16}px`,
+  };
+
   const handleTextChange = (e) => {
     setEditedContent(e.target.value);
   };
@@ -133,10 +141,7 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
       {element.type === 'text' && !isEditingText && (
         <p
           className="w-full h-full break-words overflow-hidden"
-          style={{
-            ...element.style,
-            fontSize: `${element.style.fontSize}px`,
-          }}
+          style={textStyle}
         >
           {element.content}
         </p>
@@ -148,10 +153,7 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing }) => {
           onChange={handleTextChange}
           onBlur={handleTextBlur}
           className="w-full h-full p-0 border-none resize-none bg-transparent"
-          style={{
-            ...element.style,
-            fontSize: `${element.style.fontSize}px`,
-          }}
+          style={textStyle}
         />
       )}
       {element.type === 'image' && (

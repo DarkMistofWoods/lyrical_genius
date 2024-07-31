@@ -1,7 +1,23 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { saveMoodBoardsToLocalStorage, loadMoodBoardsFromLocalStorage } from '../utils/localStorage';
 
-const initialState = loadMoodBoardsFromLocalStorage();
+const createDefaultMoodBoard = () => ({
+  id: Date.now(),
+  name: 'Untitled Mood Board',
+  elements: [],
+});
+
+const initialState = (() => {
+  const loadedState = loadMoodBoardsFromLocalStorage();
+  if (loadedState.moodBoards.length === 0) {
+    const defaultBoard = createDefaultMoodBoard();
+    return {
+      moodBoards: [defaultBoard],
+      currentMoodBoardId: defaultBoard.id,
+    };
+  }
+  return loadedState;
+})();
 
 export const moodBoardSlice = createSlice({
   name: 'moodBoard',
@@ -91,6 +107,14 @@ export const moodBoardSlice = createSlice({
       }
       saveMoodBoardsToLocalStorage(state);
     },
+
+    resetToNewMoodBoard: (state) => {
+      const newMoodBoard = createDefaultMoodBoard();
+      state.moodBoards.push(newMoodBoard);
+      state.currentMoodBoardId = newMoodBoard.id;
+      saveMoodBoardsToLocalStorage(state);
+    },
+
     resetCurrentMoodBoard: (state) => {
       const currentBoard = state.moodBoards.find(board => board.id === state.currentMoodBoardId);
       if (currentBoard) {
@@ -99,12 +123,9 @@ export const moodBoardSlice = createSlice({
       saveMoodBoardsToLocalStorage(state);
     },
 
-    resetToNewMoodBoard: (state) => {
-      const newMoodBoard = {
-        id: Date.now(),
-        name: `Mood Board ${state.moodBoards.length + 1}`,
-        elements: [],
-      };
+    // Keep this reducer for creating a new mood board
+    createNewMoodBoard: (state) => {
+      const newMoodBoard = createDefaultMoodBoard();
       state.moodBoards.push(newMoodBoard);
       state.currentMoodBoardId = newMoodBoard.id;
       saveMoodBoardsToLocalStorage(state);
@@ -123,7 +144,7 @@ export const {
   updateElementSize, 
   updateElementContent, 
   resetCurrentMoodBoard,
-  resetToNewMoodBoard 
+  createNewMoodBoard
 } = moodBoardSlice.actions;
 
 export default moodBoardSlice.reducer;

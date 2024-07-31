@@ -48,11 +48,11 @@ function App() {
   return (
     <div className={`min-h-screen bg-[${isDarkMode ? theme.dark.background : theme.light.background}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
       <MoodBoard isVisible={isMoodBoardVisible} isEditing={isEditingMoodBoard} />
-      <Header />
-      <div className="flex pt-4 pb-16">
+      {!isEditingMoodBoard && <Header />}
+      <div className={`flex ${isEditingMoodBoard ? 'pt-0' : 'pt-4'} pb-16`}>
         {/* Sidebar */}
         <div 
-          className={`fixed left-0 top-[calc(4rem+0.5rem)] bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
+          className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
             isSidebarCollapsed ? 'w-12' : 'w-96'
           }`}
         >
@@ -74,13 +74,13 @@ function App() {
           isSidebarCollapsed ? 'ml-12' : 'ml-96'
         } ${isPreviewCollapsed ? 'mr-12' : 'mr-96'}`}>
           <div className="max-w-3xl mx-auto px-4">
-            <LyricsEditor />
+            <LyricsEditor isEditingMoodBoard={isEditingMoodBoard} />
           </div>
         </main>
 
         {/* Preview */}
         <div 
-          className={`fixed right-0 top-[calc(4rem+0.5rem)] bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
+          className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
             isPreviewCollapsed ? 'w-12' : 'w-96'
           }`}
         >

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X } from 'lucide-react';
 import theme from '../theme';
 import { undo } from '../store/songSlice';
-import { addElement, resetToNewMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
+import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
 
 function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard, setIsEditingMoodBoard }) {
   const dispatch = useDispatch();
@@ -16,6 +16,7 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
   const [isMoodBoardOpen, setIsMoodBoardOpen] = useState(false);
   const [showAddElementModal, setShowAddElementModal] = useState(false);
   const [showMoodBoardModal, setShowMoodBoardModal] = useState(false);
+  const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [newElementType, setNewElementType] = useState('image');
   const [newElementContent, setNewElementContent] = useState('');
   const [textStyle, setTextStyle] = useState({ bold: false, italic: false, underline: false });
@@ -26,6 +27,9 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
   const [editingMoodBoardName, setEditingMoodBoardName] = useState('');
   const fileInputRef = useRef(null);
   const [editingElement, setEditingElement] = useState(null);
+
+  const currentMoodBoard = moodBoards.find(board => board.id === currentMoodBoardId);
+  const isCurrentMoodBoardEmpty = currentMoodBoard && currentMoodBoard.elements.length === 0;
 
   const handleUndo = () => {
     dispatch(undo());
@@ -60,12 +64,15 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
   };
 
   const handleResetMoodBoard = () => {
-    dispatch(resetToNewMoodBoard());
+    if (!isCurrentMoodBoardEmpty) {
+      setShowResetConfirmation(true);
+    }
   };
 
-  const currentMoodBoard = moodBoards.find(board => board.id === currentMoodBoardId);
-  const isCurrentMoodBoardEmpty = currentMoodBoard && currentMoodBoard.elements.length === 0;
-
+  const confirmResetMoodBoard = () => {
+    dispatch(resetCurrentMoodBoard());
+    setShowResetConfirmation(false);
+  };
 
   const handleAddToMoodBoard = () => {
     setShowAddElementModal(true);
@@ -266,6 +273,33 @@ function Toolbar({ isMoodBoardVisible, setIsMoodBoardVisible, isEditingMoodBoard
           </div>
         )}
       </div>
+
+      {showResetConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+          <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-6 rounded-lg shadow-lg max-w-md w-full`}>
+            <h2 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-2xl font-bold mb-6`}>
+              Clear Mood Board
+            </h2>
+            <p className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] mb-6`}>
+              Are you sure you want to clear all elements from the current mood board? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowResetConfirmation(false)}
+                className={`bg-[${theme.common.grey}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] px-6 py-2 rounded hover:opacity-80 transition-opacity`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmResetMoodBoard}
+                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-6 py-2 rounded hover:opacity-80 transition-opacity`}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showAddElementModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">

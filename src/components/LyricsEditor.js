@@ -16,7 +16,7 @@ import { ChevronUp, ChevronDown } from 'lucide-react';
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
 
-function LyricsEditor() {
+function LyricsEditor({ isEditingMoodBoard }) {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const { currentSong, songs } = useSelector(state => state.song);
@@ -212,48 +212,54 @@ function LyricsEditor() {
 
   return (
     <div className="flex-1 overflow-auto relative">
-      {/* Title input */}
-      <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
-        <input
-          type="text"
-          placeholder="Song Title"
-          className={`w-full p-2 text-sm border rounded ${
-            isDarkMode
-              ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
-              : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
-          }`}
-          value={currentSong.title}
-          onChange={handleTitleChange}
-          maxLength={100}
-        />
-      </div>
+      {!isEditingMoodBoard && (
+        <>
+          {/* Title input */}
+          <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
+            <input
+              type="text"
+              placeholder="Song Title"
+              className={`w-full p-2 text-sm border rounded ${
+                isDarkMode
+                  ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
+                  : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
+              }`}
+              value={currentSong.title}
+              onChange={handleTitleChange}
+              maxLength={100}
+            />
+          </div>
 
-      {/* Gap between sections */}
-      <div className="h-16"></div>
+          {/* Gap between sections */}
+          <div className="h-16"></div>
 
-      {/* Collapsible metadata section */}
-      <div
-        className={`transition-all duration-300 ease-in-out overflow-visible rounded-lg`}
-        style={{
-          maxHeight: isMetadataCollapsed ? '0' : '1000px',
-          opacity: isMetadataCollapsed ? 0 : 1,
-          marginTop: isMetadataCollapsed ? '1rem' : '0',
-        }}
-      >
-        <MetadataSection currentSong={currentSong} saveChanges={saveChanges} />
-      </div>
+          {/* Collapsible metadata section */}
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-visible rounded-lg`}
+            style={{
+              maxHeight: isMetadataCollapsed ? '0' : '1000px',
+              opacity: isMetadataCollapsed ? 0 : 1,
+              marginTop: isMetadataCollapsed ? '1rem' : '0',
+            }}
+          >
+            <MetadataSection currentSong={currentSong} saveChanges={saveChanges} />
+          </div>
 
-      {/* Chevron button for collapsing/expanding */}
-      <button
-        onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
-        className={`sticky z-50 left-1/2 transform -translate-x-1/2 -mt-3 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
-        style={{ top: 'auto' }}
-      >
-        {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-      </button>
+          {/* Chevron button for collapsing/expanding */}
+          <button
+            onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
+            className={`sticky z-50 left-1/2 transform -translate-x-1/2 -mt-3 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
+            style={{ top: 'auto' }}
+          >
+            {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+          </button>
+        </>
+      )}
 
       {/* Main content area */}
-      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isMetadataCollapsed ? 'mt-12' : 'mt-4'}`}>
+      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${
+        isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
+      }`}>
         {sections.length === 0 && (
           <div className="h-8 relative">
             <AddSectionButton
