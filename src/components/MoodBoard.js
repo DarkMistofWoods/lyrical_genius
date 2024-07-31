@@ -55,7 +55,10 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing, isSelected, onSe
         const elementCenterY = elementRect.top + elementRect.height / 2;
         
         const angle = Math.atan2(e.clientY - elementCenterY, e.clientX - elementCenterX);
-        const degrees = angle * (180 / Math.PI);
+        let degrees = angle * (180 / Math.PI);
+        
+        // Snap to 15-degree increments
+        degrees = Math.round(degrees / 15) * 15;
         
         dispatch(updateElementRotation({
           id: element.id,
@@ -82,7 +85,8 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing, isSelected, onSe
   }, [isDragging, isResizing, isRotating, dispatch, dragOffset, element.id, isEditing, initialMousePos, initialSize, isSelected]);
 
   const handleMouseDown = (e) => {
-    if (isEditing && !isEditingText) {
+    e.stopPropagation(); // Prevent event from bubbling up to the MoodBoard
+    if (isEditing) {
       setIsDragging(true);
       setDragOffset({
         x: e.clientX - element.position.x,
@@ -111,11 +115,13 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing, isSelected, onSe
     }
   };
 
-  const handleRemove = () => {
+  const handleRemove = (e) => {
+    e.stopPropagation();
     dispatch(removeElement(element.id));
   };
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = (e) => {
+    e.stopPropagation();
     if (isEditing && element.type === 'text') {
       setIsEditingText(true);
       onStartEditing(element);
@@ -229,6 +235,19 @@ const MoodBoard = ({ isVisible, isEditing }) => {
     setSelectedElementId(elementId);
   };
 
+  const handleBoardClick = (e) => {
+    // Only deselect if clicking directly on the board, not on an element
+    if (e.target === e.currentTarget && isEditing) {
+      setSelectedElementId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!isEditing) {
+      setSelectedElementId(null);
+    }
+  }, [isEditing]);
+
   if (!isVisible || !currentMoodBoard) return null;
 
   return (
@@ -238,6 +257,7 @@ const MoodBoard = ({ isVisible, isEditing }) => {
         backgroundColor: isDarkMode ? theme.dark.background : theme.light.background,
         opacity: isEditing ? 1 : 0.1,
       }}
+      onClick={handleBoardClick}
     >
       <h2 className={`text-2xl font-bold m-4 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
         {currentMoodBoard.name}
