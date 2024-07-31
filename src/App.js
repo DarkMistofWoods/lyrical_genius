@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import LyricsEditor from './components/LyricsEditor';
 import LivePreview from './components/LivePreview';
 import Toolbar from './components/Toolbar';
+import MoodBoard from './components/MoodBoard';
 import { loadSongs } from './store/songSlice';
 import { loadSongsFromLocalStorage } from './utils/localStorage';
 import theme from './theme';
@@ -16,6 +17,8 @@ function App() {
   const { currentSong } = useSelector(state => state.song);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
+  const [isMoodBoardVisible, setIsMoodBoardVisible] = useState(true);
+  const [isEditingMoodBoard, setIsEditingMoodBoard] = useState(false);
 
   useEffect(() => {
     const savedSongs = loadSongsFromLocalStorage();
@@ -44,8 +47,9 @@ function App() {
 
   return (
     <div className={`min-h-screen bg-[${isDarkMode ? theme.dark.background : theme.light.background}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
+      <MoodBoard isVisible={isMoodBoardVisible} isEditing={isEditingMoodBoard} />
       <Header />
-      <div className="flex pt-4 pb-16"> {/* Add bottom padding to account for the toolbar */}
+      <div className="flex pt-4 pb-16">
         {/* Sidebar */}
         <div 
           className={`fixed left-0 top-[calc(4rem+0.5rem)] bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
@@ -82,7 +86,7 @@ function App() {
         >
           <div className={`bg-[${theme.common.grey}] h-full rounded-l-lg relative`}>
             <div className="overflow-y-auto h-full pt-4 px-4">
-              {!isPreviewCollapsed && <LivePreview onCopyLyrics={handleCopyLyrics} />}
+              {!isPreviewCollapsed && <LivePreview />}
             </div>
             <button
               onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
@@ -93,7 +97,12 @@ function App() {
           </div>
         </div>
       </div>
-      <Toolbar />
+      <Toolbar 
+        isMoodBoardVisible={isMoodBoardVisible}
+        setIsMoodBoardVisible={setIsMoodBoardVisible}
+        isEditingMoodBoard={isEditingMoodBoard}
+        setIsEditingMoodBoard={setIsEditingMoodBoard}
+      />
     </div>
   );
 }

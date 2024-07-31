@@ -2,6 +2,7 @@
 
 const SONGS_STORAGE_KEY = 'lyrical_genius_songs';
 const CATEGORIES_STORAGE_KEY = 'lyrical_genius_categories';
+const MOOD_BOARDS_STORAGE_KEY = 'lyrical_genius_mood_boards';
 
 export const saveSongsToLocalStorage = (songs) => {
   try {
@@ -47,10 +48,33 @@ export const loadCategoriesFromLocalStorage = () => {
   }
 };
 
+export const saveMoodBoardsToLocalStorage = (moodBoardState) => {
+  try {
+    const serializedMoodBoards = JSON.stringify(moodBoardState);
+    localStorage.setItem(MOOD_BOARDS_STORAGE_KEY, serializedMoodBoards);
+  } catch (error) {
+    console.error('Error saving mood boards to localStorage:', error);
+  }
+};
+
+export const loadMoodBoardsFromLocalStorage = () => {
+  try {
+    const serializedMoodBoards = localStorage.getItem(MOOD_BOARDS_STORAGE_KEY);
+    if (serializedMoodBoards === null) {
+      return { moodBoards: [], currentMoodBoardId: null };
+    }
+    return JSON.parse(serializedMoodBoards);
+  } catch (error) {
+    console.error('Error loading mood boards from localStorage:', error);
+    return { moodBoards: [], currentMoodBoardId: null };
+  }
+};
+
 export const clearLocalStorage = () => {
   try {
     localStorage.removeItem(SONGS_STORAGE_KEY);
     localStorage.removeItem(CATEGORIES_STORAGE_KEY);
+    localStorage.removeItem(MOOD_BOARDS_STORAGE_KEY);
   } catch (error) {
     console.error('Error clearing localStorage:', error);
   }
