@@ -74,22 +74,20 @@ function App() {
     if (!isFocusModeActive) {
       setIsSidebarCollapsed(true);
       setIsPreviewCollapsed(true);
-      setIsMoodBoardVisible(false);
     } else {
       setIsSidebarCollapsed(false);
       setIsPreviewCollapsed(false);
-      setIsMoodBoardVisible(true);
     }
   };
 
   return (
     <div className={`min-h-screen bg-[${isDarkMode ? theme.dark.background : theme.light.background}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
-      <MoodBoard isVisible={isMoodBoardVisible && !isFocusModeActive} isEditing={isEditingMoodBoard} />
-      {!isEditingMoodBoard && !isFocusModeActive && <Header />}
-      <div className={`flex ${isEditingMoodBoard || isFocusModeActive ? 'pt-0' : 'pt-4'} pb-16`}>
+      <MoodBoard isVisible={isMoodBoardVisible} isEditing={isEditingMoodBoard} />
+      {!isEditingMoodBoard && <Header />}
+      <div className={`flex ${isEditingMoodBoard ? 'pt-0' : 'pt-4'} pb-16`}>
         {/* Sidebar */}
         <div 
-          className={`fixed left-0 ${isEditingMoodBoard || isFocusModeActive ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
+          className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
             isSidebarCollapsed || isFocusModeActive ? '-translate-x-full' : 'translate-x-0'
           } ${
             isSidebarCollapsed ? 'w-12' : 'w-96'
@@ -121,7 +119,7 @@ function App() {
 
         {/* Preview */}
         <div 
-          className={`fixed right-0 ${isEditingMoodBoard || isFocusModeActive ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
+          className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
             isPreviewCollapsed || isFocusModeActive ? 'translate-x-full' : 'translate-x-0'
           } ${
             isPreviewCollapsed ? 'w-12' : 'w-96'
