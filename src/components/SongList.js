@@ -258,11 +258,11 @@ function SongList() {
         )}
       </div>
       <div className="flex-grow overflow-y-auto mb-4">
-        <ul className="space-y-2">
+        <ul className="space-y-2 p-2">
           {filteredSongs.map(song => (
             <li 
               key={song.id} 
-              className={`p-2 rounded transition-colors duration-200 ${
+              className={`p-2 rounded-lg transition-colors duration-200 ${
                 currentSong.id === song.id 
                   ? `bg-[#595859] border border-[${theme.common.brown}]`
                   : `bg-[#403E3F] hover:bg-[#4a4849] border border-[${theme.common.grey}]`
