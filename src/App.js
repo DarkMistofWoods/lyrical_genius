@@ -83,7 +83,7 @@ function App() {
   return (
     <div className={`min-h-screen bg-[${isDarkMode ? theme.dark.background : theme.light.background}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
       <MoodBoard isVisible={isMoodBoardVisible} isEditing={isEditingMoodBoard} />
-      {!isEditingMoodBoard && <Header />}
+      {!isEditingMoodBoard && <Header isFocusModeActive={isFocusModeActive} />}
       <div className={`flex ${isEditingMoodBoard ? 'pt-0' : 'pt-4'} pb-16`}>
         {/* Sidebar */}
         {!isEditingMoodBoard && (

@@ -3,13 +3,30 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '../store/themeSlice';
 import theme from '../theme';
 
-function Header() {
+function Header({ isFocusModeActive }) {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const currentTheme = isDarkMode ? theme.dark : theme.light;
 
   return (
-    <header className={`bg-[${currentTheme.background}] text-[${currentTheme.text}] bg-opacity-45 p-4 flex justify-between items-center fixed top-0 left-0 right-0 z-50`}>
+    <header className={`
+      bg-[${currentTheme.background}] 
+      text-[${currentTheme.text}] 
+      bg-opacity-45 
+      p-4 
+      flex 
+      justify-between 
+      items-center 
+      fixed 
+      top-0 
+      left-0 
+      right-0 
+      z-50
+      transition-transform 
+      duration-300 
+      ease-in-out
+      ${isFocusModeActive ? '-translate-y-full' : 'translate-y-0'}
+    `}>
       <h1 className="text-2xl font-bold">Lyrical Genius (you!)</h1>
       <div className="flex items-center">
         <a 
