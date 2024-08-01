@@ -88,22 +88,24 @@ function App() {
         {/* Sidebar */}
         {!isEditingMoodBoard && (
           <div 
-            className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-opacity duration-300 ${
-              isSidebarCollapsed || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
-            } w-96`}
+            className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ${
+              isSidebarCollapsed ? 'w-0' : 'w-96'
+            }`}
           >
             <div className={`bg-[${theme.common.grey}] h-full rounded-r-lg relative bg-opacity-0`}>
-              <div className="overflow-y-auto h-full pt-4">
+              <div className={`overflow-y-auto h-full pt-4 transition-opacity duration-300 ${
+                isSidebarCollapsed || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}>
                 <Sidebar />
               </div>
-              {!isFocusModeActive && (
-                <button
-                  onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                  className={`absolute top-1/2 -right-12 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
-                >
-                  {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-                </button>
-              )}
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${
+                  isSidebarCollapsed ? 'left-2' : 'right-0 translate-x-full'
+                }`}
+              >
+                {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+              </button>
             </div>
           </div>
         )}
@@ -122,22 +124,24 @@ function App() {
         {/* Preview */}
         {!isEditingMoodBoard && (
           <div 
-            className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-opacity duration-300 ${
-              isPreviewCollapsed || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
-            } w-96`}
+            className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ${
+              isPreviewCollapsed ? 'w-0' : 'w-96'
+            }`}
           >
             <div className={`bg-[${theme.common.grey}] h-full rounded-l-lg relative bg-opacity-0`}>
-              <div className="overflow-y-auto h-full pt-4 px-4">
+              <div className={`overflow-y-auto h-full pt-4 px-4 transition-opacity duration-300 ${
+                isPreviewCollapsed || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}>
                 <LivePreview />
               </div>
-              {!isFocusModeActive && (
-                <button
-                  onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
-                  className={`absolute top-1/2 -left-12 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
-                >
-                  {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-                </button>
-              )}
+              <button
+                onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
+                className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${
+                  isPreviewCollapsed ? 'right-2' : 'left-0 -translate-x-full'
+                }`}
+              >
+                {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+              </button>
             </div>
           </div>
         )}
