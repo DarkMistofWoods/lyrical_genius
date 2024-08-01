@@ -8,7 +8,7 @@ import { Search, X, Plus, Edit2, Trash2 } from 'lucide-react';
 
 function SongList() {
   const dispatch = useDispatch();
-  const { songs, currentSong, categories } = useSelector(state => state.song);
+  const { songs, currentSong, categories, categoryColors } = useSelector(state => state.song);
   const [songToDelete, setSongToDelete] = useState(null);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [searchTerm, setSearchTerm] = useState('');
@@ -150,7 +150,7 @@ function SongList() {
             <button
               key={category}
               onClick={() => handleAssignCategory(songId, category)}
-              className={`block px-4 py-2 text-sm text-[${isDarkMode ? theme.common.white : theme.common.black}] hover:bg-[${theme.common.grey}] w-full text-left`}
+              className={`block px-4 py-2 text-sm text-[${theme.common.black}] hover:bg-[${theme.common.grey}] w-full text-left`}
               role="menuitem"
             >
               {category}
@@ -190,7 +190,7 @@ function SongList() {
         <h3 className="text-sm font-semibold mb-2">Categories</h3>
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
-            <div key={category} className={`flex items-center bg-[${theme.common.brown}] rounded px-2 py-1 ${selectedCategory === category ? 'ring-2 ring-[#F2F2F2]' : ''}`}>
+            <div key={category} className={`flex items-center rounded px-2 py-1 ${selectedCategory === category ? 'ring-2 ring-[#F2F2F2]' : ''}`} style={{ backgroundColor: categoryColors[category] }}>
               {editingCategory === category ? (
                 <input
                   type="text"
@@ -198,12 +198,12 @@ function SongList() {
                   onChange={(e) => setNewCategoryName(e.target.value)}
                   onBlur={() => handleRenameCategory(category, newCategoryName)}
                   onKeyPress={(e) => e.key === 'Enter' && handleRenameCategory(category, newCategoryName)}
-                  className="bg-transparent border-b border-[#595859] focus:outline-none text-sm text-[#F2F2F2]"
+                  className="bg-transparent border-b border-[#595859] focus:outline-none text-sm text-[#0D0C0C]"
                   autoFocus
                 />
               ) : (
                 <button
-                  className="text-sm text-[#F2F2F2]"
+                  className="text-sm text-[#0D0C0C]"
                   onClick={(e) => handleCategoryClick(category, e)}
                 >
                   {category}
@@ -211,13 +211,13 @@ function SongList() {
               )}
               <button
                 onClick={() => setEditingCategory(category)}
-                className="ml-2 text-[#F2F2F2] hover:text-[#0D0C0C]"
+                className="ml-2 text-[#0D0C0C] hover:text-[#595859]"
               >
                 <Edit2 size={12} />
               </button>
               <button
                 onClick={() => handleDeleteCategory(category)}
-                className="ml-2 text-[#F2F2F2] hover:text-[#0D0C0C]"
+                className="ml-2 text-[#0D0C0C] hover:text-[#595859]"
               >
                 <Trash2 size={12} />
               </button>
@@ -279,7 +279,8 @@ function SongList() {
               {song.categories.map((category) => (
                 <span
                   key={category}
-                  className={`text-xs bg-[${theme.common.brown}] text-[${theme.common.white}] rounded px-1 py-0.5 flex items-center cursor-pointer`}
+                  className={`text-xs rounded px-1 py-0.5 flex items-center cursor-pointer text-[${theme.common.black}]`}
+                  style={{ backgroundColor: categoryColors[category] }}
                   onClick={(e) => handleCategoryClick(category, e)}
                 >
                   {category}
@@ -288,7 +289,7 @@ function SongList() {
                       e.stopPropagation();
                       handleUnassignCategory(song.id, category);
                     }}
-                    className="ml-1 text-[#F2F2F2] hover:text-[#0D0C0C]"
+                    className="ml-1 text-[#0D0C0C] hover:text-[#595859]"
                   >
                     <X size={10} />
                   </button>

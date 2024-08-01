@@ -2,6 +2,7 @@
 
 const SONGS_STORAGE_KEY = 'lyrical_genius_songs';
 const CATEGORIES_STORAGE_KEY = 'lyrical_genius_categories';
+const CATEGORY_COLORS_STORAGE_KEY = 'lyrical_genius_category_colors';
 const MOOD_BOARDS_STORAGE_KEY = 'lyrical_genius_mood_boards';
 
 export const saveSongsToLocalStorage = (songs) => {
@@ -53,6 +54,28 @@ export const loadCategoriesFromLocalStorage = () => {
   } catch (error) {
     console.error('Error loading categories from localStorage:', error);
     return [];
+  }
+};
+
+export const saveCategoryColorsToLocalStorage = (categoryColors) => {
+  try {
+    const serializedCategoryColors = JSON.stringify(categoryColors);
+    localStorage.setItem(CATEGORY_COLORS_STORAGE_KEY, serializedCategoryColors);
+  } catch (error) {
+    console.error('Error saving category colors to localStorage:', error);
+  }
+};
+
+export const loadCategoryColorsFromLocalStorage = () => {
+  try {
+    const serializedCategoryColors = localStorage.getItem(CATEGORY_COLORS_STORAGE_KEY);
+    if (serializedCategoryColors === null) {
+      return {};
+    }
+    return JSON.parse(serializedCategoryColors);
+  } catch (error) {
+    console.error('Error loading category colors from localStorage:', error);
+    return {};
   }
 };
 

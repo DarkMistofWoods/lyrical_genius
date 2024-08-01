@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { saveSongsToLocalStorage, saveCategoriesToLocalStorage, loadSongsFromLocalStorage, loadCategoriesFromLocalStorage } from '../utils/localStorage';
+import { saveSongsToLocalStorage, saveCategoriesToLocalStorage, loadSongsFromLocalStorage, loadCategoriesFromLocalStorage, saveCategoryColorsToLocalStorage, loadCategoryColorsFromLocalStorage } from '../utils/localStorage';
+import { getCategoryColor } from '../utils/helpers';
 
 const createNewSong = () => ({
   id: Date.now(),
@@ -23,6 +24,7 @@ const initialState = {
   songs: loadSongsFromLocalStorage(),
   currentSong: loadSongsFromLocalStorage()[0] || createNewSong(),
   categories: loadCategoriesFromLocalStorage(),
+  categoryColors: loadCategoryColorsFromLocalStorage(),
   history: [],
   historyIndex: -1
 };
@@ -132,15 +134,18 @@ export const songSlice = createSlice({
       }
     },
     // New reducers for category management
-
     addCategory: (state, action) => {
       if (!state.categories.includes(action.payload)) {
         state.categories.push(action.payload);
+        state.categoryColors[action.payload] = getCategoryColor(action.payload, state.categoryColors);
         saveCategoriesToLocalStorage(state.categories);
+        saveCategoryColorsToLocalStorage(state.categoryColors);
       }
     },
+
     deleteCategory: (state, action) => {
       state.categories = state.categories.filter(category => category !== action.payload);
+      delete state.categoryColors[action.payload];
       state.songs.forEach(song => {
         song.categories = song.categories.filter(category => category !== action.payload);
       });
@@ -149,12 +154,16 @@ export const songSlice = createSlice({
       }
       saveSongsToLocalStorage(state.songs);
       saveCategoriesToLocalStorage(state.categories);
+      saveCategoryColorsToLocalStorage(state.categoryColors);
     },
+
     renameCategory: (state, action) => {
       const { oldName, newName } = action.payload;
       const index = state.categories.findIndex(category => category === oldName);
       if (index !== -1) {
         state.categories[index] = newName;
+        state.categoryColors[newName] = state.categoryColors[oldName];
+        delete state.categoryColors[oldName];
         state.songs.forEach(song => {
           const categoryIndex = song.categories.findIndex(category => category === oldName);
           if (categoryIndex !== -1) {
@@ -169,6 +178,7 @@ export const songSlice = createSlice({
         }
         saveSongsToLocalStorage(state.songs);
         saveCategoriesToLocalStorage(state.categories);
+        saveCategoryColorsToLocalStorage(state.categoryColors);
       }
     },
     assignSongToCategory: (state, action) => {

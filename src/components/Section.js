@@ -33,6 +33,8 @@ function Section({
 
   const iconButtonStyle = `
     w-6 h-6 
+    p-1
+    mr-1 ml-1
     flex items-center justify-center 
     rounded-lg
     bg-[${isDarkMode ? theme.dark.background : theme.light.background}] 
@@ -222,7 +224,7 @@ function Section({
                     <button
                       key={num}
                       onClick={() => changeVerseNumber(index, num)}
-                      className={`w-6 h-6 flex items-center justify-center rounded-full mr-1 ${
+                      className={`w-6 h-6 flex items-center justify-center rounded-full ml-1 ${
                         section.verseNumber === num
                           ? 'bg-[#A68477] text-white'
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
