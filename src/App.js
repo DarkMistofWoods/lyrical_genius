@@ -64,11 +64,6 @@ function App() {
       .catch(err => console.error('Failed to copy lyrics: ', err));
   };
 
-  const handleUndo = () => {
-    // TODO: Implement undo functionality
-    console.log('Undo action triggered');
-  };
-
   const toggleFocusMode = () => {
     setIsFocusModeActive(!isFocusModeActive);
     if (!isFocusModeActive) {
