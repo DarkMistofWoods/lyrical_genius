@@ -1,11 +1,38 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { saveMoodBoardsToLocalStorage, loadMoodBoardsFromLocalStorage } from '../utils/localStorage';
 
+const defaultBackground = {
+  type: 'none',
+  color: '#ffffff',
+  gradient: {
+    color1: '#ffffff',
+    color2: '#000000',
+    angle: 45
+  }
+};
+
 const createDefaultMoodBoard = () => ({
   id: Date.now(),
   name: 'Untitled Mood Board',
   elements: [],
+  background: { ...defaultBackground },
+  opacity: 0.1,
 });
+
+const validateMoodBoard = (moodBoard) => {
+  return {
+    ...createDefaultMoodBoard(),
+    ...moodBoard,
+    background: {
+      ...defaultBackground,
+      ...(moodBoard.background || {}),
+      gradient: {
+        ...defaultBackground.gradient,
+        ...(moodBoard.background?.gradient || {})
+      }
+    }
+  };
+};
 
 const initialState = (() => {
   const loadedState = loadMoodBoardsFromLocalStorage();
@@ -16,7 +43,10 @@ const initialState = (() => {
       currentMoodBoardId: defaultBoard.id,
     };
   }
-  return loadedState;
+  return {
+    ...loadedState,
+    moodBoards: loadedState.moodBoards.map(validateMoodBoard)
+  };
 })();
 
 export const moodBoardSlice = createSlice({
@@ -142,6 +172,39 @@ export const moodBoardSlice = createSlice({
       }
       saveMoodBoardsToLocalStorage(state);
     },
+
+    updateBackground: (state, action) => {
+      const currentBoard = state.moodBoards.find(board => board.id === state.currentMoodBoardId);
+      if (currentBoard) {
+        currentBoard.background = {
+          ...defaultBackground,
+          ...currentBoard.background,
+          ...action.payload,
+          gradient: {
+            ...defaultBackground.gradient,
+            ...(currentBoard.background?.gradient || {}),
+            ...(action.payload.gradient || {})
+          }
+        };
+      }
+      saveMoodBoardsToLocalStorage(state);
+    },
+
+    updateOpacity: (state, action) => {
+      const currentBoard = state.moodBoards.find(board => board.id === state.currentMoodBoardId);
+      if (currentBoard) {
+        currentBoard.opacity = action.payload;
+      }
+      saveMoodBoardsToLocalStorage(state);
+    },
+
+    updateGradientAngle: (state, action) => {
+      const currentBoard = state.moodBoards.find(board => board.id === state.currentMoodBoardId);
+      if (currentBoard && currentBoard.background?.gradient) {
+        currentBoard.background.gradient.angle = action.payload;
+      }
+      saveMoodBoardsToLocalStorage(state);
+    },
   },
 });
 
@@ -157,7 +220,10 @@ export const {
   updateElementContent, 
   resetCurrentMoodBoard,
   createNewMoodBoard,
-  updateElementRotation
+  updateElementRotation,
+  updateBackground,
+  updateOpacity,
+  updateGradientAngle
 } = moodBoardSlice.actions;
 
 export default moodBoardSlice.reducer;

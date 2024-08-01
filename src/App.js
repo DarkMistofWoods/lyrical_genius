@@ -86,59 +86,65 @@ function App() {
       {!isEditingMoodBoard && <Header />}
       <div className={`flex ${isEditingMoodBoard ? 'pt-0' : 'pt-4'} pb-16`}>
         {/* Sidebar */}
-        <div 
-          className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
-            isSidebarCollapsed || isFocusModeActive ? '-translate-x-full' : 'translate-x-0'
-          } ${
-            isSidebarCollapsed ? 'w-12' : 'w-96'
-          }`}
-        >
-          <div className={`bg-[${theme.common.grey}] h-full rounded-r-lg relative`}>
-            <div className="overflow-y-auto h-full pt-4 px-4">
-              {!isSidebarCollapsed && <Sidebar />}
+        {!isEditingMoodBoard && (
+          <div 
+            className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ${
+              isSidebarCollapsed || isFocusModeActive ? '-translate-x-full' : 'translate-x-0'
+            } ${
+              isSidebarCollapsed ? 'w-12' : 'w-96'
+            }`}
+          >
+            <div className={`bg-[${theme.common.grey}] h-full rounded-r-lg relative bg-opacity-0`}>
+              <div className="overflow-y-auto h-full pt-4">
+                {!isSidebarCollapsed && <Sidebar />}
+              </div>
+              {!isFocusModeActive && (
+                <button
+                  onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                  className={`absolute top-1/2 -right-12 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
+                >
+                  {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                </button>
+              )}
             </div>
-            {!isFocusModeActive && (
-              <button
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className={`absolute top-1/2 -right-12 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
-              >
-                {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-              </button>
-            )}
           </div>
-        </div>
+        )}
 
         {/* Main content */}
-        <main className={`flex-1 transition-all duration-300 ease-in-out ${
-          isSidebarCollapsed || isFocusModeActive ? 'ml-0' : 'ml-96'
-        } ${isPreviewCollapsed || isFocusModeActive ? 'mr-0' : 'mr-96'}`}>
-          <div className="max-w-3xl mx-auto px-4">
-            <LyricsEditor isEditingMoodBoard={isEditingMoodBoard} isFocusModeActive={isFocusModeActive} />
-          </div>
-        </main>
+        {!isEditingMoodBoard && (
+          <main className={`flex-1 transition-all duration-300 ease-in-out ${
+            isSidebarCollapsed || isFocusModeActive ? 'ml-0' : 'ml-96'
+          } ${isPreviewCollapsed || isFocusModeActive ? 'mr-0' : 'mr-96'}`}>
+            <div className="max-w-3xl mx-auto px-4">
+              <LyricsEditor isEditingMoodBoard={isEditingMoodBoard} isFocusModeActive={isFocusModeActive} />
+            </div>
+          </main>
+        )}
 
         {/* Preview */}
-        <div 
-          className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
-            isPreviewCollapsed || isFocusModeActive ? 'translate-x-full' : 'translate-x-0'
-          } ${
-            isPreviewCollapsed ? 'w-12' : 'w-96'
-          }`}
-        >
-          <div className={`bg-[${theme.common.grey}] h-full rounded-l-lg relative`}>
-            <div className="overflow-y-auto h-full pt-4 px-4">
-              {!isPreviewCollapsed && <LivePreview />}
+        {!isEditingMoodBoard && (
+          <div 
+            className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
+              isPreviewCollapsed || isFocusModeActive ? 'translate-x-full' : 'translate-x-0'
+            } ${
+              isPreviewCollapsed ? 'w-12' : 'w-96'
+            }`}
+          >
+            <div className={`bg-[${theme.common.grey}] h-full rounded-l-lg relative bg-opacity-0`}>
+              <div className="overflow-y-auto h-full pt-4 px-4">
+                {!isPreviewCollapsed && <LivePreview />}
+              </div>
+              {!isFocusModeActive && (
+                <button
+                  onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
+                  className={`absolute top-1/2 -left-12 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
+                >
+                  {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                </button>
+              )}
             </div>
-            {!isFocusModeActive && (
-              <button
-                onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
-                className={`absolute top-1/2 -left-12 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full`}
-              >
-                {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-              </button>
-            )}
           </div>
-        </div>
+        )}
       </div>
       <Toolbar 
         isMoodBoardVisible={isMoodBoardVisible}

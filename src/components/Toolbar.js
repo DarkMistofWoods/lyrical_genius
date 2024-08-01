@@ -239,18 +239,18 @@ function Toolbar({
           </button>
         </div>
         {openPanel === 'tools' && (
-          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-45 border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
+          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-0 p-4 shadow-lg`}>
             <p className="text-center">Tools panel (to be implemented)</p>
           </div>
         )}
         {openPanel === 'feedback' && (
-          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-45 border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
+          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-0 p-4 shadow-lg`}>
             <p className="text-center">Feedback panel (to be implemented)</p>
           </div>
         )}
         {openPanel === 'versionControl' && (
           <div
-            className={`fixed bottom-[52px] left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-45 border-t border-[${theme.common.grey}] shadow-lg z-40`}
+            className={`fixed bottom-[52px] left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] shadow-lg z-40`}
             style={{ height: '200px' }} // Fixed height for consistency
           >
             <div className="h-full flex flex-col p-4">
@@ -294,7 +294,7 @@ function Toolbar({
           </div>
         )}
         {openPanel === 'moodBoard' && (
-          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-45 border-t border-[${theme.common.grey}] p-4 shadow-lg`}>
+          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-0 p-4 shadow-lg`}>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => setIsEditingMoodBoard(!isEditingMoodBoard)}
