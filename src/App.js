@@ -88,15 +88,13 @@ function App() {
         {/* Sidebar */}
         {!isEditingMoodBoard && (
           <div 
-            className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ${
-              isSidebarCollapsed || isFocusModeActive ? '-translate-x-full' : 'translate-x-0'
-            } ${
-              isSidebarCollapsed ? 'w-12' : 'w-96'
-            }`}
+            className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-opacity duration-300 ${
+              isSidebarCollapsed || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            } w-96`}
           >
             <div className={`bg-[${theme.common.grey}] h-full rounded-r-lg relative bg-opacity-0`}>
               <div className="overflow-y-auto h-full pt-4">
-                {!isSidebarCollapsed && <Sidebar />}
+                <Sidebar />
               </div>
               {!isFocusModeActive && (
                 <button
@@ -124,15 +122,13 @@ function App() {
         {/* Preview */}
         {!isEditingMoodBoard && (
           <div 
-            className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ease-in-out ${
-              isPreviewCollapsed || isFocusModeActive ? 'translate-x-full' : 'translate-x-0'
-            } ${
-              isPreviewCollapsed ? 'w-12' : 'w-96'
-            }`}
+            className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-opacity duration-300 ${
+              isPreviewCollapsed || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            } w-96`}
           >
             <div className={`bg-[${theme.common.grey}] h-full rounded-l-lg relative bg-opacity-0`}>
               <div className="overflow-y-auto h-full pt-4 px-4">
-                {!isPreviewCollapsed && <LivePreview />}
+                <LivePreview />
               </div>
               {!isFocusModeActive && (
                 <button
