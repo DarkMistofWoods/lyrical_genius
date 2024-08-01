@@ -9,7 +9,7 @@ function Header() {
   const currentTheme = isDarkMode ? theme.dark : theme.light;
 
   return (
-    <header className={`bg-[${currentTheme.background}] text-[${currentTheme.text}] p-4 flex justify-between items-center fixed top-0 left-0 right-0 z-50`}>
+    <header className={`bg-[${currentTheme.background}] text-[${currentTheme.text}] bg-opacity-45 p-4 flex justify-between items-center fixed top-0 left-0 right-0 z-50`}>
       <h1 className="text-2xl font-bold">Lyrical Genius (you!)</h1>
       <div className="flex items-center">
         <a 
