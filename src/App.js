@@ -11,6 +11,7 @@ import { loadSongsFromLocalStorage } from './utils/localStorage';
 import theme from './theme';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { saveVersion } from './store/songSlice';
+import { loadTheme } from './store/themeSlice';
 
 function App() {
   const dispatch = useDispatch();
@@ -25,6 +26,10 @@ function App() {
   useEffect(() => {
     const savedSongs = loadSongsFromLocalStorage();
     dispatch(loadSongs(savedSongs));
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(loadTheme());
   }, [dispatch]);
 
   useEffect(() => {
