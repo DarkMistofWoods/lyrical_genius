@@ -11,6 +11,8 @@ function LivePreview() {
   const [hideBrackets, setHideBrackets] = useState(false);
   const [formattedLyrics, setFormattedLyrics] = useState('');
   const [lyricsOnly, setLyricsOnly] = useState('');
+  const [wordCount, setWordCount] = useState(0);
+  const [charCount, setCharCount] = useState(0);
 
   const parseSections = (lyrics) => {
     const sectionRegex = /\[(.*?)\](?:\|\|\|([\s\S]*?))?(?=\n\n\[|$)/g;
@@ -44,11 +46,13 @@ function LivePreview() {
 
     setFormattedLyrics(`${currentSong.title || 'Untitled'}\n\n${styleString}\n\n${lyricsContent}`);
     setLyricsOnly(lyricsContent);
-  }, [currentSong, hideBrackets]);
 
-  const wordCount = currentSong.lyrics.split(/\s+/).filter(Boolean).length;
-  const charCount = currentSong.lyrics.length;
-  const lineCount = currentSong.lyrics.split('\n').filter(Boolean).length;
+    // Count words and characters, excluding bracketed content
+    const contentOnly = parsedSections.map(section => section.content).join(' ');
+    const words = contentOnly.trim().split(/\s+/).filter(Boolean);
+    setWordCount(words.length);
+    setCharCount(contentOnly.replace(/\s/g, '').length);
+  }, [currentSong, hideBrackets]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(lyricsOnly)
@@ -79,7 +83,7 @@ function LivePreview() {
         {formattedLyrics.split('\n\n').slice(2).join('\n\n')}
       </div>
       <div className="text-center text-xs mb-8">
-        Words: {wordCount} | Characters: {charCount} | Lines: {lineCount}
+        Words: {wordCount} | Characters: {charCount}
       </div>
       <button
         onClick={handleCopy}
