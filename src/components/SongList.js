@@ -4,7 +4,7 @@ import { setCurrentSong, addSong, deleteSong, addCategory, deleteCategory, renam
 import { saveSongsToLocalStorage } from '../utils/localStorage';
 import theme from '../theme';
 import ReactDOM from 'react-dom';
-import { Search, X, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Search, X, Plus, Edit2, Trash2, ChevronDown, ChevronUp  } from 'lucide-react';
 
 function SongList() {
   const dispatch = useDispatch();
@@ -18,6 +18,7 @@ function SongList() {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [activeSongForCategory, setActiveSongForCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isCategoryAccordionOpen, setIsCategoryAccordionOpen] = useState(false);
 
   useEffect(() => {
     const filtered = songs.filter(song => 
@@ -150,7 +151,7 @@ function SongList() {
             <button
               key={category}
               onClick={() => handleAssignCategory(songId, category)}
-              className={`block px-4 py-2 text-sm text-[${theme.common.black}] hover:bg-[${theme.common.grey}] w-full text-left`}
+              className={`block px-4 py-2 text-sm text-[${theme.common.white}] hover:bg-[${theme.common.grey}] w-full text-left`}
               role="menuitem"
             >
               {category}
@@ -161,8 +162,12 @@ function SongList() {
     );
   };
 
+  const toggleCategoryAccordion = () => {
+    setIsCategoryAccordionOpen(!isCategoryAccordionOpen);
+  };
+
   return (
-    <div className="p-4">
+    <div className="flex flex-col h-full p-4">
       <h2 className="text-lg font-semibold mb-2">Your Songs</h2>
       <div className="mb-4 relative">
         <input
@@ -187,132 +192,146 @@ function SongList() {
         )}
       </div>
       <div className="mb-4">
-        <h3 className="text-sm font-semibold mb-2">Categories</h3>
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <div key={category} className={`flex items-center rounded px-2 py-1 ${selectedCategory === category ? 'ring-2 ring-[#F2F2F2]' : ''}`} style={{ backgroundColor: categoryColors[category] }}>
-              {editingCategory === category ? (
-                <input
-                  type="text"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  onBlur={() => handleRenameCategory(category, newCategoryName)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleRenameCategory(category, newCategoryName)}
-                  className="bg-transparent border-b border-[#595859] focus:outline-none text-sm text-[#0D0C0C]"
-                  autoFocus
-                />
-              ) : (
-                <button
-                  className="text-sm text-[#0D0C0C]"
-                  onClick={(e) => handleCategoryClick(category, e)}
-                >
-                  {category}
-                </button>
-              )}
-              <button
-                onClick={() => setEditingCategory(category)}
-                className="ml-2 text-[#0D0C0C] hover:text-[#595859]"
-              >
-                <Edit2 size={12} />
-              </button>
-              <button
-                onClick={() => handleDeleteCategory(category)}
-                className="ml-2 text-[#0D0C0C] hover:text-[#595859]"
-              >
-                <Trash2 size={12} />
-              </button>
-            </div>
-          ))}
-          <div className="flex items-center">
-            <input
-              type="text"
-              placeholder="New category"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              className={`bg-transparent border-b border-[${theme.common.brown}] focus:outline-none text-sm mr-2`}
-            />
-            <button
-              onClick={handleAddCategory}
-              className={`text-[${theme.common.white}] hover:text-[${theme.common.grey}]`}
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-      <ul className="mb-4 space-y-2 max-h-[calc(100vh-350px)] overflow-y-auto">
-        {filteredSongs.map(song => (
-          <li 
-            key={song.id} 
-            className={`p-2 rounded transition-colors duration-200 ${
-              currentSong.id === song.id 
-                ? `bg-[#595859] border border-[${theme.common.brown}]`
-                : `bg-[#403E3F] hover:bg-[#4a4849] border border-[${theme.common.grey}]`
-            }`}
-          >
-            <div className="flex justify-between items-center mb-1">
-              <button
-                onClick={() => handleSelectSong(song)}
-                className={`text-left truncate flex-grow ${currentSong.id === song.id ? 'font-bold' : ''}`}
-              >
-                {song.title || 'Untitled'}
-              </button>
-              <div className="flex items-center">
-                <button
-                  onClick={() => {
-                    setShowCategoryDropdown(!showCategoryDropdown);
-                    setActiveSongForCategory(song.id);
-                  }}
-                  className="text-gray-400 hover:text-gray-200 mr-2"
-                >
-                  <Plus size={16} />
-                </button>
-                <button
-                  onClick={() => handleDeleteSong(song.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Delete
-                </button>
+        <button
+          onClick={toggleCategoryAccordion}
+          className={`flex items-center justify-between w-full p-2 bg-[${theme.common.grey}] rounded-t`}
+        >
+          <span className="font-semibold">Categories</span>
+          {isCategoryAccordionOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </button>
+        {isCategoryAccordionOpen && (
+          <div className="p-2 bg-[${theme.common.grey}] rounded-b">
+            <div className="max-h-40 overflow-y-auto">
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <div key={category} className={`flex items-center rounded px-2 py-1 ${selectedCategory === category ? 'ring-2 ring-[#F2F2F2]' : ''}`} style={{ backgroundColor: categoryColors[category] }}>
+                    {editingCategory === category ? (
+                      <input
+                        type="text"
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        onBlur={() => handleRenameCategory(category, newCategoryName)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleRenameCategory(category, newCategoryName)}
+                        className="bg-transparent border-b border-[#595859] focus:outline-none text-sm text-[#0D0C0C]"
+                        autoFocus
+                      />
+                    ) : (
+                      <button
+                        className="text-sm text-[#0D0C0C]"
+                        onClick={(e) => handleCategoryClick(category, e)}
+                      >
+                        {category}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setEditingCategory(category)}
+                      className="ml-2 text-[#0D0C0C] hover:text-[#595859]"
+                    >
+                      <Edit2 size={12} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCategory(category)}
+                      className="ml-2 text-[#0D0C0C] hover:text-[#595859]"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {song.categories.map((category) => (
-                <span
-                  key={category}
-                  className={`text-xs rounded px-1 py-0.5 flex items-center cursor-pointer text-[${theme.common.black}]`}
-                  style={{ backgroundColor: categoryColors[category] }}
-                  onClick={(e) => handleCategoryClick(category, e)}
+            <div className="flex items-center mt-2">
+              <input
+                type="text"
+                placeholder="New category"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                className={`bg-transparent border-b border-[${theme.common.brown}] focus:outline-none text-sm mr-2 flex-grow`}
+              />
+              <button
+                onClick={handleAddCategory}
+                className={`text-[${theme.common.white}] hover:text-[${theme.common.grey}]`}
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="flex-grow overflow-y-auto mb-4">
+        <ul className="space-y-2">
+          {filteredSongs.map(song => (
+            <li 
+              key={song.id} 
+              className={`p-2 rounded transition-colors duration-200 ${
+                currentSong.id === song.id 
+                  ? `bg-[#595859] border border-[${theme.common.brown}]`
+                  : `bg-[#403E3F] hover:bg-[#4a4849] border border-[${theme.common.grey}]`
+              }`}
+            >
+              <div className="flex justify-between items-center mb-1">
+                <button
+                  onClick={() => handleSelectSong(song)}
+                  className={`text-left truncate flex-grow ${currentSong.id === song.id ? 'font-bold' : ''}`}
                 >
-                  {category}
+                  {song.title || 'Untitled'}
+                </button>
+                <div className="flex items-center">
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleUnassignCategory(song.id, category);
+                    onClick={() => {
+                      setShowCategoryDropdown(!showCategoryDropdown);
+                      setActiveSongForCategory(song.id);
                     }}
-                    className="ml-1 text-[#0D0C0C] hover:text-[#595859]"
+                    className="text-gray-400 hover:text-gray-200 mr-2"
                   >
-                    <X size={10} />
+                    <Plus size={16} />
                   </button>
-                </span>
-              ))}
-            </div>
-            <div className="text-xs text-gray-400 italic mt-1">
-              {Object.values(song.style).flat().filter(Boolean).map((style, index, array) => (
-                <React.Fragment key={index}>
                   <button
-                    onClick={(e) => handleStyleClick(style, e)}
-                    className="hover:underline"
+                    onClick={() => handleDeleteSong(song.id)}
+                    className="text-red-500 hover:text-red-700"
                   >
-                    {style}
+                    Delete
                   </button>
-                  {index < array.length - 1 && ", "}
-                </React.Fragment>
-              ))}
-            </div>
-            <CategoryDropdown songId={song.id} />
-          </li>
-        ))}
-      </ul>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {song.categories.map((category) => (
+                  <span
+                    key={category}
+                    className={`text-xs rounded px-1 py-0.5 flex items-center cursor-pointer text-[${theme.common.black}]`}
+                    style={{ backgroundColor: categoryColors[category] }}
+                    onClick={(e) => handleCategoryClick(category, e)}
+                  >
+                    {category}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUnassignCategory(song.id, category);
+                      }}
+                      className="ml-1 text-[#0D0C0C] hover:text-[#595859]"
+                    >
+                      <X size={10} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="text-xs text-gray-400 italic mt-1">
+                {Object.values(song.style).flat().filter(Boolean).map((style, index, array) => (
+                  <React.Fragment key={index}>
+                    <button
+                      onClick={(e) => handleStyleClick(style, e)}
+                      className="hover:underline"
+                    >
+                      {style}
+                    </button>
+                    {index < array.length - 1 && ", "}
+                  </React.Fragment>
+                ))}
+              </div>
+              <CategoryDropdown songId={song.id} />
+            </li>
+          ))}
+        </ul>
+      </div>
       <button
         onClick={handleNewSong}
         className={`w-full bg-[${theme.common.brown}] text-[${theme.common.white}] py-2 px-4 rounded hover:opacity-80`}
