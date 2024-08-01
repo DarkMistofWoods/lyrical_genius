@@ -37,9 +37,10 @@ function Section({
     mr-1 ml-1
     flex items-center justify-center 
     rounded-lg
-    bg-[${isDarkMode ? theme.dark.background : theme.light.background}] 
+    bg-[${isDarkMode ? theme.dark.background : theme.light.background}]
+    bg-opacity-50
     text-[${isDarkMode ? theme.dark.text : theme.light.text}] 
-    hover:bg-[${theme.common.brown}] 
+    hover:bg-opacity-100
     hover:text-[${theme.common.white}] 
     transition-colors
   `;
