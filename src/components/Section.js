@@ -31,6 +31,17 @@ function Section({
   const modifierButtonRef = useRef(null);
   const dropdownRef = useRef(null);
 
+  const iconButtonStyle = `
+    w-6 h-6 
+    flex items-center justify-center 
+    rounded-lg
+    bg-[${isDarkMode ? theme.dark.background : theme.light.background}] 
+    text-[${isDarkMode ? theme.dark.text : theme.light.text}] 
+    hover:bg-[${theme.common.brown}] 
+    hover:text-[${theme.common.white}] 
+    transition-colors
+  `;
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) && !modifierButtonRef.current.contains(event.target)) {
@@ -142,31 +153,31 @@ function Section({
       <div className={`p-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] flex justify-between items-center w-full mb-4 relative z-10`}>
         <span>{displayLabel()}</span>
         {!isFocusMode && (
-          <div className="flex">
+          <div className="flex space-x-2">
             <button
               ref={modifierButtonRef}
               onClick={() => setShowModifierDropdown(!showModifierDropdown)}
-              className="text-[#F2F2F2] hover:text-[#0D0C0C] mr-2"
+              className={iconButtonStyle}
             >
               <Tag size={16} />
             </button>
             <button
               onClick={() => moveSection(index, 'up')}
-              className={`text-[#F2F2F2] hover:text-[#0D0C0C] mr-2 ${index === 0 ? 'opacity-50' : ''}`}
+              className={`${iconButtonStyle} ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={index === 0}
             >
               <ArrowUp size={16} />
             </button>
             <button
               onClick={() => moveSection(index, 'down')}
-              className={`text-[#F2F2F2] hover:text-[#0D0C0C] mr-2 ${index === sectionsLength - 1 ? 'opacity-50' : ''}`}
+              className={`${iconButtonStyle} ${index === sectionsLength - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={index === sectionsLength - 1}
             >
               <ArrowDown size={16} />
             </button>
             <button
               onClick={() => removeSection(index)}
-              className="text-[#F2F2F2] hover:text-[#0D0C0C]"
+              className={iconButtonStyle}
             >
               <XCircle size={16} />
             </button>
@@ -186,13 +197,13 @@ function Section({
             <>
               <button
                 onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
-                className="text-[#A68477] hover:text-[#595859] mr-2"
+                className={iconButtonStyle}
               >
                 <Settings size={16} />
               </button>
               <button
                 onClick={() => duplicateSection(index)}
-                className="text-[#A68477] hover:text-[#595859] mr-2"
+                className={iconButtonStyle}
               >
                 <Copy size={16} />
               </button>
@@ -200,7 +211,7 @@ function Section({
                 <button
                   ref={modifierButtonRef}
                   onClick={() => setShowModifierDropdown(!showModifierDropdown)}
-                  className="text-[#A68477] hover:text-[#595859] mr-2"
+                  className={iconButtonStyle}
                 >
                   <Tag size={16} />
                 </button>
@@ -253,23 +264,23 @@ function Section({
         {showModifierDropdown && renderModifierDropdown()}
       </div>
       {!isFocusMode && (
-        <div className="ml-2 flex flex-col justify-center h-full">
+        <div className="ml-2 flex flex-col space-y-2">
           <button
             onClick={() => removeSection(index)}
-            className="text-[#A68477] hover:text-[#595859] mb-2"
+            className={iconButtonStyle}
           >
             <XCircle size={20} />
           </button>
           <button
             onClick={() => moveSection(index, 'up')}
-            className="text-[#A68477] hover:text-[#595859] mb-2"
+            className={`${iconButtonStyle} ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={index === 0}
           >
             <ArrowUp size={20} />
           </button>
           <button
             onClick={() => moveSection(index, 'down')}
-            className="text-[#A68477] hover:text-[#595859]"
+            className={`${iconButtonStyle} ${index === sectionsLength - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={index === sectionsLength - 1}
           >
             <ArrowDown size={20} />
