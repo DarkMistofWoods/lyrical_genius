@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X } from 'lucide-react';
+import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Search, MessageCircle, AtSign, Book } from 'lucide-react';
 import theme from '../theme';
 import { undo, saveCurrentVersion, removeVersion, revertToVersion } from '../store/songSlice';
 import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
@@ -240,7 +240,32 @@ function Toolbar({
         </div>
         {openPanel === 'tools' && (
           <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-0 p-4 shadow-lg`}>
-            <p className="text-center">Tools panel (to be implemented)</p>
+            <div className="flex justify-center space-x-4">
+              <button
+                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                title="Rhyme Finder"
+              >
+                <Search size={20} />
+              </button>
+              <button
+                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                title="Metaphor Generator"
+              >
+                <MessageCircle size={20} />
+              </button>
+              <button
+                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                title="Simile Generator"
+              >
+                <AtSign size={20} />
+              </button>
+              <button
+                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                title="Cultural Reference Search"
+              >
+                <Book size={20} />
+              </button>
+            </div>
           </div>
         )}
         {openPanel === 'feedback' && (
@@ -251,7 +276,7 @@ function Toolbar({
         {openPanel === 'versionControl' && (
           <div
             className={`fixed bottom-[52px] left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] shadow-lg z-40`}
-            style={{ height: '200px' }} // Fixed height for consistency
+            style={{ height: '200px' }}
           >
             <div className="h-full flex flex-col p-4">
               <h3 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-lg font-bold mb-2`}>Version Control</h3>
