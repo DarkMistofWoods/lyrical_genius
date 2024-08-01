@@ -98,14 +98,15 @@ function App() {
               }`}>
                 <Sidebar />
               </div>
-              <button
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${
-                  isSidebarCollapsed ? 'left-2' : 'right-0 translate-x-full'
-                }`}
-              >
-                {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-              </button>
+              {!isEditingMoodBoard && !isFocusModeActive && (
+                <button
+                  onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                  className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${isSidebarCollapsed ? 'left-2' : 'right-0 translate-x-full'
+                    }`}
+                >
+                  {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -134,14 +135,15 @@ function App() {
               }`}>
                 <LivePreview />
               </div>
-              <button
-                onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
-                className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${
-                  isPreviewCollapsed ? 'right-2' : 'left-0 -translate-x-full'
-                }`}
-              >
-                {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-              </button>
+              {!isEditingMoodBoard && !isFocusModeActive && (
+                <button
+                  onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
+                  className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${isPreviewCollapsed ? 'right-2' : 'left-0 -translate-x-full'
+                    }`}
+                >
+                  {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                </button>
+              )}
             </div>
           </div>
         )}
