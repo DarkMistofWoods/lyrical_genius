@@ -11,6 +11,8 @@ Lyrical Genius is a web application designed to help songwriters create, edit, a
 - Dark mode support
 - Local storage for saving progress
 - Responsive design for mobile compatibility
+- Focus mode feature to reduce distractions
+- Access to integrated tools like a dictionary, synonym generator, syllable counter, and more.
 
 ## Tech Stack
 
