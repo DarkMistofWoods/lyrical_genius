@@ -1,6 +1,6 @@
 # Lyrical Genius
 
-Lyrical Genius is a web application designed to help songwriters create, edit, and organize their lyrics with ease. It offers a user-friendly interface for managing song sections, applying styles, and previewing formatted lyrics.
+Lyrical Genius is a web application designed to help songwriters create, edit, and organize their lyrics for Suno with ease. It offers a user-friendly interface for managing song sections, applying styles, previewing formatted lyrics, and accessing helpful tools.
 
 ## Features
 
