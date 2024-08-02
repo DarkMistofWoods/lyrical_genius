@@ -122,6 +122,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_twitter) - email@example.com
-
 Project Link: [https://github.com/darkmistofwoods/lyrical-genius](https://github.com/darkmistofwoods/lyrical-genius)
