@@ -5,17 +5,12 @@ import theme from '../theme';
 const categories = [
   {
     name: 'Lyric Sections',
-    items: ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog']
+    items: ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog', 'Custom']
   },
   {
     name: 'Structure Modifiers',
-    items: ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop']
-  },
-  // Uncomment when ready to implement Vocal Modifiers
-  // {
-  //   name: 'Vocal Modifiers',
-  //   items: ['Whisper', 'Shout', 'Harmony', 'Ad-lib']
-  // }
+    items: ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop', 'Custom']
+  }
 ];
 
 const CategorizedDropdown = ({ onSelect, isDarkMode }) => {

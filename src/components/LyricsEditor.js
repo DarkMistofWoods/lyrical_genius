@@ -113,11 +113,25 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         content: type,
         modifier: null
       };
+    } else if (category === 'Custom') {
+      const customName = prompt("Enter custom section name:");
+      if (customName) {
+        newSection = {
+          type: customName,
+          content: '',
+          verseNumber: null,
+          modifier: null
+        };
+      } else {
+        return; // User cancelled custom section creation
+      }
     }
 
-    newSections.splice(index, 0, newSection);
-    updateSections(newSections);
-    setAddingSectionAt(null);
+    if (newSection) {
+      newSections.splice(index, 0, newSection);
+      updateSections(newSections);
+      setAddingSectionAt(null);
+    }
   };
 
   const duplicateSection = (index) => {
@@ -184,9 +198,9 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     updateSections(newSections);
   };
 
-  const removeModifier = (index) => {
+  const removeModifier = (index, updatedModifier) => {
     const newSections = [...sections];
-    newSections[index] = { ...newSections[index], modifier: null };
+    newSections[index] = { ...newSections[index], modifier: updatedModifier || null };
     updateSections(newSections);
   };
 

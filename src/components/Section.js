@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useSelector } from 'react-redux';
-import { Settings, Copy, XCircle, ArrowUp, ArrowDown, Tag } from 'lucide-react';
+import { Settings, Copy, XCircle, ArrowUp, ArrowDown, Tag, X } from 'lucide-react';
 import theme from '../theme';
 
 const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
+const structureModifiers = ['Intro', 'Outro', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
 const modifiers = ['Sad', 'Happy', 'Angry', 'Fast', 'Slow'];
 
 function Section({ 
@@ -28,6 +29,7 @@ function Section({
   const [showModifierDropdown, setShowModifierDropdown] = useState(false);
   const [customModifier, setCustomModifier] = useState('');
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const [modifierPosition, setModifierPosition] = useState('prefix'); // New state for modifier position
   const modifierButtonRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -86,7 +88,19 @@ function Section({
   }, [showModifierDropdown]);
 
   const handleModifierSelect = (modifier) => {
-    addModifier(index, modifier);
+    if (section.type === 'StructureModifier') {
+      const currentModifier = section.modifier || '';
+      const newModifier = modifierPosition === 'prefix' 
+        ? `${modifier} ${currentModifier}`.trim() 
+        : `${currentModifier} ${modifier}`.trim();
+      addModifier(index, newModifier);
+    } else {
+      // For Lyric Sections, allow only prefix
+      const currentTags = section.modifier ? section.modifier.split(' ') : [];
+      if (currentTags.length < 2) {
+        addModifier(index, currentTags.length === 0 ? modifier : `${modifier} ${currentTags[0]}`);
+      }
+    }
     setShowModifierDropdown(false);
     setCustomModifier('');
   };
@@ -96,6 +110,12 @@ function Section({
     if (customModifier.trim()) {
       handleModifierSelect(customModifier.trim());
     }
+  };
+
+  const handleRemoveModifier = (tagToRemove) => {
+    const currentTags = section.modifier ? section.modifier.split(' ') : [];
+    const updatedTags = currentTags.filter(tag => tag !== tagToRemove);
+    removeModifier(index, updatedTags.join(' '));
   };
 
   const capitalizeFirstLetter = (string) => {
@@ -108,8 +128,9 @@ function Section({
         ? `${capitalizeFirstLetter(section.modifier)} ${capitalizeFirstLetter(section.content)}`
         : capitalizeFirstLetter(section.content);
     } else {
+      const tags = section.modifier ? section.modifier.split(' ') : [];
       const baseLabel = section.type;
-      return section.modifier ? `${capitalizeFirstLetter(section.modifier)} ${baseLabel}` : baseLabel;
+      return `${tags.map(capitalizeFirstLetter).join(' ')} ${baseLabel}`.trim();
     }
   };
 
@@ -120,6 +141,22 @@ function Section({
         className={`fixed z-50 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}
         style={{ top: `${dropdownPosition.top}px`, left: `${dropdownPosition.left}px` }}
       >
+        {section.type === 'StructureModifier' && (
+          <div className="flex justify-around p-2 border-b border-[#595859]">
+            <button
+              onClick={() => setModifierPosition('prefix')}
+              className={`px-2 py-1 rounded ${modifierPosition === 'prefix' ? 'bg-[#A68477] text-white' : ''}`}
+            >
+              Prefix
+            </button>
+            <button
+              onClick={() => setModifierPosition('suffix')}
+              className={`px-2 py-1 rounded ${modifierPosition === 'suffix' ? 'bg-[#A68477] text-white' : ''}`}
+            >
+              Suffix
+            </button>
+          </div>
+        )}
         {modifiers.map((modifier) => (
           <button
             key={modifier}
@@ -139,12 +176,17 @@ function Section({
           />
         </form>
         {section.modifier && (
-          <button
-            onClick={() => removeModifier(index)}
-            className={`block w-full text-left px-4 py-2 text-red-500 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'}`}
-          >
-            Remove Modifier
-          </button>
+          <div className="px-4 py-2">
+            {section.modifier.split(' ').map((tag, index) => (
+              <button
+                key={index}
+                onClick={() => handleRemoveModifier(tag)}
+                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
+              >
+                Remove {tag} <X size={12} className="inline" />
+              </button>
+            ))}
+          </div>
         )}
       </div>,
       document.body
@@ -163,6 +205,12 @@ function Section({
               className={iconButtonStyle}
             >
               <Tag size={16} />
+            </button>
+            <button
+              onClick={() => duplicateSection(index)}
+              className={iconButtonStyle}
+            >
+              <Copy size={16} />
             </button>
             <button
               onClick={() => moveSection(index, 'up')}
@@ -262,6 +310,18 @@ function Section({
                 {type}
               </button>
             ))}
+            <button
+              onClick={() => {
+                const customType = prompt("Enter custom section name:");
+                if (customType) {
+                  changeSectionType(index, customType);
+                  setEditingSectionAt(null);
+                }
+              }}
+              className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
+            >
+              Custom Section
+            </button>
           </div>
         )}
         {showModifierDropdown && renderModifierDropdown()}
