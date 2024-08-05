@@ -165,7 +165,7 @@ function MetadataSection({ currentSong, saveChanges }) {
             </div>
             {filteredOptions.map((categoryGroup, index) => (
               <div key={index}>
-                <h3 className={`p-2 font-bold bg-[${theme.common.brown}] text-[${theme.common.white}]`}>
+                <h3 className={`pl-2 rounded-lg font-bold bg-[${theme.common.brown}] text-[${theme.common.white}]`}>
                   {categoryGroup.category}
                 </h3>
                 {categoryGroup.options.map((option) => (
