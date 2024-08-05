@@ -74,17 +74,25 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const updateLyricsInStore = useCallback((newSections) => {
     const formattedSections = newSections.map(section => {
       if (section.type === 'StructureModifier') {
-        const modifiedContent = section.modifier ? `${section.modifier} ${section.content}` : section.content;
-        return `[${modifiedContent.toLowerCase()}]`;
+        let formattedContent = section.content.toLowerCase();
+        if (section.modifier) {
+          const words = section.modifier.toLowerCase().split(' ');
+          if (!words.includes(formattedContent)) {
+            words.push(formattedContent);
+          }
+          formattedContent = words.join(' ');
+        }
+        return `[${formattedContent}]`;
+      } else {
+        let formattedType = section.type.toLowerCase();
+        if (formattedType === 'verse' && section.verseNumber) {
+          formattedType = `verse ${section.verseNumber}`;
+        }
+        if (section.modifier) {
+          formattedType = `${section.modifier.toLowerCase()} ${formattedType}`;
+        }
+        return `[${formattedType}]|||${section.content}`;
       }
-      let formattedType = section.type.toLowerCase();
-      if (formattedType === 'verse' && section.verseNumber) {
-        formattedType = `verse ${section.verseNumber}`;
-      }
-      if (section.modifier) {
-        formattedType = `${section.modifier.toLowerCase()} ${formattedType}`;
-      }
-      return `[${formattedType}]|||${section.content}`;
     });
 
     const combinedLyrics = formattedSections.join('\n\n');

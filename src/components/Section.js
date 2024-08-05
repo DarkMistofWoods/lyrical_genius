@@ -29,7 +29,7 @@ function Section({
   const [showModifierDropdown, setShowModifierDropdown] = useState(false);
   const [customModifier, setCustomModifier] = useState('');
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
-  const [modifierPosition, setModifierPosition] = useState('prefix'); // New state for modifier position
+  const [modifierPosition, setModifierPosition] = useState('prefix');
   const modifierButtonRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -87,12 +87,24 @@ function Section({
     };
   }, [showModifierDropdown]);
 
+  const capitalizeFirstLetter = (string) => {
+    return string.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
   const handleModifierSelect = (modifier) => {
+    modifier = capitalizeFirstLetter(modifier);
     if (section.type === 'StructureModifier') {
-      const currentModifier = section.modifier || '';
-      const newModifier = modifierPosition === 'prefix' 
-        ? `${modifier} ${currentModifier}`.trim() 
-        : `${currentModifier} ${modifier}`.trim();
+      const baseContent = capitalizeFirstLetter(section.content);
+      let newModifier;
+      if (modifierPosition === 'prefix') {
+        newModifier = section.modifier ? `${modifier} ${section.modifier}` : modifier;
+      } else {
+        newModifier = section.modifier ? `${section.modifier} ${modifier}` : modifier;
+      }
+      // Ensure the base content is not repeated
+      if (!newModifier.toLowerCase().includes(baseContent.toLowerCase())) {
+        newModifier = `${newModifier} ${baseContent}`;
+      }
       addModifier(index, newModifier);
     } else {
       // For Lyric Sections, allow only prefix
@@ -113,20 +125,39 @@ function Section({
   };
 
   const handleRemoveModifier = (tagToRemove) => {
-    const currentTags = section.modifier ? section.modifier.split(' ') : [];
-    const updatedTags = currentTags.filter(tag => tag !== tagToRemove);
-    removeModifier(index, updatedTags.join(' '));
-  };
-
-  const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    if (section.type === 'StructureModifier') {
+      const words = section.modifier ? section.modifier.split(' ') : [];
+      const baseContent = section.content.toLowerCase();
+      const newWords = words.filter(word => 
+        word.toLowerCase() !== tagToRemove.toLowerCase() && 
+        word.toLowerCase() !== baseContent
+      );
+      if (!newWords.some(word => word.toLowerCase() === baseContent)) {
+        newWords.push(capitalizeFirstLetter(baseContent));
+      }
+      const newModifier = newWords.join(' ');
+      removeModifier(index, newModifier !== capitalizeFirstLetter(baseContent) ? newModifier : null);
+    } else {
+      const currentTags = section.modifier ? section.modifier.split(' ') : [];
+      const updatedTags = currentTags.filter(tag => tag.toLowerCase() !== tagToRemove.toLowerCase());
+      removeModifier(index, updatedTags.join(' ') || null);
+    }
   };
 
   const displayLabel = () => {
     if (section.type === 'StructureModifier') {
-      return section.modifier 
-        ? `${capitalizeFirstLetter(section.modifier)} ${capitalizeFirstLetter(section.content)}`
-        : capitalizeFirstLetter(section.content);
+      if (section.modifier) {
+        // Split the modifier into words
+        const words = section.modifier.split(' ');
+        // Check if the base content is already included in the modifier
+        if (!words.some(word => word.toLowerCase() === section.content.toLowerCase())) {
+          // If not included, append the base content
+          words.push(section.content);
+        }
+        return words.map(capitalizeFirstLetter).join(' ');
+      } else {
+        return capitalizeFirstLetter(section.content);
+      }
     } else {
       const tags = section.modifier ? section.modifier.split(' ') : [];
       const baseLabel = section.type;
@@ -163,7 +194,7 @@ function Section({
             onClick={() => handleModifierSelect(modifier)}
             className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
           >
-            {modifier}
+            {capitalizeFirstLetter(modifier)}
           </button>
         ))}
         <form onSubmit={handleCustomModifierSubmit} className="p-2">
@@ -177,13 +208,13 @@ function Section({
         </form>
         {section.modifier && (
           <div className="px-4 py-2">
-            {section.modifier.split(' ').map((tag, index) => (
+            {section.modifier.split(' ').filter(tag => tag.toLowerCase() !== section.content.toLowerCase()).map((tag, index) => (
               <button
                 key={index}
                 onClick={() => handleRemoveModifier(tag)}
                 className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
               >
-                Remove {tag} <X size={12} className="inline" />
+                {tag} <X size={12} className="inline" />
               </button>
             ))}
           </div>
@@ -240,7 +271,7 @@ function Section({
   }
 
   return (
-    <div className="mb-4 flex items-start relative">
+    <div className="mb-4 flex items-start relative border-2 border-[#A68477] rounded-lg pt-1 pl-1 pr-1">
       <div className="flex-grow relative">
         <div className="flex items-center mb-1">
           <span className="font-bold text-sm mr-2">{displayLabel()}</span>
