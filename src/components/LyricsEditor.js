@@ -99,34 +99,33 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const addSection = (category, type, index) => {
     const newSections = [...sections];
     let newSection;
-
-    if (category === 'Lyric Sections') {
+  
+    if (category === 'Structure Modifiers') {
+      newSection = {
+        type: 'StructureModifier',
+        content: type,
+        modifier: null
+      };
+    } else if (category === 'Lyric Sections') {
       newSection = {
         type,
         content: '',
         verseNumber: type === 'Verse' ? 1 : null,
         modifier: null
       };
-    } else if (category === 'Structure Modifiers') {
-      newSection = {
-        type: 'StructureModifier',
-        content: type,
-        modifier: null
-      };
     } else if (category === 'Custom') {
       const customName = prompt("Enter custom section name:");
       if (customName) {
         newSection = {
-          type: customName,
-          content: '',
-          verseNumber: null,
+          type: 'StructureModifier',
+          content: customName,
           modifier: null
         };
       } else {
-        return; // User cancelled custom section creation
+        return;
       }
     }
-
+  
     if (newSection) {
       newSections.splice(index, 0, newSection);
       updateSections(newSections);

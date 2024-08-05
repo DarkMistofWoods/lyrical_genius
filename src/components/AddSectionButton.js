@@ -43,7 +43,7 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
       <button
         ref={buttonRef}
         onClick={() => setAddingSectionAt(isAdding ? null : index)}
-        className={`absolute z-10 transform -translate-x-1/2 bg-[${theme.common.brown}] rounded-full p-1 hover:opacity-80`}
+        className={`absolute z-10 transform -translate-x-1/2 bg-transparent border rounded-lg p-2 mt-1 hover:opacity-60`}
         style={{ top: '-10px', left: '50%' }}
       >
         <Plus size={16} className={`text-[${theme.common.white}]`} />
