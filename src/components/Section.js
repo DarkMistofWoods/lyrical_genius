@@ -1,30 +1,30 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useSelector } from 'react-redux';
-import { Settings, Copy, XCircle, ArrowUp, ArrowDown, Tag, X, AlertCircle } from 'lucide-react';
+import { Settings, Copy, XCircle, Tag, X, AlertCircle, GripVertical } from 'lucide-react';
 import theme from '../theme';
-import { capitalizeFirstLetter } from '../utils/helpers';  // Adjust the path as necessary
+import { capitalizeFirstLetter } from '../utils/helpers';
 
 const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const structureModifiers = ['Intro', 'Outro', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
 const modifiers = ['Sad', 'Happy', 'Angry', 'Fast', 'Slow'];
 
-function Section({ 
-  section, 
-  index, 
+function Section({
+  section,
+  index,
   editingSectionAt,
-  setEditingSectionAt, 
-  duplicateSection, 
-  changeVerseNumber, 
-  removeSection, 
-  moveSection, 
+  setEditingSectionAt,
+  duplicateSection,
+  changeVerseNumber,
+  removeSection,
   handleSectionChange,
   sectionsLength,
   changeSectionType,
   addModifier,
   removeModifier,
-  isFocusMode
+  isFocusMode,
+  dragHandleProps
 }) {
   const [showModifierDropdown, setShowModifierDropdown] = useState(false);
   const [customModifier, setCustomModifier] = useState('');
@@ -299,20 +299,6 @@ function Section({
               <Copy size={16} />
             </button>
             <button
-              onClick={() => moveSection(index, 'up')}
-              className={`${iconButtonStyle} ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={index === 0}
-            >
-              <ArrowUp size={16} />
-            </button>
-            <button
-              onClick={() => moveSection(index, 'down')}
-              className={`${iconButtonStyle} ${index === sectionsLength - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={index === sectionsLength - 1}
-            >
-              <ArrowDown size={16} />
-            </button>
-            <button
               onClick={() => removeSection(index)}
               className={iconButtonStyle}
             >
@@ -494,25 +480,14 @@ function Section({
   
       {!isFocusMode && (
         <div className="ml-2 flex flex-col space-y-2">
+          <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
+            <GripVertical size={20} />
+          </div>
           <button
             onClick={() => removeSection(index)}
             className={iconButtonStyle}
           >
             <XCircle size={20} />
-          </button>
-          <button
-            onClick={() => moveSection(index, 'up')}
-            className={`${iconButtonStyle} ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={index === 0}
-          >
-            <ArrowUp size={20} />
-          </button>
-          <button
-            onClick={() => moveSection(index, 'down')}
-            className={`${iconButtonStyle} ${index === sectionsLength - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={index === sectionsLength - 1}
-          >
-            <ArrowDown size={20} />
           </button>
         </div>
       )}

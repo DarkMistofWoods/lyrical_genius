@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import theme from '../theme';
 import {
   updateLyrics,
@@ -12,7 +13,7 @@ import Section from './Section';
 import MetadataSection from './MetadataSection';
 import AddSectionButton from './AddSectionButton';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { capitalizeFirstLetter } from '../utils/helpers';  // Adjust the path as necessary
+import { capitalizeFirstLetter } from '../utils/helpers';
 
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const structureModifiers = ['Intro', 'Outro', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
@@ -229,6 +230,18 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     updateLyricsInStore(newSections);
   }, [updateLyricsInStore]);
 
+  const onDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const newSections = Array.from(sections);
+    const [reorderedSection] = newSections.splice(result.source.index, 1);
+    newSections.splice(result.destination.index, 0, reorderedSection);
+
+    updateSections(newSections);
+  };
+
   const handleTitleChange = (e) => {
     dispatch(updateTitle(e.target.value));
     saveChanges({ ...currentSong, title: e.target.value });
@@ -358,55 +371,75 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         {isFocusModeActive ? (
           renderFocusMode()
         ) : (
-          <>
-            {sections.length === 0 && (
-              <div className="h-8 relative">
-                <AddSectionButton
-                  index={0}
-                  isAdding={addingSectionAt === 0}
-                  setAddingSectionAt={setAddingSectionAt}
-                  addSection={addSection}
-                />
-              </div>
-            )}
-            {sections.map((section, index) => (
-              <React.Fragment key={index}>
-                {index === 0 && (
-                  <div className="h-8 relative mb-2">
-                    <AddSectionButton
-                      index={0}
-                      isAdding={addingSectionAt === 0}
-                      setAddingSectionAt={setAddingSectionAt}
-                      addSection={addSection}
-                    />
-                  </div>
-                )}
-                <Section
-                  section={section}
-                  index={index}
-                  editingSectionAt={editingSectionAt}
-                  setEditingSectionAt={setEditingSectionAt}
-                  duplicateSection={duplicateSection}
-                  changeVerseNumber={changeVerseNumber}
-                  removeSection={removeSection}
-                  moveSection={moveSection}
-                  handleSectionChange={handleSectionChange}
-                  sectionsLength={sections.length}
-                  changeSectionType={changeSectionType}
-                  addModifier={addModifier}
-                  removeModifier={removeModifier}
-                />
-                <div className="h-8 relative mb-2">
-                  <AddSectionButton
-                    index={index + 1}
-                    isAdding={addingSectionAt === index + 1}
-                    setAddingSectionAt={setAddingSectionAt}
-                    addSection={addSection}
-                  />
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="lyrics-list">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {sections.length === 0 && (
+                    <div className="h-8 relative">
+                      <AddSectionButton
+                        index={0}
+                        isAdding={addingSectionAt === 0}
+                        setAddingSectionAt={setAddingSectionAt}
+                        addSection={addSection}
+                      />
+                    </div>
+                  )}
+                  {sections.map((section, index) => (
+                    <Draggable key={`section-${index}`} draggableId={`section-${index}`} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          style={{
+                            ...provided.draggableProps.style,
+                            marginBottom: snapshot.isDragging ? 0 : '1rem'
+                          }}
+                        >
+                          <React.Fragment>
+                            {index === 0 && (
+                              <div className="h-8 relative mb-2">
+                                <AddSectionButton
+                                  index={0}
+                                  isAdding={addingSectionAt === 0}
+                                  setAddingSectionAt={setAddingSectionAt}
+                                  addSection={addSection}
+                                />
+                              </div>
+                            )}
+                            <Section
+                              section={section}
+                              index={index}
+                              editingSectionAt={editingSectionAt}
+                              setEditingSectionAt={setEditingSectionAt}
+                              duplicateSection={duplicateSection}
+                              changeVerseNumber={changeVerseNumber}
+                              removeSection={removeSection}
+                              handleSectionChange={handleSectionChange}
+                              sectionsLength={sections.length}
+                              changeSectionType={changeSectionType}
+                              addModifier={addModifier}
+                              removeModifier={removeModifier}
+                              dragHandleProps={provided.dragHandleProps}
+                            />
+                            <div className="h-8 relative mb-2">
+                              <AddSectionButton
+                                index={index + 1}
+                                isAdding={addingSectionAt === index + 1}
+                                setAddingSectionAt={setAddingSectionAt}
+                                addSection={addSection}
+                              />
+                            </div>
+                          </React.Fragment>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
                 </div>
-              </React.Fragment>
-            ))}
-          </>
+              )}
+            </Droppable>
+          </DragDropContext>
         )}
       </div>
     </div>
