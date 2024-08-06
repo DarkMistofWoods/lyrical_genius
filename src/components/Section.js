@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useSelector } from 'react-redux';
-import { Settings, Copy, XCircle, ArrowUp, ArrowDown, Tag, X } from 'lucide-react';
+import { Settings, Copy, XCircle, ArrowUp, ArrowDown, Tag, X, AlertCircle } from 'lucide-react';
 import theme from '../theme';
+import { capitalizeFirstLetter } from '../utils/helpers';  // Adjust the path as necessary
 
 const verseNumbers = [1, 2, 3, 4, 5, 6, 7];
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
@@ -25,13 +26,14 @@ function Section({
   removeModifier,
   isFocusMode
 }) {
-  const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [showModifierDropdown, setShowModifierDropdown] = useState(false);
   const [customModifier, setCustomModifier] = useState('');
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [modifierPosition, setModifierPosition] = useState('prefix');
+  const [showMaxModifierWarning, setShowMaxModifierWarning] = useState(false);
   const modifierButtonRef = useRef(null);
   const dropdownRef = useRef(null);
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   const iconButtonStyle = `
     w-6 h-6 
@@ -87,40 +89,37 @@ function Section({
     };
   }, [showModifierDropdown]);
 
-  const capitalizeFirstLetter = (string) => {
-    return string.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  };
-
   const handleModifierSelect = (modifier) => {
-  modifier = capitalizeFirstLetter(modifier);
-  if (section.type === 'StructureModifier') {
-    const baseContent = capitalizeFirstLetter(section.content);
-    let currentModifiers = section.modifier ? section.modifier.split(' ') : [];
-    let prefixes = currentModifiers.filter(m => !m.toLowerCase().includes(baseContent.toLowerCase()));
-    let suffixes = currentModifiers.filter(m => m.toLowerCase().includes(baseContent.toLowerCase())).map(m => m.replace(new RegExp(baseContent, 'i'), '')).filter(m => m);
-
-    if (modifierPosition === 'prefix' && prefixes.length < 2) {
-      prefixes.push(modifier);
-    } else if (modifierPosition === 'suffix' && suffixes.length < 2) {
-      suffixes.push(modifier);
+    modifier = capitalizeFirstLetter(modifier);
+    if (section.type === 'StructureModifier') {
+      let prefixes = section.modifier?.prefix || [];
+      let suffixes = section.modifier?.suffix || [];
+      
+      if (prefixes.length + suffixes.length < 2) {
+        if (modifierPosition === 'prefix') {
+          prefixes.push(modifier);
+        } else if (modifierPosition === 'suffix') {
+          // Allow any modifier as a suffix
+          suffixes.push(modifier);
+        }
+        addModifier(index, { prefix: prefixes, suffix: suffixes });
+      } else {
+        setShowMaxModifierWarning(true);
+        setTimeout(() => setShowMaxModifierWarning(false), 3000);
+      }
     } else {
-      alert("Maximum number of modifiers reached for this position.");
-      setShowModifierDropdown(false);
-      return;
+      // For Lyric Sections, allow only prefix
+      const currentTags = section.modifier ? section.modifier.split(' ') : [];
+      if (currentTags.length < 2) {
+        addModifier(index, currentTags.length === 0 ? modifier : `${modifier} ${currentTags[0]}`);
+      } else {
+        setShowMaxModifierWarning(true);
+        setTimeout(() => setShowMaxModifierWarning(false), 3000);
+      }
     }
-
-    let newModifier = [...prefixes, baseContent, ...suffixes].join(' ').trim();
-    addModifier(index, newModifier);
-  } else {
-    // For Lyric Sections, allow only prefix
-    const currentTags = section.modifier ? section.modifier.split(' ') : [];
-    if (currentTags.length < 2) {
-      addModifier(index, currentTags.length === 0 ? modifier : `${modifier} ${currentTags[0]}`);
-    }
-  }
-  setShowModifierDropdown(false);
-  setCustomModifier('');
-};
+    setShowModifierDropdown(false);
+    setCustomModifier('');
+  };
 
   const handleCustomModifierSubmit = (e) => {
     e.preventDefault();
@@ -131,38 +130,24 @@ function Section({
 
   const handleRemoveModifier = (tagToRemove) => {
     if (section.type === 'StructureModifier') {
-      const words = section.modifier ? section.modifier.split(' ') : [];
-      const baseContent = section.content.toLowerCase();
-      const newWords = words.filter(word => 
-        word.toLowerCase() !== tagToRemove.toLowerCase() && 
-        word.toLowerCase() !== baseContent
-      );
-      if (!newWords.some(word => word.toLowerCase() === baseContent)) {
-        newWords.push(capitalizeFirstLetter(baseContent));
-      }
-      const newModifier = newWords.join(' ');
-      removeModifier(index, newModifier !== capitalizeFirstLetter(baseContent) ? newModifier : null);
+      const newModifier = {
+        prefix: (section.modifier?.prefix || []).filter(m => m !== tagToRemove),
+        suffix: (section.modifier?.suffix || []).filter(m => m !== tagToRemove)
+      };
+      removeModifier(index, newModifier);
     } else {
       const currentTags = section.modifier ? section.modifier.split(' ') : [];
-      const updatedTags = currentTags.filter(tag => tag.toLowerCase() !== tagToRemove.toLowerCase());
+      const updatedTags = currentTags.filter(tag => tag !== tagToRemove);
       removeModifier(index, updatedTags.join(' ') || null);
     }
   };
 
   const displayLabel = () => {
     if (section.type === 'StructureModifier') {
-      if (section.modifier) {
-        // Split the modifier into words
-        const words = section.modifier.split(' ');
-        // Check if the base content is already included in the modifier
-        if (!words.some(word => word.toLowerCase() === section.content.toLowerCase())) {
-          // If not included, append the base content
-          words.push(section.content);
-        }
-        return words.map(capitalizeFirstLetter).join(' ');
-      } else {
-        return capitalizeFirstLetter(section.content);
-      }
+      const baseContent = capitalizeFirstLetter(section.content);
+      const prefixes = section.modifier?.prefix || [];
+      const suffixes = section.modifier?.suffix || [];
+      return `${prefixes.join(' ')} ${baseContent} ${suffixes.join(' ')}`.trim();
     } else {
       const tags = section.modifier ? section.modifier.split(' ') : [];
       const baseLabel = section.type;
@@ -211,9 +196,22 @@ function Section({
             className={`w-full p-1 ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'} border border-[#595859] rounded`}
           />
         </form>
-        {section.modifier && (
+        {section.type === 'StructureModifier' && section.modifier && (
           <div className="px-4 py-2">
-            {section.modifier.split(' ').filter(tag => tag.toLowerCase() !== section.content.toLowerCase()).map((tag, index) => (
+            {[...(section.modifier.prefix || []), ...(section.modifier.suffix || [])].map((tag, index) => (
+              <button
+                key={index}
+                onClick={() => handleRemoveModifier(tag)}
+                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
+              >
+                {tag} <X size={12} className="inline" />
+              </button>
+            ))}
+          </div>
+        )}
+        {section.type !== 'StructureModifier' && section.modifier && (
+          <div className="px-4 py-2">
+            {section.modifier.split(' ').map((tag, index) => (
               <button
                 key={index}
                 onClick={() => handleRemoveModifier(tag)}
@@ -362,6 +360,14 @@ function Section({
         )}
         {showModifierDropdown && renderModifierDropdown()}
       </div>
+      
+      {showMaxModifierWarning && (
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-red-500 text-white px-2 py-1 rounded text-sm flex items-center z-50">
+          <AlertCircle size={16} className="mr-1" />
+          Max modifiers reached (2)
+        </div>
+      )}
+
       {!isFocusMode && (
         <div className="ml-2 flex flex-col space-y-2">
           <button

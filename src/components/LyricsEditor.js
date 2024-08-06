@@ -12,6 +12,7 @@ import Section from './Section';
 import MetadataSection from './MetadataSection';
 import AddSectionButton from './AddSectionButton';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { capitalizeFirstLetter } from '../utils/helpers';  // Adjust the path as necessary
 
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
@@ -29,6 +30,14 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const updateTimeoutRef = useRef(null);
   const previousSectionsRef = useRef([]);
 
+  const saveChanges = useCallback((updatedSong) => {
+    dispatch(updateSong(updatedSong));
+    const updatedSongs = songs.map(song =>
+      song.id === updatedSong.id ? updatedSong : song
+    );
+    saveSongsToLocalStorage(updatedSongs);
+  }, [dispatch, songs]);
+
   const parseLyrics = useCallback((lyrics) => {
     const sectionRegex = /\[(.*?)\](?:\|\|\|([\s\S]*?))?(?=\n\n\[|$)/g;
     const parsedSections = [];
@@ -37,57 +46,48 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     while ((match = sectionRegex.exec(lyrics)) !== null) {
       const [, type, content] = match;
       const parts = type.trim().split(' ');
-      const lastPart = parts[parts.length - 1].toLowerCase();
-
-      if (structureModifiers.map(m => m.toLowerCase()).includes(lastPart)) {
+      
+      // Find the base content (last structure modifier in the parts)
+      const baseContentIndex = parts.length - 1 - [...parts].reverse().findIndex(part => 
+        structureModifiers.map(m => m.toLowerCase()).includes(part.toLowerCase())
+      );
+      
+      if (baseContentIndex !== -1 && baseContentIndex < parts.length) {
+        const baseContent = parts[baseContentIndex];
+        const prefixes = parts.slice(0, baseContentIndex);
+        const suffixes = parts.slice(baseContentIndex + 1);
+        
         parsedSections.push({
           type: 'StructureModifier',
-          content: lastPart.charAt(0).toUpperCase() + lastPart.slice(1),
-          modifier: parts.length > 1 ? parts.slice(0, -1).join(' ') : null
+          content: capitalizeFirstLetter(baseContent),
+          modifier: { prefix: prefixes, suffix: suffixes }
         });
       } else {
-        let sectionType, verseNumber, modifier;
-
-        if (parts[parts.length - 2]?.toLowerCase() === 'verse' && !isNaN(parts[parts.length - 1])) {
-          sectionType = 'Verse';
-          verseNumber = parseInt(parts[parts.length - 1]);
-          modifier = parts.length > 2 ? parts.slice(0, -2).join(' ') : null;
-        } else {
-          sectionType = parts[parts.length - 1].charAt(0).toUpperCase() + parts[parts.length - 1].slice(1);
-          verseNumber = null;
-          modifier = parts.length > 1 ? parts.slice(0, -1).join(' ') : null;
-        }
-
+        // Handle as a regular section type
+        const sectionType = parts[parts.length - 1];
+        const modifier = parts.slice(0, -1).join(' ');
+        
         parsedSections.push({
-          type: sectionType,
+          type: capitalizeFirstLetter(sectionType),
           content: content || '',
-          verseNumber: verseNumber,
-          showTypeInPreview: lastPart !== 'line',
-          modifier: modifier
+          modifier: modifier || null
         });
       }
     }
 
     return parsedSections;
-  }, []);
+  }, [structureModifiers]);
 
   const updateLyricsInStore = useCallback((newSections) => {
     const formattedSections = newSections.map(section => {
       if (section.type === 'StructureModifier') {
-        let formattedContent = section.content.toLowerCase();
-        if (section.modifier) {
-          const words = section.modifier.toLowerCase().split(' ');
-          if (!words.includes(formattedContent)) {
-            words.push(formattedContent);
-          }
-          formattedContent = words.join(' ');
-        }
+        const baseContent = section.content;
+        const prefixes = section.modifier?.prefix || [];
+        const suffixes = section.modifier?.suffix || [];
+        const formattedContent = [...prefixes, baseContent, ...suffixes].filter(Boolean).join(' ');
         return `[${formattedContent}]`;
       } else {
         let formattedType = section.type.toLowerCase();
-        if (formattedType === 'verse' && section.verseNumber) {
-          formattedType = `verse ${section.verseNumber}`;
-        }
         if (section.modifier) {
           formattedType = `${section.modifier.toLowerCase()} ${formattedType}`;
         }
@@ -102,7 +102,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       saveChanges({ ...currentSong, lyrics: combinedLyrics });
       previousSectionsRef.current = newSections;
     }
-  }, [currentSong, dispatch]);
+  }, [currentSong, dispatch, saveChanges]);
 
   const addSection = (category, type, index) => {
     const newSections = [...sections];
@@ -213,14 +213,6 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const handleTitleChange = (e) => {
     dispatch(updateTitle(e.target.value));
     saveChanges({ ...currentSong, title: e.target.value });
-  };
-
-  const saveChanges = (updatedSong) => {
-    dispatch(updateSong(updatedSong));
-    const updatedSongs = songs.map(song =>
-      song.id === updatedSong.id ? updatedSong : song
-    );
-    saveSongsToLocalStorage(updatedSongs);
   };
 
   useEffect(() => {
