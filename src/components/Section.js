@@ -91,10 +91,11 @@ function Section({
 
   const handleModifierSelect = (modifier) => {
     modifier = capitalizeFirstLetter(modifier);
+  
     if (section.type === 'StructureModifier') {
       let prefixes = Array.isArray(section.modifier?.prefix) ? [...section.modifier.prefix] : [];
       let suffixes = Array.isArray(section.modifier?.suffix) ? [...section.modifier.suffix] : [];
-      
+  
       if (prefixes.length + suffixes.length < 2) {
         if (modifierPosition === 'prefix') {
           prefixes.push(modifier);
@@ -109,7 +110,7 @@ function Section({
     } else if (section.type === 'Verse') {
       let prefixes = Array.isArray(section.modifier?.prefix) ? [...section.modifier.prefix] : 
                      (section.modifier?.prefix ? [section.modifier.prefix] : []);
-      
+  
       if (prefixes.length < 2) {
         prefixes.push(modifier);
         addModifier(index, { prefix: prefixes });
@@ -119,7 +120,7 @@ function Section({
       }
     } else {
       let modifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') : [];
-      
+  
       if (modifiers.length < 2) {
         modifiers.push(modifier);
         addModifier(index, modifiers.join(' '));
@@ -403,7 +404,7 @@ function Section({
           Max modifiers reached (2)
         </div>
       )}
-
+  
       {!isFocusMode && (
         <div className="ml-2 flex flex-col space-y-2">
           <button

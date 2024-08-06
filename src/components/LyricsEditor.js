@@ -102,16 +102,21 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       } else if (section.type === 'Verse') {
         let formattedType = `Verse ${section.verseNumber}`;
         if (section.modifier?.prefix) {
-          formattedType = `${section.modifier.prefix} ${formattedType}`;
+          // Ensure section.modifier.prefix is handled as an array
+          const prefixString = Array.isArray(section.modifier.prefix) ? section.modifier.prefix.join(' ') : section.modifier.prefix;
+          formattedType = `${prefixString} ${formattedType}`;
         }
         if (section.modifier?.suffix) {
-          formattedType = `${formattedType} ${section.modifier.suffix}`;
+          const suffixString = Array.isArray(section.modifier.suffix) ? section.modifier.suffix.join(' ') : section.modifier.suffix;
+          formattedType = `${formattedType} ${suffixString}`;
         }
         return `[${formattedType}]|||${section.content}`;
       } else {
         let formattedType = section.type.toLowerCase();
         if (section.modifier) {
-          formattedType = `${section.modifier.toLowerCase()} ${formattedType}`;
+          // Ensure section.modifier is handled as a string for other section types
+          const modifierString = Array.isArray(section.modifier) ? section.modifier.join(' ') : section.modifier;
+          formattedType = `${modifierString} ${formattedType}`;
         }
         return `[${formattedType}]|||${section.content}`;
       }
