@@ -54,10 +54,13 @@ function Section({
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) && !modifierButtonRef.current.contains(event.target)) {
         setShowModifierDropdown(false);
       }
+      if (editingSectionAt !== null && !document.querySelector(`[data-section-index='${editingSectionAt}']`).contains(event.target)) {
+        setEditingSectionAt(null);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [editingSectionAt]);
 
   useEffect(() => {
     function updateDropdownPosition() {
@@ -225,7 +228,7 @@ function Section({
               <button
                 key={index}
                 onClick={() => handleRemoveModifier(tag)}
-                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
+                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-[${theme.common.brown}] text-white hover:bg-red-600`}
               >
                 {tag} <X size={12} className="inline" />
               </button>
@@ -239,7 +242,7 @@ function Section({
               <button
                 key={index}
                 onClick={() => handleRemoveModifier(prefix)}
-                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
+                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-[${theme.common.brown}] text-white hover:bg-red-600`}
               >
                 {prefix} <X size={12} className="inline" />
               </button>
@@ -252,7 +255,7 @@ function Section({
               <button
                 key={index}
                 onClick={() => handleRemoveModifier(tag)}
-                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
+                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-[${theme.common.brown}] text-white hover:bg-red-600`}
               >
                 {tag} <X size={12} className="inline" />
               </button>
@@ -311,7 +314,7 @@ function Section({
   }
 
   return (
-    <div className="mb-4 flex items-start relative bg-[#595859] bg-opacity-30 border-2 border-[#A68477] rounded-lg pt-1 pl-1 pr-1">
+    <div data-section-index={index} className="mb-4 flex items-start relative bg-[#595859] bg-opacity-30 border-2 border-[#A68477] rounded-lg pt-1 pl-1 pr-1">
       <div className="flex-grow relative">
         <div className="flex items-center mb-1">
           <span className="font-bold text-sm mr-2">{displayLabel()}</span>
