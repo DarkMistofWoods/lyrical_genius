@@ -245,7 +245,7 @@ function Toolbar({
           </button>
         </div>
         {openPanel === 'tools' && (
-          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-0 p-4 shadow-lg`}>
+          <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
             <div className="flex justify-center space-x-4">
               <button
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
@@ -275,15 +275,13 @@ function Toolbar({
           </div>
         )}
         {openPanel === 'feedback' && (
-          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-0 p-4 shadow-lg`}>
+          <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
             <p className="text-center">Feedback panel (to be implemented)</p>
           </div>
         )}
         {openPanel === 'versionControl' && (
           <div
-            className={`fixed bottom-[52px] left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border-t border-[${theme.common.grey}] shadow-lg z-40`}
-            style={{ height: '200px' }}
-          >
+            className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`} style={{ maxHeight: '200px', overflowY: 'auto' }}>
             <div className="h-full flex flex-col p-4">
               <h3 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-lg font-bold mb-2`}>Version Control</h3>
               <button
@@ -325,7 +323,7 @@ function Toolbar({
           </div>
         )}
         {openPanel === 'moodBoard' && (
-          <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-0 p-4 shadow-lg`}>
+          <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={handleEditMoodBoard}
