@@ -71,10 +71,16 @@ function Toolbar({
 
   const handleEditMoodBoard = () => {
     setIsEditingMoodBoard(!isEditingMoodBoard);
+    if (!isEditingMoodBoard && !isMoodBoardVisible) {
+      setIsMoodBoardVisible(true);
+    }
   };
 
   const handleToggleMoodBoardVisibility = () => {
     setIsMoodBoardVisible(!isMoodBoardVisible);
+    if (isEditingMoodBoard && isMoodBoardVisible) {
+        setIsEditingMoodBoard(false);
+    }
   };
 
   const handleResetMoodBoard = () => {
@@ -322,14 +328,14 @@ function Toolbar({
           <div className={`absolute bottom-full left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-0 p-4 shadow-lg`}>
             <div className="flex justify-center space-x-4">
               <button
-                onClick={() => setIsEditingMoodBoard(!isEditingMoodBoard)}
+                onClick={handleEditMoodBoard}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isEditingMoodBoard ? 'opacity-60' : ''}`}
                 title={isEditingMoodBoard ? "Exit Editing Mode" : "Enter Editing Mode"}
               >
                 <Edit size={20} />
               </button>
               <button
-                onClick={() => setIsMoodBoardVisible(!isMoodBoardVisible)}
+                onClick={handleToggleMoodBoardVisibility}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${!isMoodBoardVisible ? 'opacity-60' : ''}`}
                 title={isMoodBoardVisible ? "Hide Mood Board" : "Show Mood Board"}
               >
