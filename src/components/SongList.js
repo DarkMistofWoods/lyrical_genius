@@ -15,6 +15,7 @@ function SongList() {
   const [filteredSongs, setFilteredSongs] = useState(songs);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [activeSongForCategory, setActiveSongForCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -107,12 +108,13 @@ function SongList() {
     }
   };
 
-  const handleRenameCategory = (oldName, newName) => {
-    if (newName.trim() && oldName !== newName.trim()) {
-      dispatch(renameCategory({ oldName, newName: newName.trim() }));
+  const handleRenameCategory = (oldName) => {
+    if (editingCategoryName.trim() && oldName !== editingCategoryName.trim()) {
+      dispatch(renameCategory({ oldName, newName: editingCategoryName.trim() }));
       setEditingCategory(null);
+      setEditingCategoryName('');
       if (selectedCategory === oldName) {
-        setSelectedCategory(newName.trim());
+        setSelectedCategory(editingCategoryName.trim());
       }
     }
   };
@@ -223,10 +225,15 @@ function SongList() {
                     {editingCategory === category ? (
                       <input
                         type="text"
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                        onBlur={() => handleRenameCategory(category, newCategoryName)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleRenameCategory(category, newCategoryName)}
+                        value={editingCategoryName}
+                        onChange={(e) => setEditingCategoryName(e.target.value)}
+                        onBlur={() => handleRenameCategory(category)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleRenameCategory(category);
+                          }
+                        }}
                         className="bg-transparent border-b border-[#595859] focus:outline-none text-sm text-[#0D0C0C]"
                         autoFocus
                       />
@@ -239,7 +246,10 @@ function SongList() {
                       </button>
                     )}
                     <button
-                      onClick={() => setEditingCategory(category)}
+                      onClick={() => {
+                        setEditingCategory(category);
+                        setEditingCategoryName(category);
+                      }}
                       className="ml-2 text-[#0D0C0C] hover:text-[#595859]"
                     >
                       <Edit2 size={12} />
@@ -262,7 +272,7 @@ function SongList() {
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission if within a form
+                    e.preventDefault();
                     handleAddCategory();
                   }
                 }}
