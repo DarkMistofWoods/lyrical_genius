@@ -107,7 +107,8 @@ function Section({
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
       }
     } else if (section.type === 'Verse') {
-      let prefixes = Array.isArray(section.modifier?.prefix) ? [...section.modifier.prefix] : [];
+      let prefixes = Array.isArray(section.modifier?.prefix) ? [...section.modifier.prefix] : 
+                     (section.modifier?.prefix ? [section.modifier.prefix] : []);
       
       if (prefixes.length < 2) {
         prefixes.push(modifier);
@@ -146,7 +147,9 @@ function Section({
       };
       removeModifier(index, newModifier);
     } else if (section.type === 'Verse') {
-      const newPrefixes = Array.isArray(section.modifier?.prefix) ? section.modifier.prefix.filter(m => m !== tagToRemove) : [];
+      const newPrefixes = Array.isArray(section.modifier?.prefix) 
+        ? section.modifier.prefix.filter(m => m !== tagToRemove)
+        : (section.modifier?.prefix && section.modifier.prefix !== tagToRemove ? [section.modifier.prefix] : []);
       removeModifier(index, { prefix: newPrefixes });
     } else {
       const currentModifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') : [];
@@ -162,12 +165,12 @@ function Section({
       const suffixes = Array.isArray(section.modifier?.suffix) ? section.modifier.suffix : [];
       return `${prefixes.join(' ')} ${baseContent} ${suffixes.join(' ')}`.trim();
     } else if (section.type === 'Verse') {
-      const prefixes = Array.isArray(section.modifier?.prefix) ? section.modifier.prefix : 
-                       (section.modifier?.prefix ? [section.modifier.prefix] : []);
+      const prefixes = Array.isArray(section.modifier?.prefix) ? section.modifier.prefix :
+        (section.modifier?.prefix ? [section.modifier.prefix] : []);
       return `${prefixes.map(capitalizeFirstLetter).join(' ')} Verse ${section.verseNumber}`.trim();
     } else {
-      const modifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') : 
-                        (Array.isArray(section.modifier) ? section.modifier : []);
+      const modifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') :
+        (Array.isArray(section.modifier) ? section.modifier : []);
       const baseLabel = section.type;
       return `${modifiers.map(capitalizeFirstLetter).join(' ')} ${baseLabel}`.trim();
     }
@@ -228,9 +231,10 @@ function Section({
             ))}
           </div>
         )}
-        {section.type === 'Verse' && section.modifier && section.modifier.prefix && (
+        {section.type === 'Verse' && section.modifier && (
           <div className="px-4 py-2">
-            {Array.isArray(section.modifier.prefix) && section.modifier.prefix.map((prefix, index) => (
+            {(Array.isArray(section.modifier.prefix) ? section.modifier.prefix : 
+              (section.modifier.prefix ? [section.modifier.prefix] : [])).map((prefix, index) => (
               <button
                 key={index}
                 onClick={() => handleRemoveModifier(prefix)}
