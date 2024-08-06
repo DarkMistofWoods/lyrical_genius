@@ -92,8 +92,8 @@ function Section({
   const handleModifierSelect = (modifier) => {
     modifier = capitalizeFirstLetter(modifier);
     if (section.type === 'StructureModifier') {
-      let prefixes = section.modifier?.prefix || [];
-      let suffixes = section.modifier?.suffix || [];
+      let prefixes = Array.isArray(section.modifier?.prefix) ? [...section.modifier.prefix] : [];
+      let suffixes = Array.isArray(section.modifier?.suffix) ? [...section.modifier.suffix] : [];
       
       if (prefixes.length + suffixes.length < 2) {
         if (modifierPosition === 'prefix') {
@@ -107,26 +107,21 @@ function Section({
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
       }
     } else if (section.type === 'Verse') {
-      let prefix = section.modifier?.prefix || null;
-      let suffix = section.modifier?.suffix || null;
+      let prefixes = Array.isArray(section.modifier?.prefix) ? [...section.modifier.prefix] : [];
       
-      if (!prefix && !suffix) {
-        prefix = modifier;
-      } else if (prefix && !suffix) {
-        suffix = modifier;
+      if (prefixes.length < 2) {
+        prefixes.push(modifier);
+        addModifier(index, { prefix: prefixes });
       } else {
         setShowMaxModifierWarning(true);
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
-        setShowModifierDropdown(false);
-        setCustomModifier('');
-        return;
       }
-      
-      addModifier(index, { prefix, suffix });
     } else {
-      // For other Lyric Sections, allow only one modifier
-      if (!section.modifier) {
-        addModifier(index, modifier);
+      let modifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') : [];
+      
+      if (modifiers.length < 2) {
+        modifiers.push(modifier);
+        addModifier(index, modifiers.join(' '));
       } else {
         setShowMaxModifierWarning(true);
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
@@ -146,38 +141,35 @@ function Section({
   const handleRemoveModifier = (tagToRemove) => {
     if (section.type === 'StructureModifier') {
       const newModifier = {
-        prefix: (section.modifier?.prefix || []).filter(m => m !== tagToRemove),
-        suffix: (section.modifier?.suffix || []).filter(m => m !== tagToRemove)
+        prefix: Array.isArray(section.modifier?.prefix) ? section.modifier.prefix.filter(m => m !== tagToRemove) : [],
+        suffix: Array.isArray(section.modifier?.suffix) ? section.modifier.suffix.filter(m => m !== tagToRemove) : []
       };
       removeModifier(index, newModifier);
     } else if (section.type === 'Verse') {
-      const newModifier = { ...section.modifier };
-      if (newModifier.prefix === tagToRemove) {
-        newModifier.prefix = null;
-      }
-      if (newModifier.suffix === tagToRemove) {
-        newModifier.suffix = null;
-      }
-      removeModifier(index, newModifier);
+      const newPrefixes = Array.isArray(section.modifier?.prefix) ? section.modifier.prefix.filter(m => m !== tagToRemove) : [];
+      removeModifier(index, { prefix: newPrefixes });
     } else {
-      removeModifier(index, null);
+      const currentModifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') : [];
+      const newModifiers = currentModifiers.filter(m => m !== tagToRemove);
+      removeModifier(index, newModifiers.join(' '));
     }
   };
 
   const displayLabel = () => {
     if (section.type === 'StructureModifier') {
       const baseContent = capitalizeFirstLetter(section.content);
-      const prefixes = section.modifier?.prefix || [];
-      const suffixes = section.modifier?.suffix || [];
+      const prefixes = Array.isArray(section.modifier?.prefix) ? section.modifier.prefix : [];
+      const suffixes = Array.isArray(section.modifier?.suffix) ? section.modifier.suffix : [];
       return `${prefixes.join(' ')} ${baseContent} ${suffixes.join(' ')}`.trim();
     } else if (section.type === 'Verse') {
-      const prefix = section.modifier?.prefix ? `${capitalizeFirstLetter(section.modifier.prefix)} ` : '';
-      const suffix = section.modifier?.suffix ? ` ${capitalizeFirstLetter(section.modifier.suffix)}` : '';
-      return `${prefix}Verse ${section.verseNumber}${suffix}`.trim();
+      const prefixes = Array.isArray(section.modifier?.prefix) ? section.modifier.prefix : 
+                       (section.modifier?.prefix ? [section.modifier.prefix] : []);
+      return `${prefixes.map(capitalizeFirstLetter).join(' ')} Verse ${section.verseNumber}`.trim();
     } else {
-      const tags = section.modifier ? section.modifier.split(' ') : [];
+      const modifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') : 
+                        (Array.isArray(section.modifier) ? section.modifier : []);
       const baseLabel = section.type;
-      return `${tags.map(capitalizeFirstLetter).join(' ')} ${baseLabel}`.trim();
+      return `${modifiers.map(capitalizeFirstLetter).join(' ')} ${baseLabel}`.trim();
     }
   };
 
@@ -224,7 +216,8 @@ function Section({
         </form>
         {section.type === 'StructureModifier' && section.modifier && (
           <div className="px-4 py-2">
-            {[...(section.modifier.prefix || []), ...(section.modifier.suffix || [])].map((tag, index) => (
+            {[...(Array.isArray(section.modifier.prefix) ? section.modifier.prefix : []), 
+              ...(Array.isArray(section.modifier.suffix) ? section.modifier.suffix : [])].map((tag, index) => (
               <button
                 key={index}
                 onClick={() => handleRemoveModifier(tag)}
@@ -235,34 +228,30 @@ function Section({
             ))}
           </div>
         )}
-        {section.type === 'Verse' && section.modifier && (
+        {section.type === 'Verse' && section.modifier && section.modifier.prefix && (
           <div className="px-4 py-2">
-            {section.modifier.prefix && (
+            {Array.isArray(section.modifier.prefix) && section.modifier.prefix.map((prefix, index) => (
               <button
-                onClick={() => handleRemoveModifier(section.modifier.prefix)}
+                key={index}
+                onClick={() => handleRemoveModifier(prefix)}
                 className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
               >
-                {section.modifier.prefix} <X size={12} className="inline" />
+                {prefix} <X size={12} className="inline" />
               </button>
-            )}
-            {section.modifier.suffix && (
-              <button
-                onClick={() => handleRemoveModifier(section.modifier.suffix)}
-                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
-              >
-                {section.modifier.suffix} <X size={12} className="inline" />
-              </button>
-            )}
+            ))}
           </div>
         )}
         {section.type !== 'StructureModifier' && section.type !== 'Verse' && section.modifier && (
           <div className="px-4 py-2">
-            <button
-              onClick={() => handleRemoveModifier(section.modifier)}
-              className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
-            >
-              {section.modifier} <X size={12} className="inline" />
-            </button>
+            {(typeof section.modifier === 'string' ? section.modifier.split(' ') : []).map((tag, index) => (
+              <button
+                key={index}
+                onClick={() => handleRemoveModifier(tag)}
+                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
+              >
+                {tag} <X size={12} className="inline" />
+              </button>
+            ))}
           </div>
         )}
       </div>,
