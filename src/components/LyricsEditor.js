@@ -372,7 +372,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
           renderFocusMode()
         ) : (
           <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="lyrics-list">
+            <Droppable droppableId="lyrics">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {sections.length === 0 && (
@@ -386,15 +386,11 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                     </div>
                   )}
                   {sections.map((section, index) => (
-                    <Draggable key={`section-${index}`} draggableId={`section-${index}`} index={index}>
-                      {(provided, snapshot) => (
+                    <Draggable key={section.id || index} draggableId={section.id || `section-${index}`} index={index}>
+                      {(provided) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          style={{
-                            ...provided.draggableProps.style,
-                            marginBottom: snapshot.isDragging ? 0 : '1rem'
-                          }}
                         >
                           <React.Fragment>
                             {index === 0 && (
