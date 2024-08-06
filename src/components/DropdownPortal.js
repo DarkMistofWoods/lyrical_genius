@@ -20,7 +20,7 @@ const DropdownPortal = ({ children, buttonRef, isOpen, onClose }) => {
 
       let top;
       if (spaceBelow >= dropdownHeight || spaceBelow > spaceAbove) {
-        top = buttonRect.bottom;
+        top = buttonRect.top - dropdownHeight;
       } else {
         top = buttonRect.top - dropdownHeight;
       }
