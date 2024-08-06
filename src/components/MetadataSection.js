@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateStyle } from '../store/songSlice';
 import theme from '../theme';
@@ -95,6 +95,10 @@ function MetadataSection({ currentSong, saveChanges }) {
     }))
     .filter(categoryGroup => categoryGroup.options.length > 0);
 
+  const isStyleSelected = (category, value) => {
+    return currentSong.style[category.toLowerCase()]?.includes(value) || false;
+  };
+
   return (
     <div className={`bg-[${theme.common.grey}] p-4 rounded-lg relative`}>
       {/* Display selected styles */}
@@ -171,10 +175,17 @@ function MetadataSection({ currentSong, saveChanges }) {
                 {categoryGroup.options.map((option) => (
                   <div
                     key={option.value}
-                    className={`p-2 cursor-pointer hover:bg-[${isDarkMode ? theme.dark.background : theme.light.background}]`}
+                    className={`p-2 cursor-pointer transition-colors duration-200 ${
+                      isStyleSelected(categoryGroup.category, option.value)
+                        ? `text-[${theme.common.white}]`
+                        : `text-[${isDarkMode ? theme.dark.text : theme.light.text}] hover:bg-[${theme.common.brown}] hover:bg-opacity-50 hover:text-[${theme.common.white}]`
+                    }`}
                     onClick={() => handleStyleChange(categoryGroup.category, option.value)}
                   >
                     {option.value}
+                    {isStyleSelected(categoryGroup.category, option.value) && (
+                      <span className="ml-2">✓</span>
+                    )}
                   </div>
                 ))}
               </div>
