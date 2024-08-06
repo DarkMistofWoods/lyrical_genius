@@ -40,18 +40,26 @@ function LivePreview() {
         .join('\n\n');
     } else {
       lyricsContent = parsedSections
-        .map(section => `[${section.type}]${section.content ? '\n' + section.content : ''}`)
+        .map(section => {
+          if (section.type === 'line') {
+            return section.content;
+          } else {
+            return `[${section.type}]${section.content ? '\n' + section.content : ''}`;
+          }
+        })
         .join('\n\n');
     }
 
     setFormattedLyrics(`${currentSong.title || 'Untitled'}\n\n${styleString}\n\n${lyricsContent}`);
     setLyricsOnly(lyricsContent);
 
-    // Count words and characters, excluding bracketed content
+    // Count words (excluding bracketed content)
     const contentOnly = parsedSections.map(section => section.content).join(' ');
     const words = contentOnly.trim().split(/\s+/).filter(Boolean);
     setWordCount(words.length);
-    setCharCount(contentOnly.replace(/\s/g, '').length);
+
+    // Count all characters, including spaces, newlines, and bracketed content
+    setCharCount(currentSong.lyrics.length);
   }, [currentSong, hideBrackets]);
 
   const handleCopy = () => {
@@ -73,7 +81,7 @@ function LivePreview() {
           className={`flex items-center bg-[${theme.common.brown}] text-[${theme.common.white}] py-1 px-3 rounded text-sm hover:opacity-80`}
         >
           {hideBrackets ? <Eye size={16} className="mr-2" /> : <EyeOff size={16} className="mr-2" />}
-          {hideBrackets ? 'Show' : 'Hide'} Brackets
+          {hideBrackets ? 'Show' : 'Hide'} Metatags
         </button>
       </div>
       <div className="text-sm italic mb-4">
