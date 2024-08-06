@@ -99,7 +99,6 @@ function Section({
         if (modifierPosition === 'prefix') {
           prefixes.push(modifier);
         } else if (modifierPosition === 'suffix') {
-          // Allow any modifier as a suffix
           suffixes.push(modifier);
         }
         addModifier(index, { prefix: prefixes, suffix: suffixes });
@@ -107,11 +106,27 @@ function Section({
         setShowMaxModifierWarning(true);
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
       }
+    } else if (section.type === 'Verse') {
+      let prefix = section.modifier?.prefix || null;
+      let suffix = section.modifier?.suffix || null;
+      
+      if (!prefix && !suffix) {
+        prefix = modifier;
+      } else if (prefix && !suffix) {
+        suffix = modifier;
+      } else {
+        setShowMaxModifierWarning(true);
+        setTimeout(() => setShowMaxModifierWarning(false), 3000);
+        setShowModifierDropdown(false);
+        setCustomModifier('');
+        return;
+      }
+      
+      addModifier(index, { prefix, suffix });
     } else {
-      // For Lyric Sections, allow only prefix
-      const currentTags = section.modifier ? section.modifier.split(' ') : [];
-      if (currentTags.length < 2) {
-        addModifier(index, currentTags.length === 0 ? modifier : `${modifier} ${currentTags[0]}`);
+      // For other Lyric Sections, allow only one modifier
+      if (!section.modifier) {
+        addModifier(index, modifier);
       } else {
         setShowMaxModifierWarning(true);
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
@@ -135,10 +150,17 @@ function Section({
         suffix: (section.modifier?.suffix || []).filter(m => m !== tagToRemove)
       };
       removeModifier(index, newModifier);
+    } else if (section.type === 'Verse') {
+      const newModifier = { ...section.modifier };
+      if (newModifier.prefix === tagToRemove) {
+        newModifier.prefix = null;
+      }
+      if (newModifier.suffix === tagToRemove) {
+        newModifier.suffix = null;
+      }
+      removeModifier(index, newModifier);
     } else {
-      const currentTags = section.modifier ? section.modifier.split(' ') : [];
-      const updatedTags = currentTags.filter(tag => tag !== tagToRemove);
-      removeModifier(index, updatedTags.join(' ') || null);
+      removeModifier(index, null);
     }
   };
 
@@ -148,6 +170,10 @@ function Section({
       const prefixes = section.modifier?.prefix || [];
       const suffixes = section.modifier?.suffix || [];
       return `${prefixes.join(' ')} ${baseContent} ${suffixes.join(' ')}`.trim();
+    } else if (section.type === 'Verse') {
+      const prefix = section.modifier?.prefix ? `${capitalizeFirstLetter(section.modifier.prefix)} ` : '';
+      const suffix = section.modifier?.suffix ? ` ${capitalizeFirstLetter(section.modifier.suffix)}` : '';
+      return `${prefix}Verse ${section.verseNumber}${suffix}`.trim();
     } else {
       const tags = section.modifier ? section.modifier.split(' ') : [];
       const baseLabel = section.type;
@@ -209,17 +235,34 @@ function Section({
             ))}
           </div>
         )}
-        {section.type !== 'StructureModifier' && section.modifier && (
+        {section.type === 'Verse' && section.modifier && (
           <div className="px-4 py-2">
-            {section.modifier.split(' ').map((tag, index) => (
+            {section.modifier.prefix && (
               <button
-                key={index}
-                onClick={() => handleRemoveModifier(tag)}
+                onClick={() => handleRemoveModifier(section.modifier.prefix)}
                 className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
               >
-                {tag} <X size={12} className="inline" />
+                {section.modifier.prefix} <X size={12} className="inline" />
               </button>
-            ))}
+            )}
+            {section.modifier.suffix && (
+              <button
+                onClick={() => handleRemoveModifier(section.modifier.suffix)}
+                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
+              >
+                {section.modifier.suffix} <X size={12} className="inline" />
+              </button>
+            )}
+          </div>
+        )}
+        {section.type !== 'StructureModifier' && section.type !== 'Verse' && section.modifier && (
+          <div className="px-4 py-2">
+            <button
+              onClick={() => handleRemoveModifier(section.modifier)}
+              className={`inline-block px-2 py-1 m-1 text-xs rounded bg-red-500 text-white hover:bg-red-600`}
+            >
+              {section.modifier} <X size={12} className="inline" />
+            </button>
           </div>
         )}
       </div>,

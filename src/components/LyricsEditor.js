@@ -42,39 +42,52 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     const sectionRegex = /\[(.*?)\](?:\|\|\|([\s\S]*?))?(?=\n\n\[|$)/g;
     const parsedSections = [];
     let match;
-
+  
     while ((match = sectionRegex.exec(lyrics)) !== null) {
       const [, type, content] = match;
       const parts = type.trim().split(' ');
       
-      // Find the base content (last structure modifier in the parts)
-      const baseContentIndex = parts.length - 1 - [...parts].reverse().findIndex(part => 
-        structureModifiers.map(m => m.toLowerCase()).includes(part.toLowerCase())
-      );
-      
-      if (baseContentIndex !== -1 && baseContentIndex < parts.length) {
-        const baseContent = parts[baseContentIndex];
-        const prefixes = parts.slice(0, baseContentIndex);
-        const suffixes = parts.slice(baseContentIndex + 1);
-        
+      const verseIndex = parts.findIndex(part => part.toLowerCase() === 'verse');
+      if (verseIndex !== -1) {
+        // Handle verse with potential prefixes and number
+        const verseNumber = parts[verseIndex + 1] ? parseInt(parts[verseIndex + 1], 10) : 1;
+        const prefix = parts.slice(0, verseIndex).join(' ');
+        const suffix = parts.slice(verseIndex + 2).join(' ');
         parsedSections.push({
-          type: 'StructureModifier',
-          content: capitalizeFirstLetter(baseContent),
-          modifier: { prefix: prefixes, suffix: suffixes }
+          type: 'Verse',
+          content: content || '',
+          verseNumber: verseNumber,
+          modifier: { prefix: prefix || null, suffix: suffix || null }
         });
       } else {
-        // Handle as a regular section type
-        const sectionType = parts[parts.length - 1];
-        const modifier = parts.slice(0, -1).join(' ');
+        // Handle other section types (no changes here)
+        const baseContentIndex = parts.length - 1 - [...parts].reverse().findIndex(part => 
+          structureModifiers.map(m => m.toLowerCase()).includes(part.toLowerCase())
+        );
         
-        parsedSections.push({
-          type: capitalizeFirstLetter(sectionType),
-          content: content || '',
-          modifier: modifier || null
-        });
+        if (baseContentIndex !== -1 && baseContentIndex < parts.length) {
+          const baseContent = parts[baseContentIndex];
+          const prefixes = parts.slice(0, baseContentIndex);
+          const suffixes = parts.slice(baseContentIndex + 1);
+          
+          parsedSections.push({
+            type: 'StructureModifier',
+            content: capitalizeFirstLetter(baseContent),
+            modifier: { prefix: prefixes, suffix: suffixes }
+          });
+        } else {
+          const sectionType = parts[parts.length - 1];
+          const modifier = parts.slice(0, -1).join(' ');
+          
+          parsedSections.push({
+            type: capitalizeFirstLetter(sectionType),
+            content: content || '',
+            modifier: modifier || null
+          });
+        }
       }
     }
-
+  
     return parsedSections;
   }, [structureModifiers]);
 
@@ -86,6 +99,15 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         const suffixes = section.modifier?.suffix || [];
         const formattedContent = [...prefixes, baseContent, ...suffixes].filter(Boolean).join(' ');
         return `[${formattedContent}]`;
+      } else if (section.type === 'Verse') {
+        let formattedType = `Verse ${section.verseNumber}`;
+        if (section.modifier?.prefix) {
+          formattedType = `${section.modifier.prefix} ${formattedType}`;
+        }
+        if (section.modifier?.suffix) {
+          formattedType = `${formattedType} ${section.modifier.suffix}`;
+        }
+        return `[${formattedType}]|||${section.content}`;
       } else {
         let formattedType = section.type.toLowerCase();
         if (section.modifier) {
@@ -94,9 +116,9 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         return `[${formattedType}]|||${section.content}`;
       }
     });
-
+  
     const combinedLyrics = formattedSections.join('\n\n');
-
+  
     if (JSON.stringify(newSections) !== JSON.stringify(previousSectionsRef.current)) {
       dispatch(updateLyrics(combinedLyrics));
       saveChanges({ ...currentSong, lyrics: combinedLyrics });
