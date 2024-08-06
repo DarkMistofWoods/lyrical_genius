@@ -15,7 +15,7 @@ import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { capitalizeFirstLetter } from '../utils/helpers';  // Adjust the path as necessary
 
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
-const structureModifiers = ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
+const structureModifiers = ['Intro', 'Outro', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
 
 function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const dispatch = useDispatch();
@@ -46,30 +46,26 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     while ((match = sectionRegex.exec(lyrics)) !== null) {
       const [, type, content] = match;
       const parts = type.trim().split(' ');
-      
+  
       const verseIndex = parts.findIndex(part => part.toLowerCase() === 'verse');
       if (verseIndex !== -1) {
-        // Handle verse with potential prefixes and number
         const verseNumber = parts[verseIndex + 1] ? parseInt(parts[verseIndex + 1], 10) : 1;
-        const prefix = parts.slice(0, verseIndex).join(' ');
+        const prefix = parts.slice(0, verseIndex);
         const suffix = parts.slice(verseIndex + 2).join(' ');
         parsedSections.push({
           type: 'Verse',
           content: content || '',
           verseNumber: verseNumber,
-          modifier: { prefix: prefix || null, suffix: suffix || null }
+          modifier: { prefix: prefix || [], suffix: suffix || null }
         });
       } else {
-        // Handle other section types (no changes here)
         const baseContentIndex = parts.length - 1 - [...parts].reverse().findIndex(part => 
           structureModifiers.map(m => m.toLowerCase()).includes(part.toLowerCase())
         );
-        
         if (baseContentIndex !== -1 && baseContentIndex < parts.length) {
           const baseContent = parts[baseContentIndex];
           const prefixes = parts.slice(0, baseContentIndex);
           const suffixes = parts.slice(baseContentIndex + 1);
-          
           parsedSections.push({
             type: 'StructureModifier',
             content: capitalizeFirstLetter(baseContent),
@@ -78,7 +74,6 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         } else {
           const sectionType = parts[parts.length - 1];
           const modifier = parts.slice(0, -1).join(' ');
-          
           parsedSections.push({
             type: capitalizeFirstLetter(sectionType),
             content: content || '',
@@ -87,7 +82,6 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         }
       }
     }
-  
     return parsedSections;
   }, [structureModifiers]);
 
@@ -102,7 +96,6 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       } else if (section.type === 'Verse') {
         let formattedType = `Verse ${section.verseNumber}`;
         if (section.modifier?.prefix) {
-          // Ensure section.modifier.prefix is handled as an array
           const prefixString = Array.isArray(section.modifier.prefix) ? section.modifier.prefix.join(' ') : section.modifier.prefix;
           formattedType = `${prefixString} ${formattedType}`;
         }
@@ -114,7 +107,6 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       } else {
         let formattedType = section.type.toLowerCase();
         if (section.modifier) {
-          // Ensure section.modifier is handled as a string for other section types
           const modifierString = Array.isArray(section.modifier) ? section.modifier.join(' ') : section.modifier;
           formattedType = `${modifierString} ${formattedType}`;
         }
@@ -203,7 +195,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     const newSections = [...sections];
     newSections[index] = { ...newSections[index], content };
     setSections(newSections);
-
+  
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current);
     }
