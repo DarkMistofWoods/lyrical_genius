@@ -219,7 +219,7 @@ function SongList() {
             <div className="max-h-40 overflow-y-auto">
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
-                  <div key={category} className={`flex items-center rounded px-2 py-1 ${selectedCategory === category ? 'ring-2 ring-[#F2F2F2]' : ''}`} style={{ backgroundColor: categoryColors[category] }}>
+                  <div key={category} className={`flex items-center rounded m-1 px-1 py-0.5 ${selectedCategory === category ? 'ring-2 ring-[#A68477]' : ''}`} style={{ backgroundColor: categoryColors[category] }}>
                     {editingCategory === category ? (
                       <input
                         type="text"
