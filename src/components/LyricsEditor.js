@@ -108,12 +108,17 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     const newSections = [...sections];
     let newSection;
   
-    if (category === 'Structure Modifiers') {
-      newSection = {
-        type: 'StructureModifier',
-        content: type,
-        modifier: null
-      };
+    if (category === 'Structure Modifiers' || type === 'Custom') {
+      const content = type === 'Custom' ? prompt("Enter custom modifier name:") : type;
+      if (content) {
+        newSection = {
+          type: 'StructureModifier',
+          content: content,
+          modifier: null
+        };
+      } else {
+        return;
+      }
     } else if (category === 'Lyric Sections') {
       newSection = {
         type,
@@ -121,17 +126,6 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         verseNumber: type === 'Verse' ? 1 : null,
         modifier: null
       };
-    } else if (category === 'Custom') {
-      const customName = prompt("Enter custom section name:");
-      if (customName) {
-        newSection = {
-          type: 'StructureModifier',
-          content: customName,
-          modifier: null
-        };
-      } else {
-        return;
-      }
     }
   
     if (newSection) {

@@ -92,30 +92,35 @@ function Section({
   };
 
   const handleModifierSelect = (modifier) => {
-    modifier = capitalizeFirstLetter(modifier);
-    if (section.type === 'StructureModifier') {
-      const baseContent = capitalizeFirstLetter(section.content);
-      let newModifier;
-      if (modifierPosition === 'prefix') {
-        newModifier = section.modifier ? `${modifier} ${section.modifier}` : modifier;
-      } else {
-        newModifier = section.modifier ? `${section.modifier} ${modifier}` : modifier;
-      }
-      // Ensure the base content is not repeated
-      if (!newModifier.toLowerCase().includes(baseContent.toLowerCase())) {
-        newModifier = `${newModifier} ${baseContent}`;
-      }
-      addModifier(index, newModifier);
+  modifier = capitalizeFirstLetter(modifier);
+  if (section.type === 'StructureModifier') {
+    const baseContent = capitalizeFirstLetter(section.content);
+    let currentModifiers = section.modifier ? section.modifier.split(' ') : [];
+    let prefixes = currentModifiers.filter(m => !m.toLowerCase().includes(baseContent.toLowerCase()));
+    let suffixes = currentModifiers.filter(m => m.toLowerCase().includes(baseContent.toLowerCase())).map(m => m.replace(new RegExp(baseContent, 'i'), '')).filter(m => m);
+
+    if (modifierPosition === 'prefix' && prefixes.length < 2) {
+      prefixes.push(modifier);
+    } else if (modifierPosition === 'suffix' && suffixes.length < 2) {
+      suffixes.push(modifier);
     } else {
-      // For Lyric Sections, allow only prefix
-      const currentTags = section.modifier ? section.modifier.split(' ') : [];
-      if (currentTags.length < 2) {
-        addModifier(index, currentTags.length === 0 ? modifier : `${modifier} ${currentTags[0]}`);
-      }
+      alert("Maximum number of modifiers reached for this position.");
+      setShowModifierDropdown(false);
+      return;
     }
-    setShowModifierDropdown(false);
-    setCustomModifier('');
-  };
+
+    let newModifier = [...prefixes, baseContent, ...suffixes].join(' ').trim();
+    addModifier(index, newModifier);
+  } else {
+    // For Lyric Sections, allow only prefix
+    const currentTags = section.modifier ? section.modifier.split(' ') : [];
+    if (currentTags.length < 2) {
+      addModifier(index, currentTags.length === 0 ? modifier : `${modifier} ${currentTags[0]}`);
+    }
+  }
+  setShowModifierDropdown(false);
+  setCustomModifier('');
+};
 
   const handleCustomModifierSubmit = (e) => {
     e.preventDefault();
