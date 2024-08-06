@@ -271,7 +271,7 @@ function Section({
   }
 
   return (
-    <div className="mb-4 flex items-start relative border-2 border-[#A68477] rounded-lg pt-1 pl-1 pr-1">
+    <div className="mb-4 flex items-start relative bg-[#595859] bg-opacity-30 border-2 border-[#A68477] rounded-lg pt-1 pl-1 pr-1">
       <div className="flex-grow relative">
         <div className="flex items-center mb-1">
           <span className="font-bold text-sm mr-2">{displayLabel()}</span>
