@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, addSong, deleteSong, addCategory, deleteCategory, renameCategory, assignSongToCategory, unassignSongFromCategory } from '../store/songSlice';
 import { saveSongsToLocalStorage } from '../utils/localStorage';
@@ -19,6 +19,7 @@ function SongList() {
   const [activeSongForCategory, setActiveSongForCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isCategoryAccordionOpen, setIsCategoryAccordionOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const filtered = songs.filter(song => 
@@ -33,6 +34,20 @@ function SongList() {
     );
     setFilteredSongs(filtered);
   }, [searchTerm, songs, selectedCategory]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowCategoryDropdown(false);
+        setActiveSongForCategory(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSelectSong = (song) => {
     dispatch(setCurrentSong(song));
@@ -145,7 +160,7 @@ function SongList() {
     if (!showCategoryDropdown || activeSongForCategory !== songId) return null;
 
     return (
-      <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[${isDarkMode ? theme.dark.background : theme.light.background}] ring-1 ring-black ring-opacity-5 z-50`}>
+      <div ref={dropdownRef} className={`absolute right-0 -mt-10 w-48 rounded-md shadow-lg bg-[${isDarkMode ? theme.dark.background : theme.light.background}] ring-1 ring-black ring-opacity-5 z-50`}>
         <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
           {categories.map((category) => (
             <button

@@ -34,6 +34,8 @@ function Section({
   const modifierButtonRef = useRef(null);
   const dropdownRef = useRef(null);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
+  const [showCustomSectionPrompt, setShowCustomSectionPrompt] = useState(false);
+  const [customSectionName, setCustomSectionName] = useState('');
 
   const iconButtonStyle = `
     w-6 h-6 
@@ -91,6 +93,16 @@ function Section({
       window.removeEventListener('resize', updateDropdownPosition);
     };
   }, [showModifierDropdown]);
+
+  const handleCustomSectionSubmit = (e) => {
+    e.preventDefault();
+    if (customSectionName.trim()) {
+      changeSectionType(index, customSectionName.trim());
+      setShowCustomSectionPrompt(false);
+      setCustomSectionName('');
+      setEditingSectionAt(null);
+    }
+  };
 
   const handleModifierSelect = (modifier) => {
     modifier = capitalizeFirstLetter(modifier);
@@ -385,17 +397,89 @@ function Section({
               </button>
             ))}
             <button
-              onClick={() => {
-                const customType = prompt("Enter custom section name:");
-                if (customType) {
-                  changeSectionType(index, customType);
-                  setEditingSectionAt(null);
-                }
-              }}
+              onClick={() => setShowCustomSectionPrompt(true)}
               className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
             >
               Custom Section
             </button>
+          </div>
+        )}
+
+        {showCustomSectionPrompt && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-6 rounded-lg shadow-lg max-w-md w-full`}>
+              <h2 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-xl font-bold mb-4`}>
+                Add Custom Section
+              </h2>
+              <form onSubmit={handleCustomSectionSubmit}>
+                <input
+                  type="text"
+                  value={customSectionName}
+                  onChange={(e) => setCustomSectionName(e.target.value)}
+                  placeholder="Enter custom section name"
+                  className={`w-full p-2 mb-4 border rounded bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}
+                  autoFocus
+                />
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCustomSectionPrompt(false);
+                      setCustomSectionName('');
+                      setEditingSectionAt(null);
+                    }}
+                    className={`px-4 py-2 rounded bg-[${theme.common.grey}] text-[${theme.common.white}] hover:opacity-80`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className={`px-4 py-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] hover:opacity-80`}
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showCustomSectionPrompt && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-6 rounded-lg shadow-lg max-w-md w-full`}>
+              <h2 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-xl font-bold mb-4`}>
+                Add Custom Section
+              </h2>
+              <form onSubmit={handleCustomSectionSubmit}>
+                <input
+                  type="text"
+                  value={customSectionName}
+                  onChange={(e) => setCustomSectionName(e.target.value)}
+                  placeholder="Enter custom section name"
+                  className={`w-full p-2 mb-4 border rounded bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}
+                  autoFocus
+                />
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCustomSectionPrompt(false);
+                      setCustomSectionName('');
+                      setEditingSectionAt(null);
+                    }}
+                    className={`px-4 py-2 rounded bg-[${theme.common.grey}] text-[${theme.common.white}] hover:opacity-80`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className={`px-4 py-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] hover:opacity-80`}
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
         {showModifierDropdown && renderModifierDropdown()}
