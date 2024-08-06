@@ -260,6 +260,12 @@ function SongList() {
                 placeholder="New category"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent form submission if within a form
+                    handleAddCategory();
+                  }
+                }}
                 className={`bg-transparent border-b border-[${theme.common.brown}] focus:outline-none text-sm mr-2 flex-grow`}
               />
               <button
