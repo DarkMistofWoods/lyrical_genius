@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import DropdownPortal from './DropdownPortal';
 import CategorizedDropdown from './CategorizedDropdown';
 import theme from '../theme';
@@ -43,7 +43,7 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
       <button
         ref={buttonRef}
         onClick={() => setAddingSectionAt(isAdding ? null : index)}
-        className={`absolute z-10 transform -translate-x-1/2 bg-transparent border-2 border-[#A68477] rounded-lg p-1 mt-1 hover:opacity-60 transition-opacity duration-300 ${isAdding ? 'opacity-0' : 'opacity-100'}`}
+        className={`absolute z-10 transform -translate-x-1/2 bg-transparent border-2 border-[#A68477] rounded-lg p-1 mt-1 hover:opacity-60`}
         style={{ top: '-10px', left: '50%' }}
       >
         <Plus size={16} className={`text-[${theme.common.white}]`} />
