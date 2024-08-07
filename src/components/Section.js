@@ -304,6 +304,9 @@ function Section({
             >
               <XCircle size={16} />
             </button>
+            <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
+              <GripVertical size={16} />
+            </div>
           </div>
         )}
         {showModifierDropdown && renderModifierDropdown()}
@@ -312,9 +315,9 @@ function Section({
   }
 
   return (
-    <div data-section-index={index} className="mb-4 flex items-start relative bg-[#595859] bg-opacity-30 border-2 border-[#A68477] rounded-lg pt-1 pl-1 pr-1">
-      <div className="flex-grow relative">
-        <div className="flex items-center mb-1">
+    <div data-section-index={index} className="mb-4 flex flex-col relative bg-[#595859] bg-opacity-30 border-2 border-[#A68477] rounded-lg p-1">
+      <div className="flex justify-between items-start mb-1">
+        <div className="flex items-center">
           <span className="font-bold text-sm mr-2">{displayLabel()}</span>
           {!isFocusMode && (
             <>
@@ -345,11 +348,10 @@ function Section({
                     <button
                       key={num}
                       onClick={() => changeVerseNumber(index, num)}
-                      className={`w-6 h-6 flex items-center justify-center rounded-full ml-1 ${
-                        section.verseNumber === num
+                      className={`w-6 h-6 flex items-center justify-center rounded-full ml-1 ${section.verseNumber === num
                           ? 'bg-[#A68477] text-white'
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
+                        }`}
                     >
                       {num}
                     </button>
@@ -359,138 +361,97 @@ function Section({
             </>
           )}
         </div>
-        <textarea
-          placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
-          className={`w-full p-2 border rounded ${
-            isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
-          }`}
-          value={section.content}
-          onChange={(e) => handleSectionChange(index, e.target.value)}
-          rows={6}
-        ></textarea>
-        {editingSectionAt === index && (
-          <div className={`absolute z-50 top-6 left-0 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}>
-            {sectionTypes.map((type) => (
-              <button
-                key={type}
-                onClick={() => {
-                  changeSectionType(index, type);
-                  setEditingSectionAt(null);
-                }}
-                className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
-              >
-                {type}
-              </button>
-            ))}
-            <button
-              onClick={() => setShowCustomSectionPrompt(true)}
-              className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
-            >
-              Custom Section
-            </button>
-          </div>
-        )}
-
-        {showCustomSectionPrompt && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-6 rounded-lg shadow-lg max-w-md w-full`}>
-              <h2 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-xl font-bold mb-4`}>
-                Add Custom Section
-              </h2>
-              <form onSubmit={handleCustomSectionSubmit}>
-                <input
-                  type="text"
-                  value={customSectionName}
-                  onChange={(e) => setCustomSectionName(e.target.value)}
-                  placeholder="Enter custom section name"
-                  className={`w-full p-2 mb-4 border rounded bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}
-                  autoFocus
-                />
-                <div className="flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCustomSectionPrompt(false);
-                      setCustomSectionName('');
-                      setEditingSectionAt(null);
-                    }}
-                    className={`px-4 py-2 rounded bg-[${theme.common.grey}] text-[${theme.common.white}] hover:opacity-80`}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className={`px-4 py-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] hover:opacity-80`}
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {showCustomSectionPrompt && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-6 rounded-lg shadow-lg max-w-md w-full`}>
-              <h2 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-xl font-bold mb-4`}>
-                Add Custom Section
-              </h2>
-              <form onSubmit={handleCustomSectionSubmit}>
-                <input
-                  type="text"
-                  value={customSectionName}
-                  onChange={(e) => setCustomSectionName(e.target.value)}
-                  placeholder="Enter custom section name"
-                  className={`w-full p-2 mb-4 border rounded bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}
-                  autoFocus
-                />
-                <div className="flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCustomSectionPrompt(false);
-                      setCustomSectionName('');
-                      setEditingSectionAt(null);
-                    }}
-                    className={`px-4 py-2 rounded bg-[${theme.common.grey}] text-[${theme.common.white}] hover:opacity-80`}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className={`px-4 py-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] hover:opacity-80`}
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        {showModifierDropdown && renderModifierDropdown()}
-      </div>
-      
-      {showMaxModifierWarning && (
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-red-500 text-white px-2 py-1 rounded text-sm flex items-center z-50">
-          <AlertCircle size={16} className="mr-1" />
-          Max modifiers reached (2)
-        </div>
-      )}
-  
-      {!isFocusMode && (
-        <div className="ml-2 flex flex-col space-y-2">
-          <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
-            <GripVertical size={20} />
-          </div>
+        {!isFocusMode && (
           <button
             onClick={() => removeSection(index)}
             className={iconButtonStyle}
           >
             <XCircle size={20} />
           </button>
+        )}
+      </div>
+      <div className="relative">
+        <textarea
+          placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
+          className={`w-full p-2 pr-8 border rounded ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
+            }`}
+          value={section.content}
+          onChange={(e) => handleSectionChange(index, e.target.value)}
+          rows={6}
+        ></textarea>
+        {!isFocusMode && (
+          <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move absolute bottom-1 right-1`}>
+            <GripVertical size={20} />
+          </div>
+        )}
+      </div>
+      {showMaxModifierWarning && (
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-red-500 text-white px-2 py-1 rounded text-sm flex items-center z-50">
+          <AlertCircle size={16} className="mr-1" />
+          Max modifiers reached (2)
         </div>
       )}
+      {editingSectionAt === index && (
+        <div className={`absolute z-50 top-6 left-0 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}>
+          {sectionTypes.map((type) => (
+            <button
+              key={type}
+              onClick={() => {
+                changeSectionType(index, type);
+                setEditingSectionAt(null);
+              }}
+              className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
+            >
+              {type}
+            </button>
+          ))}
+          <button
+            onClick={() => setShowCustomSectionPrompt(true)}
+            className={`block w-full text-left px-4 py-2 hover:${isDarkMode ? 'bg-[#0D0C0C]' : 'bg-[#A68477]'} ${isDarkMode ? 'text-[#F2F2F2]' : 'text-[#0D0C0C]'}`}
+          >
+            Custom Section
+          </button>
+        </div>
+      )}
+      {showCustomSectionPrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-6 rounded-lg shadow-lg max-w-md w-full`}>
+            <h2 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-xl font-bold mb-4`}>
+              Add Custom Section
+            </h2>
+            <form onSubmit={handleCustomSectionSubmit}>
+              <input
+                type="text"
+                value={customSectionName}
+                onChange={(e) => setCustomSectionName(e.target.value)}
+                placeholder="Enter custom section name"
+                className={`w-full p-2 mb-4 border rounded bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}
+                autoFocus
+              />
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCustomSectionPrompt(false);
+                    setCustomSectionName('');
+                    setEditingSectionAt(null);
+                  }}
+                  className={`px-4 py-2 rounded bg-[${theme.common.grey}] text-[${theme.common.white}] hover:opacity-80`}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className={`px-4 py-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] hover:opacity-80`}
+                >
+                  Add
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showModifierDropdown && renderModifierDropdown()}
     </div>
   );
 }

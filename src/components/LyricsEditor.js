@@ -27,6 +27,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const [editingSectionAt, setEditingSectionAt] = useState(null);
   const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(false);
   const [focusedSectionIndex, setFocusedSectionIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const updateTimeoutRef = useRef(null);
   const previousSectionsRef = useRef([]);
@@ -230,7 +231,12 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     updateLyricsInStore(newSections);
   }, [updateLyricsInStore]);
 
+  const onDragStart = () => {
+    setIsDragging(true);
+  };
+
   const onDragEnd = (result) => {
+    setIsDragging(false);
     if (!result.destination) {
       return;
     }
@@ -365,17 +371,16 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       )}
 
       {/* Main content area */}
-      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${
-        isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
-      }`}>
+      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
+        }`}>
         {isFocusModeActive ? (
           renderFocusMode()
         ) : (
-          <DragDropContext onDragEnd={onDragEnd}>
+          <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
             <Droppable droppableId="lyrics-list">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {sections.length === 0 && (
+                  {sections.length === 0 && !isDragging && (
                     <div className="h-8 relative">
                       <AddSectionButton
                         index={0}
@@ -386,7 +391,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                     </div>
                   )}
                   {sections.map((section, index) => (
-                    <Draggable key={`section-${index}`} draggableId={`section-${index}`} index={index}>
+                    <Draggable key={`section-${section.id || index}`} draggableId={`section-${section.id || index}`} index={index}>
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
@@ -397,7 +402,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                           }}
                         >
                           <React.Fragment>
-                            {index === 0 && (
+                            {index === 0 && !isDragging && (
                               <div className="h-8 relative mb-2">
                                 <AddSectionButton
                                   index={0}
@@ -422,14 +427,16 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                               removeModifier={removeModifier}
                               dragHandleProps={provided.dragHandleProps}
                             />
-                            <div className="h-8 relative mb-2">
-                              <AddSectionButton
-                                index={index + 1}
-                                isAdding={addingSectionAt === index + 1}
-                                setAddingSectionAt={setAddingSectionAt}
-                                addSection={addSection}
-                              />
-                            </div>
+                            {!isDragging && (
+                              <div className="h-8 relative mb-2">
+                                <AddSectionButton
+                                  index={index + 1}
+                                  isAdding={addingSectionAt === index + 1}
+                                  setAddingSectionAt={setAddingSectionAt}
+                                  addSection={addSection}
+                                />
+                              </div>
+                            )}
                           </React.Fragment>
                         </div>
                       )}
