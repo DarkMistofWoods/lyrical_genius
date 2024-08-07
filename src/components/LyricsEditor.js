@@ -52,6 +52,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const [isMetadataCollapsed, setIsMetadataCollapsed] = useState(false);
   const [focusedSectionIndex, setFocusedSectionIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isAddButtonVisible, setIsAddButtonVisible] = useState(true)
 
   const updateTimeoutRef = useRef(null);
   const previousSectionsRef = useRef([]);
@@ -272,15 +273,20 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     }
   }, [currentSong.id, currentSong.lyrics, parseLyrics]);
 
-  const onDragEnd = useCallback((result) => {
+  const onDragStart = () => {
+    setIsDragging(true);
+    setIsAddButtonVisible(false);
+  };
+
+  const onDragEnd = (result) => {
+    setIsDragging(false);
+    setIsAddButtonVisible(true);
     if (!result.destination) return;
-  
     const newSections = Array.from(sections);
     const [reorderedSection] = newSections.splice(result.source.index, 1);
     newSections.splice(result.destination.index, 0, reorderedSection);
-  
     updateSections(newSections);
-  }, [sections, updateSections]);
+  };
 
   const handleTitleChange = (e) => {
     dispatch(updateTitle(e.target.value));
@@ -400,86 +406,72 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       {isFocusModeActive ? (
         renderFocusMode()
       ) : (
-            <DragDropContext
-              onDragStart={() => setIsDragging(true)}
-              onDragEnd={(result) => {
-                setIsDragging(false);
-                if (!result.destination) return;
-                const newSections = Array.from(sections);
-                const [reorderedSection] = newSections.splice(result.source.index, 1);
-                newSections.splice(result.destination.index, 0, reorderedSection);
-                updateSections(newSections);
-              }}
-            >
-              <StrictModeDroppable droppableId="lyrics">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef}>
-                    {sections.length === 0 && (
-                      <div className="h-8 relative mb-4">
-                        <AddSectionButton
-                          index={0}
-                          isAdding={addingSectionAt === 0}
-                          setAddingSectionAt={setAddingSectionAt}
-                          addSection={addSection}
-                        />
+        <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+          <StrictModeDroppable droppableId="lyrics">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                {sections.length === 0 && (
+                  <div className={`h-8 relative mb-4 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
+                    <AddSectionButton
+                      index={0}
+                      isAdding={addingSectionAt === 0}
+                      setAddingSectionAt={setAddingSectionAt}
+                      addSection={addSection}
+                    />
+                  </div>
+                )}
+                {sections.map((section, index) => (
+                  <Draggable key={section.id} draggableId={section.id} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                      >
+                        <React.Fragment>
+                          {index === 0 && (
+                            <div className={`h-8 relative mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
+                              <AddSectionButton
+                                index={0}
+                                isAdding={addingSectionAt === 0}
+                                setAddingSectionAt={setAddingSectionAt}
+                                addSection={addSection}
+                              />
+                            </div>
+                          )}
+                          <Section
+                            section={section}
+                            index={index}
+                            editingSectionAt={editingSectionAt}
+                            setEditingSectionAt={setEditingSectionAt}
+                            duplicateSection={duplicateSection}
+                            changeVerseNumber={changeVerseNumber}
+                            removeSection={removeSection}
+                            handleSectionChange={handleSectionChange}
+                            sectionsLength={sections.length}
+                            changeSectionType={changeSectionType}
+                            addModifier={addModifier}
+                            removeModifier={removeModifier}
+                            dragHandleProps={provided.dragHandleProps}
+                          />
+                          <div className={`h-8 relative mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
+                            <AddSectionButton
+                              index={index + 1}
+                              isAdding={addingSectionAt === index + 1}
+                              setAddingSectionAt={setAddingSectionAt}
+                              addSection={addSection}
+                            />
+                          </div>
+                        </React.Fragment>
                       </div>
                     )}
-                    {sections.map((section, index) => (
-                      <Draggable key={section.id} draggableId={section.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                          >
-                          <React.Fragment>
-                            {/* Show 'add section' button above the first section only if not dragging */}
-                            {index === 0 && !isDragging && (
-                              <div className="h-8 relative mb-2">
-                                <AddSectionButton
-                                  index={0}
-                                  isAdding={addingSectionAt === 0}
-                                  setAddingSectionAt={setAddingSectionAt}
-                                  addSection={addSection}
-                                />
-                              </div>
-                            )}
-                            <Section
-                              section={section}
-                              index={index}
-                              editingSectionAt={editingSectionAt}
-                              setEditingSectionAt={setEditingSectionAt}
-                              duplicateSection={duplicateSection}
-                              changeVerseNumber={changeVerseNumber}
-                              removeSection={removeSection}
-                              handleSectionChange={handleSectionChange}
-                              sectionsLength={sections.length}
-                              changeSectionType={changeSectionType}
-                              addModifier={addModifier}
-                              removeModifier={removeModifier}
-                              dragHandleProps={provided.dragHandleProps}
-                            />
-                            {/* Show 'add section' button below each section only if not dragging */}
-                            {!isDragging && (
-                              <div className="h-8 relative mb-2">
-                                <AddSectionButton
-                                  index={index + 1}
-                                  isAdding={addingSectionAt === index + 1}
-                                  setAddingSectionAt={setAddingSectionAt}
-                                  addSection={addSection}
-                                />
-                              </div>
-                            )}
-                          </React.Fragment>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </StrictModeDroppable>
-          </DragDropContext>
-        )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </StrictModeDroppable>
+        </DragDropContext>
+      )}
       </div>
     </div>
   );
