@@ -231,12 +231,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     updateLyricsInStore(newSections);
   }, [updateLyricsInStore]);
 
-  const onDragStart = () => {
-    setIsDragging(true);
-  };
-
   const onDragEnd = (result) => {
-    setIsDragging(false);
     if (!result.destination) {
       return;
     }
@@ -371,16 +366,17 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       )}
 
       {/* Main content area */}
-      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
-        }`}>
+      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${
+        isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
+      }`}>
         {isFocusModeActive ? (
           renderFocusMode()
         ) : (
-          <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-            <Droppable droppableId="lyrics-list">
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="lyrics">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {sections.length === 0 && !isDragging && (
+                  {sections.length === 0 && (
                     <div className="h-8 relative">
                       <AddSectionButton
                         index={0}
@@ -391,18 +387,14 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                     </div>
                   )}
                   {sections.map((section, index) => (
-                    <Draggable key={`section-${section.id || index}`} draggableId={`section-${section.id || index}`} index={index}>
-                      {(provided, snapshot) => (
+                    <Draggable key={section.id || index} draggableId={section.id || `section-${index}`} index={index}>
+                      {(provided) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          style={{
-                            ...provided.draggableProps.style,
-                            marginBottom: snapshot.isDragging ? 0 : '1rem'
-                          }}
                         >
                           <React.Fragment>
-                            {index === 0 && !isDragging && (
+                            {index === 0 && (
                               <div className="h-8 relative mb-2">
                                 <AddSectionButton
                                   index={0}
@@ -427,16 +419,14 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                               removeModifier={removeModifier}
                               dragHandleProps={provided.dragHandleProps}
                             />
-                            {!isDragging && (
-                              <div className="h-8 relative mb-2">
-                                <AddSectionButton
-                                  index={index + 1}
-                                  isAdding={addingSectionAt === index + 1}
-                                  setAddingSectionAt={setAddingSectionAt}
-                                  addSection={addSection}
-                                />
-                              </div>
-                            )}
+                            <div className="h-8 relative mb-2">
+                              <AddSectionButton
+                                index={index + 1}
+                                isAdding={addingSectionAt === index + 1}
+                                setAddingSectionAt={setAddingSectionAt}
+                                addSection={addSection}
+                              />
+                            </div>
                           </React.Fragment>
                         </div>
                       )}
