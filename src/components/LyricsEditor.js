@@ -14,6 +14,7 @@ import MetadataSection from './MetadataSection';
 import AddSectionButton from './AddSectionButton';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { capitalizeFirstLetter } from '../utils/helpers';
+import StrictModeDroppable from './StrictModeDroppable';
 
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const structureModifiers = ['Intro', 'Outro', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
@@ -399,20 +400,50 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       {isFocusModeActive ? (
         renderFocusMode()
       ) : (
-        <ErrorBoundary>
-          <DragDropContext onDragEnd={onDragEnd}>
-            {sections.length > 0 && (
-              <Droppable droppableId="lyrics">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef}>
-                    {sections.map((section, index) => (
-                      <Draggable key={section.id} draggableId={section.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
+          <DragDropContext
+            onDragStart={() => setIsDragging(true)}
+            onDragEnd={(result) => {
+              setIsDragging(false);
+              if (!result.destination) return;
+              const newSections = Array.from(sections);
+              const [reorderedSection] = newSections.splice(result.source.index, 1);
+              newSections.splice(result.destination.index, 0, reorderedSection);
+              updateSections(newSections);
+            }}
+          >
+            <StrictModeDroppable droppableId="lyrics">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {/* Always show the first 'add section' button if there are no sections */}
+                  {sections.length === 0 && (
+                    <div className="h-8 relative mb-4">
+                      <AddSectionButton
+                        index={0}
+                        isAdding={addingSectionAt === 0}
+                        setAddingSectionAt={setAddingSectionAt}
+                        addSection={addSection}
+                      />
+                    </div>
+                  )}
+                  {sections.map((section, index) => (
+                    <Draggable key={section.id} draggableId={section.id} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                        >
+                          <React.Fragment>
+                            {/* Show 'add section' button above the first section only if not dragging */}
+                            {index === 0 && !isDragging && (
+                              <div className="h-8 relative mb-2">
+                                <AddSectionButton
+                                  index={0}
+                                  isAdding={addingSectionAt === 0}
+                                  setAddingSectionAt={setAddingSectionAt}
+                                  addSection={addSection}
+                                />
+                              </div>
+                            )}
                             <Section
                               section={section}
                               index={index}
@@ -428,29 +459,31 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                               removeModifier={removeModifier}
                               dragHandleProps={provided.dragHandleProps}
                             />
-                            <div className="h-8 relative mb-2">
-                              <AddSectionButton
-                                index={index + 1}
-                                isAdding={addingSectionAt === index + 1}
-                                setAddingSectionAt={setAddingSectionAt}
-                                addSection={addSection}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            )}
+                            {/* Show 'add section' button below each section only if not dragging */}
+                            {!isDragging && (
+                              <div className="h-8 relative mb-2">
+                                <AddSectionButton
+                                  index={index + 1}
+                                  isAdding={addingSectionAt === index + 1}
+                                  setAddingSectionAt={setAddingSectionAt}
+                                  addSection={addSection}
+                                />
+                              </div>
+                            )}
+                          </React.Fragment>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </StrictModeDroppable>
           </DragDropContext>
-        </ErrorBoundary>
-      )}
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default LyricsEditor;
