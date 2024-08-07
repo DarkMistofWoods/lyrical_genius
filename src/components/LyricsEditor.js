@@ -400,38 +400,37 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       {isFocusModeActive ? (
         renderFocusMode()
       ) : (
-          <DragDropContext
-            onDragStart={() => setIsDragging(true)}
-            onDragEnd={(result) => {
-              setIsDragging(false);
-              if (!result.destination) return;
-              const newSections = Array.from(sections);
-              const [reorderedSection] = newSections.splice(result.source.index, 1);
-              newSections.splice(result.destination.index, 0, reorderedSection);
-              updateSections(newSections);
-            }}
-          >
-            <StrictModeDroppable droppableId="lyrics">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {/* Always show the first 'add section' button if there are no sections */}
-                  {sections.length === 0 && (
-                    <div className="h-8 relative mb-4">
-                      <AddSectionButton
-                        index={0}
-                        isAdding={addingSectionAt === 0}
-                        setAddingSectionAt={setAddingSectionAt}
-                        addSection={addSection}
-                      />
-                    </div>
-                  )}
-                  {sections.map((section, index) => (
-                    <Draggable key={section.id} draggableId={section.id} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                        >
+            <DragDropContext
+              onDragStart={() => setIsDragging(true)}
+              onDragEnd={(result) => {
+                setIsDragging(false);
+                if (!result.destination) return;
+                const newSections = Array.from(sections);
+                const [reorderedSection] = newSections.splice(result.source.index, 1);
+                newSections.splice(result.destination.index, 0, reorderedSection);
+                updateSections(newSections);
+              }}
+            >
+              <StrictModeDroppable droppableId="lyrics">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                    {sections.length === 0 && (
+                      <div className="h-8 relative mb-4">
+                        <AddSectionButton
+                          index={0}
+                          isAdding={addingSectionAt === 0}
+                          setAddingSectionAt={setAddingSectionAt}
+                          addSection={addSection}
+                        />
+                      </div>
+                    )}
+                    {sections.map((section, index) => (
+                      <Draggable key={section.id} draggableId={section.id} index={index}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                          >
                           <React.Fragment>
                             {/* Show 'add section' button above the first section only if not dragging */}
                             {index === 0 && !isDragging && (
