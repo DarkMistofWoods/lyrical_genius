@@ -18,6 +18,29 @@ import { capitalizeFirstLetter } from '../utils/helpers';
 const sectionTypes = ['Verse', 'Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
 const structureModifiers = ['Intro', 'Outro', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop'];
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+
+    return this.props.children;
+  }
+}
+
 function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
@@ -227,37 +250,41 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   };
 
   const updateSections = useCallback((newSections) => {
+    // console.log('Updating sections:', newSections);
     setSections(newSections);
     updateLyricsInStore(newSections);
   }, [updateLyricsInStore]);
 
-  const onDragEnd = (result) => {
-    if (!result.destination) {
-      return;
-    }
-
-    const newSections = Array.from(sections);
-    const [reorderedSection] = newSections.splice(result.source.index, 1);
-    newSections.splice(result.destination.index, 0, reorderedSection);
-
-    updateSections(newSections);
-  };
-
-  const handleTitleChange = (e) => {
-    dispatch(updateTitle(e.target.value));
-    saveChanges({ ...currentSong, title: e.target.value });
-  };
-
   useEffect(() => {
     if (currentSong.lyrics) {
       const parsedSections = parseLyrics(currentSong.lyrics);
-      setSections(parsedSections);
-      previousSectionsRef.current = parsedSections;
+      // Ensure each section has a unique id
+      const sectionsWithIds = parsedSections.map((section, index) => ({
+        ...section,
+        id: section.id || `section-${Date.now()}-${index}`
+      }));
+      setSections(sectionsWithIds);
+      previousSectionsRef.current = sectionsWithIds;
     } else {
       setSections([]);
       previousSectionsRef.current = [];
     }
   }, [currentSong.id, currentSong.lyrics, parseLyrics]);
+
+  const onDragEnd = useCallback((result) => {
+    if (!result.destination) return;
+  
+    const newSections = Array.from(sections);
+    const [reorderedSection] = newSections.splice(result.source.index, 1);
+    newSections.splice(result.destination.index, 0, reorderedSection);
+  
+    updateSections(newSections);
+  }, [sections, updateSections]);
+
+  const handleTitleChange = (e) => {
+    dispatch(updateTitle(e.target.value));
+    saveChanges({ ...currentSong, title: e.target.value });
+  };
 
   // Reset focused section index when entering/exiting focus mode
   useEffect(() => {
@@ -369,41 +396,23 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${
         isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
       }`}>
-        {isFocusModeActive ? (
-          renderFocusMode()
-        ) : (
+      {isFocusModeActive ? (
+        renderFocusMode()
+      ) : (
+        <ErrorBoundary>
           <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="lyrics">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {sections.length === 0 && (
-                    <div className="h-8 relative">
-                      <AddSectionButton
-                        index={0}
-                        isAdding={addingSectionAt === 0}
-                        setAddingSectionAt={setAddingSectionAt}
-                        addSection={addSection}
-                      />
-                    </div>
-                  )}
-                  {sections.map((section, index) => (
-                    <Draggable key={section.id || index} draggableId={section.id || `section-${index}`} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                        >
-                          <React.Fragment>
-                            {index === 0 && (
-                              <div className="h-8 relative mb-2">
-                                <AddSectionButton
-                                  index={0}
-                                  isAdding={addingSectionAt === 0}
-                                  setAddingSectionAt={setAddingSectionAt}
-                                  addSection={addSection}
-                                />
-                              </div>
-                            )}
+            {sections.length > 0 && (
+              <Droppable droppableId="lyrics">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                    {sections.map((section, index) => (
+                      <Draggable key={section.id} draggableId={section.id} index={index}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                          >
                             <Section
                               section={section}
                               index={index}
@@ -427,20 +436,21 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                                 addSection={addSection}
                               />
                             </div>
-                          </React.Fragment>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            )}
           </DragDropContext>
-        )}
-      </div>
+        </ErrorBoundary>
+      )}
     </div>
-  );
+  </div>
+);
 }
 
 export default LyricsEditor;

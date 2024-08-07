@@ -53,10 +53,10 @@ function Section({
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && !modifierButtonRef.current.contains(event.target)) {
-        setShowModifierDropdown(false);
-      }
-      if (editingSectionAt !== null && !document.querySelector(`[data-section-index='${editingSectionAt}']`).contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
+          editingSectionAt !== null && 
+          document.querySelector(`[data-section-index='${editingSectionAt}']`) &&
+          !document.querySelector(`[data-section-index='${editingSectionAt}']`).contains(event.target)) {
         setEditingSectionAt(null);
       }
     }
@@ -298,15 +298,15 @@ function Section({
             >
               <Copy size={16} />
             </button>
+            <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
+              <GripVertical size={16} />
+            </div>
             <button
               onClick={() => removeSection(index)}
               className={iconButtonStyle}
             >
               <XCircle size={16} />
             </button>
-            <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
-              <GripVertical size={16} />
-            </div>
           </div>
         )}
         {showModifierDropdown && renderModifierDropdown()}
@@ -362,12 +362,17 @@ function Section({
           )}
         </div>
         {!isFocusMode && (
-          <button
-            onClick={() => removeSection(index)}
-            className={iconButtonStyle}
-          >
-            <XCircle size={20} />
-          </button>
+          <div className="flex items-center">
+            <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move mr-1`}>
+              <GripVertical size={16} />
+            </div>
+            <button
+              onClick={() => removeSection(index)}
+              className={iconButtonStyle}
+            >
+              <XCircle size={20} />
+            </button>
+          </div>
         )}
       </div>
       <div className="relative">
@@ -379,11 +384,6 @@ function Section({
           onChange={(e) => handleSectionChange(index, e.target.value)}
           rows={6}
         ></textarea>
-        {!isFocusMode && (
-          <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move absolute bottom-1 right-1`}>
-            <GripVertical size={20} />
-          </div>
-        )}
       </div>
       {showMaxModifierWarning && (
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-red-500 text-white px-2 py-1 rounded text-sm flex items-center z-50">
