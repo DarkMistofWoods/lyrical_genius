@@ -184,6 +184,11 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const duplicateSection = (index) => {
     const newSections = [...sections];
     const duplicatedSection = { ...newSections[index] };
+    
+    // Generate a new unique ID for the duplicated section
+    duplicatedSection.id = `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Insert the duplicated section after the original one
     newSections.splice(index + 1, 0, duplicatedSection);
     updateSections(newSections);
   };
