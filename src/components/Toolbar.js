@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Search, MessageCircle, AtSign, Book } from 'lucide-react';
+import { Undo, Wrench, MessageSquare, Sparkle, GitBranch, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Search, MessageCircle, AtSign, Book, LayoutPanelTop, BookA } from 'lucide-react';
 import theme from '../theme';
 import { undo, saveCurrentVersion, removeVersion, revertToVersion } from '../store/songSlice';
 import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
@@ -243,127 +243,139 @@ function Toolbar({
           >
             <Image size={20} />
           </button>
-        </div>
-        {openPanel === 'tools' && (
-          <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
-            <div className="flex justify-center space-x-4">
-              <button
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Rhyme Finder"
-              >
-                <Search size={20} />
-              </button>
-              <button
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Metaphor Generator"
-              >
-                <MessageCircle size={20} />
-              </button>
-              <button
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Simile Generator"
-              >
-                <AtSign size={20} />
-              </button>
-              <button
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Cultural Reference Search"
-              >
-                <Book size={20} />
-              </button>
-            </div>
-          </div>
-        )}
-        {openPanel === 'feedback' && (
-          <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
-            <p className="text-center">Feedback panel (to be implemented)</p>
-          </div>
-        )}
-        {openPanel === 'versionControl' && (
-          <div
-            className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`} style={{ maxHeight: '200px', overflowY: 'auto' }}>
-            <div className="h-full flex flex-col p-4">
-              <h3 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-lg font-bold mb-2`}>Version Control</h3>
-              <button
-                onClick={handleSaveVersion}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-4 py-2 rounded hover:opacity-80 mb-2`}
-              >
-                Save Current Version
-              </button>
-              <div className="flex-grow overflow-y-auto">
-                {currentSong.versions.length > 0 ? (
-                  <ul className="space-y-2">
-                    {currentSong.versions.map((version, index) => (
-                      <li key={version.timestamp} className="flex items-center justify-between">
-                        <span className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-sm`}>
-                          {new Date(version.timestamp).toLocaleString()} - {version.title}
-                        </span>
-                        <div>
-                          <button
-                            onClick={() => handleRevertToVersion(index)}
-                            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-2 py-1 rounded hover:opacity-80 mr-2 text-xs`}
-                          >
-                            Revert
-                          </button>
-                          <button
-                            onClick={() => handleRemoveVersion(index)}
-                            className={`bg-red-500 text-white px-2 py-1 rounded hover:opacity-80 text-xs`}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>No versions saved yet.</p>
-                )}
+          {openPanel === 'tools' && (
+            <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
+              <div className="flex justify-center space-x-4">
+                <button
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                  title="Dictionary"
+                >
+                  <BookA size={20} />
+                </button>
+                <button
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                  title="Rhyme Finder"
+                >
+                  <Search size={20} />
+                </button>
+                <button
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                  title="Metaphor Generator"
+                >
+                  <MessageCircle size={20} />
+                </button>
+                <button
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                  title="Simile Generator"
+                >
+                  <AtSign size={20} />
+                </button>
+                <button
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                  title="Cultural Reference Search"
+                >
+                  <Book size={20} />
+                </button>
+                <button
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                  title="Song Templates"
+                >
+                  <LayoutPanelTop size={20} />
+                </button>
               </div>
             </div>
-          </div>
-        )}
-        {openPanel === 'moodBoard' && (
-          <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={handleEditMoodBoard}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isEditingMoodBoard ? 'opacity-60' : ''}`}
-                title={isEditingMoodBoard ? "Exit Editing Mode" : "Enter Editing Mode"}
-              >
-                <Edit size={20} />
-              </button>
-              <button
-                onClick={handleToggleMoodBoardVisibility}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${!isMoodBoardVisible ? 'opacity-60' : ''}`}
-                title={isMoodBoardVisible ? "Hide Mood Board" : "Show Mood Board"}
-              >
-                <Eye size={20} />
-              </button>
-              <button
-                onClick={() => setShowResetConfirmation(true)}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isCurrentMoodBoardEmpty ? 'opacity-50 cursor-not-allowed' : ''}`}
-                title="Reset Mood Board"
-                disabled={isCurrentMoodBoardEmpty}
-              >
-                <RefreshCw size={20} />
-              </button>
-              <button
-                onClick={() => setShowMoodBoardModal(true)}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Change Mood Board"
-              >
-                <SwitchCamera size={20} />
-              </button>
-              <button
-                onClick={() => setShowAddElementModal(true)}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Add to Mood Board"
-              >
-                <Plus size={20} />
-              </button>
+          )}
+          {openPanel === 'feedback' && (
+            <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
+              <p className="text-center">Feedback panel (to be implemented)</p>
             </div>
-          </div>
-        )}
+          )}
+          {openPanel === 'versionControl' && (
+            <div
+              className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`} style={{ maxHeight: '200px', overflowY: 'auto' }}>
+              <div className="h-full flex flex-col p-4">
+                <h3 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-lg font-bold mb-2`}>Version Control</h3>
+                <button
+                  onClick={handleSaveVersion}
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-4 py-2 rounded hover:opacity-80 mb-2`}
+                >
+                  Save Current Version
+                </button>
+                <div className="flex-grow overflow-y-auto">
+                  {currentSong.versions.length > 0 ? (
+                    <ul className="space-y-2">
+                      {currentSong.versions.map((version, index) => (
+                        <li key={version.timestamp} className="flex items-center justify-between">
+                          <span className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-sm`}>
+                            {new Date(version.timestamp).toLocaleString()} - {version.title}
+                          </span>
+                          <div>
+                            <button
+                              onClick={() => handleRevertToVersion(index)}
+                              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-2 py-1 rounded hover:opacity-80 mr-2 text-xs`}
+                            >
+                              Revert
+                            </button>
+                            <button
+                              onClick={() => handleRemoveVersion(index)}
+                              className={`bg-red-500 text-white px-2 py-1 rounded hover:opacity-80 text-xs`}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>No versions saved yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          {openPanel === 'moodBoard' && (
+            <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}>
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={handleEditMoodBoard}
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isEditingMoodBoard ? 'opacity-60' : ''}`}
+                  title={isEditingMoodBoard ? "Exit Editing Mode" : "Enter Editing Mode"}
+                >
+                  <Edit size={20} />
+                </button>
+                <button
+                  onClick={handleToggleMoodBoardVisibility}
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${!isMoodBoardVisible ? 'opacity-60' : ''}`}
+                  title={isMoodBoardVisible ? "Hide Mood Board" : "Show Mood Board"}
+                >
+                  <Eye size={20} />
+                </button>
+                <button
+                  onClick={() => setShowResetConfirmation(true)}
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isCurrentMoodBoardEmpty ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  title="Reset Mood Board"
+                  disabled={isCurrentMoodBoardEmpty}
+                >
+                  <RefreshCw size={20} />
+                </button>
+                <button
+                  onClick={() => setShowMoodBoardModal(true)}
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                  title="Change Mood Board"
+                >
+                  <SwitchCamera size={20} />
+                </button>
+                <button
+                  onClick={() => setShowAddElementModal(true)}
+                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+                  title="Add to Mood Board"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {showResetConfirmation && (
