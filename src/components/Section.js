@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { useSelector } from 'react-redux';
 import { Settings, Copy, XCircle, Tag, X, AlertCircle, GripVertical } from 'lucide-react';
@@ -36,6 +36,8 @@ function Section({
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [showCustomSectionPrompt, setShowCustomSectionPrompt] = useState(false);
   const [customSectionName, setCustomSectionName] = useState('');
+  const [localContent, setLocalContent] = useState(section.content);
+  const textareaRef = useRef(null);
 
   const iconButtonStyle = `
     w-6 h-6 
@@ -50,6 +52,20 @@ function Section({
     hover:text-[${theme.common.white}] 
     transition-colors
   `;
+
+  useEffect(() => {
+    setLocalContent(section.content);
+  }, [section.content]);
+
+  const handleLocalChange = (e) => {
+    setLocalContent(e.target.value);
+  };
+
+  const handleBlur = useCallback(() => {
+    if (localContent !== section.content) {
+      handleSectionChange(index, localContent);
+    }
+  }, [index, localContent, section.content, handleSectionChange]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -377,11 +393,14 @@ function Section({
       </div>
       <div className="relative">
         <textarea
+          ref={textareaRef}
           placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
-          className={`w-full p-2 pr-8 border rounded ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
-            }`}
-          value={section.content}
-          onChange={(e) => handleSectionChange(index, e.target.value)}
+          className={`w-full p-2 pr-8 border rounded ${
+            isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
+          }`}
+          value={localContent}
+          onChange={handleLocalChange}
+          onBlur={handleBlur}
           rows={6}
         ></textarea>
       </div>
