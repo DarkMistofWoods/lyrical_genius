@@ -15,7 +15,7 @@ function Toolbar({
 }) {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
-  const { currentSong } = useSelector(state => state.song);
+  const { currentSong, historyIndex } = useSelector(state => state.song);
   const { moodBoards, currentMoodBoardId } = useSelector(state => state.moodBoard);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -41,8 +41,13 @@ function Toolbar({
   // New state to track which panel is open
   const [openPanel, setOpenPanel] = useState(null);
 
+  // Check if undo is available
+  const isUndoAvailable = historyIndex > 0;
+
   const handleUndo = () => {
-    dispatch(undo());
+    if (isUndoAvailable) {
+      dispatch(undo());
+    }
   };
 
   const handlePanelClick = (panelName) => {
@@ -203,8 +208,9 @@ function Toolbar({
         <div className="flex space-x-4">
           <button
             onClick={handleUndo}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-            title="Undo"
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded transition-opacity ${isUndoAvailable ? 'hover:opacity-80' : 'opacity-50 cursor-not-allowed'}`}
+            title={isUndoAvailable ? "Undo" : "No actions to undo"}
+            disabled={!isUndoAvailable}
           >
             <Undo size={20} />
           </button>
