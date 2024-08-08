@@ -33,6 +33,8 @@ function Section({
   const [showMaxModifierWarning, setShowMaxModifierWarning] = useState(false);
   const modifierButtonRef = useRef(null);
   const dropdownRef = useRef(null);
+  const settingsButtonRef = useRef(null);
+  const settingsDropdownRef = useRef(null);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [showCustomSectionPrompt, setShowCustomSectionPrompt] = useState(false);
   const [customSectionName, setCustomSectionName] = useState('');
@@ -69,16 +71,24 @@ function Section({
 
   useEffect(() => {
     function handleClickOutside(event) {
+      // Handle click outside for modifier dropdown
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
+          !modifierButtonRef.current.contains(event.target)) {
+        setShowModifierDropdown(false);
+      }
+      
+      // Handle click outside for settings dropdown
+      if (settingsDropdownRef.current && !settingsDropdownRef.current.contains(event.target) &&
           editingSectionAt !== null && 
           document.querySelector(`[data-section-index='${editingSectionAt}']`) &&
           !document.querySelector(`[data-section-index='${editingSectionAt}']`).contains(event.target)) {
         setEditingSectionAt(null);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [editingSectionAt]);
+  }, [editingSectionAt, setEditingSectionAt]);
 
   useEffect(() => {
     function updateDropdownPosition() {
@@ -411,7 +421,10 @@ function Section({
         </div>
       )}
       {editingSectionAt === index && (
-        <div className={`absolute z-50 top-6 left-0 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}>
+        <div 
+          ref={settingsDropdownRef}
+          className={`absolute z-50 top-6 left-0 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}
+        >
           {sectionTypes.map((type) => (
             <button
               key={type}
