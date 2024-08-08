@@ -205,6 +205,19 @@ export const moodBoardSlice = createSlice({
       }
       saveMoodBoardsToLocalStorage(state);
     },
+
+    updateElementZIndex: (state, action) => {
+      const { id } = action.payload;
+      const currentBoard = state.moodBoards.find(board => board.id === state.currentMoodBoardId);
+      if (currentBoard) {
+        const maxZIndex = Math.max(...currentBoard.elements.map(el => el.zIndex || 0));
+        const element = currentBoard.elements.find(el => el.id === id);
+        if (element) {
+          element.zIndex = maxZIndex + 1;
+        }
+      }
+      saveMoodBoardsToLocalStorage(state);
+    },
   },
 });
 
@@ -223,7 +236,8 @@ export const {
   updateElementRotation,
   updateBackground,
   updateOpacity,
-  updateGradientAngle
+  updateGradientAngle,
+  updateElementZIndex,
 } = moodBoardSlice.actions;
 
 export default moodBoardSlice.reducer;

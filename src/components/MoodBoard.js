@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateElementPosition, removeElement, updateElementSize, updateElementContent, updateElementRotation, updateBackground, updateOpacity, updateGradientAngle } from '../store/moodBoardSlice';
+import { updateElementPosition, removeElement, updateElementSize, updateElementContent, updateElementRotation, updateBackground, updateOpacity, updateGradientAngle, updateElementZIndex } from '../store/moodBoardSlice';
 import theme from '../theme';
 import { Maximize2, X, RotateCw, Edit2, Bold, Italic, Underline, ChevronUp, ChevronDown, Settings } from 'lucide-react';
 
@@ -128,6 +128,14 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing, isSelected, onSe
     }
   };
 
+  const handleElementClick = (e) => {
+    e.stopPropagation();
+    if (isEditing) {
+      onSelect(element.id);
+      dispatch(updateElementZIndex({ id: element.id }));
+    }
+  };
+
   const textStyle = {
     fontWeight: element.style?.bold ? 'bold' : 'normal',
     fontStyle: element.style?.italic ? 'italic' : 'normal',
@@ -164,9 +172,11 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing, isSelected, onSe
         width: element.size?.width || 'auto',
         height: element.size?.height || 'auto',
         transform: `rotate(${element.rotation || 0}deg)`,
+        zIndex: element.zIndex || 0,
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
+      onClick={handleElementClick}
     >
       {element.type === 'text' && !isEditingText && (
         <p
