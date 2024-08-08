@@ -123,15 +123,26 @@ export const songSlice = createSlice({
       state.historyIndex = 0;
     },
     undo: (state) => {
-      if (state.historyIndex > 0) {
-        state.historyIndex--;
+      // Perform two undo steps at once
+      if (state.historyIndex > 1) {
+        state.historyIndex -= 2;
         state.currentSong = state.history[state.historyIndex];
         const index = state.songs.findIndex(song => song.id === state.currentSong.id);
         if (index !== -1) {
           state.songs[index] = state.currentSong;
         }
         saveSongsToLocalStorage(state.songs);
+      } else if (state.historyIndex === 1) {
+        // If we're at the second item, just go back to the first
+        state.historyIndex = 0;
+        state.currentSong = state.history[0];
+        const index = state.songs.findIndex(song => song.id === state.currentSong.id);
+        if (index !== -1) {
+          state.songs[index] = state.currentSong;
+        }
+        saveSongsToLocalStorage(state.songs);
       }
+      // If historyIndex is 0, do nothing as we're already at the start
     },
     // New reducers for category management
     addCategory: (state, action) => {
