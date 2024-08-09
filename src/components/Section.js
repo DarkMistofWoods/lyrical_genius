@@ -41,6 +41,8 @@ function Section({
   const [localContent, setLocalContent] = useState(section.content);
   const textareaRef = useRef(null);
 
+  const [settingsDropdownPosition, setSettingsDropdownPosition] = useState({ top: 0, left: 0 });
+
   const iconButtonStyle = `
     w-6 h-6 
     p-1
@@ -92,18 +94,28 @@ function Section({
 
   useEffect(() => {
     function updateDropdownPosition() {
-      if (showModifierDropdown && modifierButtonRef.current) {
+      if (showModifierDropdown && modifierButtonRef.current && dropdownRef.current) {
         const buttonRect = modifierButtonRef.current.getBoundingClientRect();
-        const dropdownHeight = 200; // Estimate the height of the dropdown
+        const dropdownRect = dropdownRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
 
         let top, left;
-        if (buttonRect.bottom + dropdownHeight <= window.innerHeight) {
-          top = buttonRect.bottom;
+
+        // Position above the button if there's not enough space below
+        if (buttonRect.bottom + dropdownRect.height > viewportHeight) {
+          top = Math.max(0, buttonRect.top - dropdownRect.height);
         } else {
-          top = Math.max(0, buttonRect.top - dropdownHeight);
+          top = buttonRect.bottom;
         }
 
+        // Align left edge with the button
         left = buttonRect.left;
+
+        // Ensure the dropdown doesn't extend past the right edge of the viewport
+        const rightEdge = left + dropdownRect.width;
+        if (rightEdge > window.innerWidth) {
+          left = Math.max(0, window.innerWidth - dropdownRect.width);
+        }
 
         setDropdownPosition({ top, left });
       }
@@ -119,6 +131,42 @@ function Section({
       window.removeEventListener('resize', updateDropdownPosition);
     };
   }, [showModifierDropdown]);
+
+  useEffect(() => {
+    function updateSettingsDropdownPosition() {
+      if (editingSectionAt === index && settingsButtonRef.current && settingsDropdownRef.current) {
+        const buttonRect = settingsButtonRef.current.getBoundingClientRect();
+        const dropdownRect = settingsDropdownRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+
+        let top = buttonRect.top + 25;
+        let left = buttonRect.left;
+
+        // Ensure the dropdown doesn't extend past the bottom of the viewport
+        if (top + dropdownRect.height > viewportHeight) {
+          top = Math.max(0, viewportHeight - dropdownRect.height);
+        }
+
+        // Ensure the dropdown doesn't extend past the right edge of the viewport
+        if (left + dropdownRect.width > viewportWidth) {
+          left = Math.max(0, viewportWidth - dropdownRect.width);
+        }
+
+        setSettingsDropdownPosition({ top, left });
+      }
+    }
+
+    updateSettingsDropdownPosition();
+
+    window.addEventListener('scroll', updateSettingsDropdownPosition);
+    window.addEventListener('resize', updateSettingsDropdownPosition);
+
+    return () => {
+      window.removeEventListener('scroll', updateSettingsDropdownPosition);
+      window.removeEventListener('resize', updateSettingsDropdownPosition);
+    };
+  }, [editingSectionAt, index]);
 
   const handleCustomSectionSubmit = (e) => {
     e.preventDefault();
@@ -348,6 +396,7 @@ function Section({
           {!isFocusMode && (
             <>
               <button
+                ref={settingsButtonRef}
                 onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
                 className={iconButtonStyle}
               >
@@ -423,7 +472,11 @@ function Section({
       {editingSectionAt === index && (
         <div 
           ref={settingsDropdownRef}
-          className={`absolute z-50 top-6 left-0 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}
+          className={`fixed z-50 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}
+          style={{
+            top: `${settingsDropdownPosition.top}px`,
+            left: `${settingsDropdownPosition.left}px`,
+          }}
         >
           {sectionTypes.map((type) => (
             <button

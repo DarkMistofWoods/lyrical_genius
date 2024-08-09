@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight } from 'lucide-react';
 import theme from '../theme';
 
@@ -13,11 +13,37 @@ const categories = [
   }
 ];
 
-const CategorizedDropdown = ({ onSelect, isDarkMode }) => {
+const CategorizedDropdown = ({ onSelect, isDarkMode, buttonRef }) => {
   const [activeCategory, setActiveCategory] = useState(null);
+  const [subDropdownPosition, setSubDropdownPosition] = useState({ top: 0, left: 0 });
+  const mainDropdownRef = useRef(null);
+  const subDropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (activeCategory !== null && buttonRef.current && mainDropdownRef.current && subDropdownRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const mainDropdownRect = mainDropdownRef.current.getBoundingClientRect();
+      const subDropdownRect = subDropdownRef.current.getBoundingClientRect();
+
+      let top = buttonRect.top - subDropdownRect.height;
+      let left = buttonRect.left;
+
+      // Ensure the sub-dropdown doesn't go off the left edge of the screen
+      if (left < 0) {
+        left = 0;
+      }
+
+      // If there's not enough space above, position it below the button
+      if (top < 0) {
+        top = buttonRect.bottom;
+      }
+
+      setSubDropdownPosition({ top, left });
+    }
+  }, [activeCategory, buttonRef]);
 
   return (
-    <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border rounded shadow-lg`}>
+    <div ref={mainDropdownRef} className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border rounded shadow-lg`}>
       {activeCategory === null ? (
         // Main category selection
         categories.map((category, index) => (
@@ -32,7 +58,15 @@ const CategorizedDropdown = ({ onSelect, isDarkMode }) => {
         ))
       ) : (
         // Items within the selected category
-        <>
+        <div
+          ref={subDropdownRef}
+          style={{
+            position: 'fixed',
+            top: `${subDropdownPosition.top}px`,
+            left: `${subDropdownPosition.left}px`,
+          }}
+          className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border rounded shadow-lg`}
+        >
           <button
             onClick={() => setActiveCategory(null)}
             className={`w-full text-left px-4 py-2 font-bold hover:bg-[${theme.common.brown}] text-[${isDarkMode ? theme.common.white : theme.common.black}]`}
@@ -48,7 +82,7 @@ const CategorizedDropdown = ({ onSelect, isDarkMode }) => {
               {item}
             </button>
           ))}
-        </>
+        </div>
       )}
     </div>
   );

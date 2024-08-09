@@ -28,8 +28,8 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
     setShowDropdown(false);
   };
 
-  const handleCustomSubmit = (e) => {
-    e.preventDefault();
+  const handleCustomSubmit = (event) => {
+    event.preventDefault();
     if (customName.trim()) {
       addSection(customCategory, customName.trim(), index);
       setShowCustomPrompt(false);
@@ -53,6 +53,7 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
           isOpen={isAdding}
           buttonRef={buttonRef}
           onClose={() => setAddingSectionAt(null)}
+          position="bottom-left"
         >
           <CategorizedDropdown
             onSelect={(category, item) => {
@@ -63,6 +64,7 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
               }
             }}
             isDarkMode={isDarkMode}
+            buttonRef={buttonRef}
           />
         </DropdownPortal>
       )}
@@ -89,7 +91,7 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
                     setCustomName('');
                     setAddingSectionAt(null);
                   }}
-                  className={`px-4 py-2 rounded bg-[${theme.common.grey}] text-[${theme.common.white}] hover:opacity-80`}
+                  className={`px-4 py-2 rounded bg-[${theme.common.grey}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] hover:opacity-80`}
                 >
                   Cancel
                 </button>
