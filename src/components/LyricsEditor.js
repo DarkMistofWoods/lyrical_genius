@@ -195,11 +195,24 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
 
   const changeSectionType = (index, newType) => {
     const newSections = [...sections];
-    newSections[index] = { 
-      ...newSections[index], 
+    const currentSection = newSections[index];
+    
+    // Create a new section object with the new type and no modifiers
+    const newSection = {
+      ...currentSection,
       type: newType,
-      verseNumber: newType === 'Verse' ? 1 : null
+      modifier: null,
+      verseNumber: newType === 'Verse' ? 1 : null,
+      content: newType === 'StructureModifier' ? newType : currentSection.content
     };
+  
+    // If the new type is a StructureModifier, we need to set up its specific structure
+    if (newType === 'StructureModifier') {
+      newSection.content = capitalizeFirstLetter(newType);
+      newSection.modifier = { prefix: [], suffix: [] };
+    }
+  
+    newSections[index] = newSection;
     updateSections(newSections);
   };
 
