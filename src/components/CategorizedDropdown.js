@@ -9,7 +9,7 @@ const categories = [
   },
   {
     name: 'Structure Modifiers',
-    items: ['Intro', 'Outro', 'Hook', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop', 'Custom']
+    items: ['Intro', 'Outro', 'Interlude', 'Instrumental', 'Break', 'End', 'Drop', 'Custom']
   }
 ];
 

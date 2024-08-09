@@ -54,6 +54,10 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isAddButtonVisible, setIsAddButtonVisible] = useState(true)
 
+  const newSectionRef = useRef(null);
+
+  const sectionRefs = useRef({});
+
   const updateTimeoutRef = useRef(null);
   const previousSectionsRef = useRef([]);
 
@@ -150,6 +154,13 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     }
   }, [currentSong, dispatch, saveChanges]);
 
+  const scrollToNewSection = useCallback((index) => {
+    const sectionRef = sectionRefs.current[index];
+    if (sectionRef) {
+      sectionRef.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
   const addSection = (category, type, index) => {
     const newSections = [...sections];
     let newSection;
@@ -160,7 +171,8 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         newSection = {
           type: 'StructureModifier',
           content: content,
-          modifier: null
+          modifier: null,
+          id: `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         };
       } else {
         return;
@@ -170,7 +182,8 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         type,
         content: '',
         verseNumber: type === 'Verse' ? 1 : null,
-        modifier: null
+        modifier: null,
+        id: `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       };
     }
   
@@ -178,6 +191,9 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       newSections.splice(index, 0, newSection);
       updateSections(newSections);
       setAddingSectionAt(null);
+      
+      // Scroll to the new section after a short delay to ensure the DOM has updated
+      setTimeout(() => scrollToNewSection(index), 100);
     }
   };
 
@@ -442,7 +458,10 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                   <Draggable key={section.id} draggableId={section.id} index={index}>
                     {(provided) => (
                       <div
-                        ref={provided.innerRef}
+                        ref={(el) => {
+                          provided.innerRef(el);
+                          sectionRefs.current[index] = el;
+                        }}
                         {...provided.draggableProps}
                       >
                         <React.Fragment>
