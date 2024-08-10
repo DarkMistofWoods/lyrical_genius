@@ -63,6 +63,7 @@ function Section({
 
   const handleLocalChange = (e) => {
     setLocalContent(e.target.value);
+    adjustTextareaHeight();
   };
 
   const handleBlur = useCallback(() => {
@@ -70,6 +71,18 @@ function Section({
       handleSectionChange(index, localContent);
     }
   }, [index, localContent, section.content, handleSectionChange]);
+
+  const adjustTextareaHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset height to auto
+      textarea.style.height = `${Math.max(textarea.scrollHeight, 24)}px`; // Set new height (24px is approx. one line)
+    }
+  }, []);
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [localContent, adjustTextareaHeight]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -454,13 +467,12 @@ function Section({
         <textarea
           ref={textareaRef}
           placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
-          className={`w-full p-2 pr-8 border rounded ${
-            isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
-          }`}
+          className={`w-full p-2 pr-8 border rounded resize-none overflow-hidden ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
+            }`}
           value={localContent}
           onChange={handleLocalChange}
           onBlur={handleBlur}
-          rows={6}
+          style={{ minHeight: '24px' }} // Approximately one line of text
         ></textarea>
       </div>
       {showMaxModifierWarning && (
