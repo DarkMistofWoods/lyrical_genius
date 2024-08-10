@@ -210,7 +210,7 @@ function Section({
       let prefixes = Array.isArray(section.modifier) ? [...section.modifier] : [];
   
       if (prefixes.length < 2) {
-        prefixes.push(modifier);
+        prefixes.unshift(modifier); // Add new modifier to the beginning for Verse
         addModifier(index, prefixes);
       } else {
         setShowMaxModifierWarning(true);
@@ -220,7 +220,7 @@ function Section({
       let modifiers = Array.isArray(section.modifier) ? [...section.modifier] : [];
   
       if (modifiers.length < 2) {
-        modifiers.push(modifier);
+        modifiers.unshift(modifier); // Add new modifier to the end for other section types
         addModifier(index, modifiers);
       } else {
         setShowMaxModifierWarning(true);
