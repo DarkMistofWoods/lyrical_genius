@@ -27,22 +27,22 @@ function Section({
   dragHandleProps
 }) {
   const [customModifier, setCustomModifier] = useState('');
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [showMaxModifierWarning, setShowMaxModifierWarning] = useState(false);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [showCustomSectionPrompt, setShowCustomSectionPrompt] = useState(false);
   const [customSectionName, setCustomSectionName] = useState('');
   const [localContent, setLocalContent] = useState(section.content);
   const textareaRef = useRef(null);
-  const [showModifierDropdown, setShowModifierDropdown] = useState(false);
-  const [isModifierDropdownVisible, setIsModifierDropdownVisible] = useState(false);
   const [isSettingsDropdownVisible, setIsSettingsDropdownVisible] = useState(false);
   const [settingsDropdownPosition, setSettingsDropdownPosition] = useState({ top: 0, left: 0 });
+  const [showModifierDropdown, setShowModifierDropdown] = useState(false);
+  const [isModifierDropdownVisible, setIsModifierDropdownVisible] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 
-  const modifierButtonRef = useRef(null);
-  const dropdownRef = useRef(null);
   const settingsButtonRef = useRef(null);
   const settingsDropdownRef = useRef(null);
+  const modifierButtonRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // console.log(`Section ${index} type:`, section.type);
   // console.log(`Section ${index} modifier:`, section.modifier);
@@ -60,6 +60,46 @@ function Section({
     hover:text-[${theme.common.white}] 
     transition-colors
   `;
+
+  useEffect(() => {
+    function updateDropdownPosition() {
+      if (showModifierDropdown && modifierButtonRef.current && dropdownRef.current) {
+        const buttonRect = modifierButtonRef.current.getBoundingClientRect();
+        const dropdownRect = dropdownRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+
+        let top = buttonRect.bottom;
+        let left = buttonRect.left;
+
+        // Position above the button if there's not enough space below
+        if (top + dropdownRect.height > viewportHeight) {
+          top = Math.max(0, buttonRect.top - dropdownRect.height);
+        }
+
+        // Ensure the dropdown doesn't extend past the right edge of the viewport
+        if (left + dropdownRect.width > viewportWidth) {
+          left = Math.max(0, viewportWidth - dropdownRect.width);
+        }
+
+        setDropdownPosition({ top, left });
+        // Only show the dropdown after position is calculated
+        setTimeout(() => setIsModifierDropdownVisible(true), 0);
+      }
+    }
+
+    if (showModifierDropdown) {
+      updateDropdownPosition();
+    }
+
+    window.addEventListener('scroll', updateDropdownPosition);
+    window.addEventListener('resize', updateDropdownPosition);
+
+    return () => {
+      window.removeEventListener('scroll', updateDropdownPosition);
+      window.removeEventListener('resize', updateDropdownPosition);
+    };
+  }, [showModifierDropdown]);
 
   useEffect(() => {
     setLocalContent(section.content);
@@ -99,8 +139,7 @@ function Section({
       // Handle click outside for settings dropdown
       if (settingsDropdownRef.current && !settingsDropdownRef.current.contains(event.target) &&
           editingSectionAt !== null && 
-          document.querySelector(`[data-section-index='${editingSectionAt}']`) &&
-          !document.querySelector(`[data-section-index='${editingSectionAt}']`).contains(event.target)) {
+          !settingsButtonRef.current.contains(event.target)) {
         setEditingSectionAt(null);
       }
     }
@@ -109,49 +148,12 @@ function Section({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [editingSectionAt, setEditingSectionAt]);
 
-  useEffect(() => {
-    function updateDropdownPosition() {
-      if (showModifierDropdown && modifierButtonRef.current && dropdownRef.current) {
-        const buttonRect = modifierButtonRef.current.getBoundingClientRect();
-        const dropdownRect = dropdownRef.current.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-
-        let top, left;
-
-        // Position above the button if there's not enough space below
-        if (buttonRect.bottom + dropdownRect.height > viewportHeight) {
-          top = Math.max(0, buttonRect.top - dropdownRect.height);
-        } else {
-          top = buttonRect.bottom;
-        }
-
-        // Align left edge with the button
-        left = buttonRect.left;
-
-        // Ensure the dropdown doesn't extend past the right edge of the viewport
-        const rightEdge = left + dropdownRect.width;
-        if (rightEdge > window.innerWidth) {
-          left = Math.max(0, window.innerWidth - dropdownRect.width);
-        }
-
-        setDropdownPosition({ top, left });
-        // Only show the dropdown after position is calculated
-        setIsModifierDropdownVisible(true);
-      }
-    }
-
-    if (showModifierDropdown) {
-      updateDropdownPosition();
-    }
-
-    window.addEventListener('scroll', updateDropdownPosition);
-    window.addEventListener('resize', updateDropdownPosition);
-
-    return () => {
-      window.removeEventListener('scroll', updateDropdownPosition);
-      window.removeEventListener('resize', updateDropdownPosition);
-    };
-  }, [showModifierDropdown]);
+  const handleSettingsButtonClick = (e) => {
+    e.stopPropagation();
+    const newEditingSectionAt = editingSectionAt === index ? null : index;
+    setEditingSectionAt(newEditingSectionAt);
+    setIsSettingsDropdownVisible(false);  // Hide dropdown initially
+  };
 
   useEffect(() => {
     function updateSettingsDropdownPosition() {
@@ -250,12 +252,6 @@ function Section({
   const handleModifierButtonClick = () => {
     setShowModifierDropdown(!showModifierDropdown);
     setIsModifierDropdownVisible(false);  // Hide dropdown initially
-  };
-
-  const handleSettingsButtonClick = () => {
-    const newEditingSectionAt = editingSectionAt === index ? null : index;
-    setEditingSectionAt(newEditingSectionAt);
-    setIsSettingsDropdownVisible(false);  // Hide dropdown initially
   };
 
   const handleRemoveModifier = (tagToRemove) => {
