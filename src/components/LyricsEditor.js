@@ -89,43 +89,33 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
           modifier: modifiers
         });
       } else {
-        const baseContentIndex = parts.length - 1 - [...parts].reverse().findIndex(part => 
-          structureModifiers.map(m => m.toLowerCase()).includes(part.toLowerCase())
-        );
-        if (baseContentIndex !== -1 && baseContentIndex < parts.length) {
-          const baseContent = parts[baseContentIndex];
-          const modifiers = parts.slice(0, baseContentIndex);
+        const baseContentIndex = parts.length - 1;
+        const baseContent = parts[baseContentIndex];
+        const modifiers = parts.slice(0, baseContentIndex);
+  
+        // Check if it's a known section type or a custom lyric section
+        const knownTypes = ['Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
+        const isKnownType = knownTypes.includes(capitalizeFirstLetter(baseContent));
+        const isCustomLyricSection = !isKnownType && content !== undefined;
+  
+        if (isKnownType || isCustomLyricSection) {
           parsedSections.push({
-            type: 'StructureModifier',
-            content: capitalizeFirstLetter(baseContent),
+            type: isKnownType ? capitalizeFirstLetter(baseContent) : baseContent,
+            content: content || '',
             modifier: modifiers
           });
         } else {
-          // This is either a known section type or a custom type
-          const knownTypes = ['Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
-          const sectionType = knownTypes.includes(capitalizeFirstLetter(parts[parts.length - 1]))
-            ? capitalizeFirstLetter(parts[parts.length - 1])
-            : 'StructureModifier';
-          
-          if (sectionType === 'StructureModifier') {
-            parsedSections.push({
-              type: 'StructureModifier',
-              content: parts[parts.length - 1],
-              modifier: parts.slice(0, -1)
-            });
-          } else {
-            const modifiers = parts.slice(0, -1);
-            parsedSections.push({
-              type: sectionType,
-              content: content || '',
-              modifier: modifiers
-            });
-          }
+          // If it's not a known type and doesn't have content, treat it as a structure modifier
+          parsedSections.push({
+            type: 'StructureModifier',
+            content: baseContent,
+            modifier: modifiers
+          });
         }
       }
     }
     return parsedSections;
-  }, [structureModifiers]);
+  }, []);
 
   const updateLyricsInStore = useCallback((newSections) => {
     const formattedSections = newSections.map(section => {
@@ -142,7 +132,8 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         }
         return `[${formattedType}]|||${section.content}`;
       } else {
-        let formattedType = section.type.toLowerCase();
+        // This handles both known section types and custom lyric sections
+        let formattedType = capitalizeFirstLetter(section.type);
         const modifiers = Array.isArray(section.modifier) ? section.modifier : [];
         if (modifiers.length > 0) {
           formattedType = `${modifiers.join(' ')} ${formattedType}`;
