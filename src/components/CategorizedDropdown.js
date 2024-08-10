@@ -15,6 +15,7 @@ const categories = [
 
 const CategorizedDropdown = ({ onSelect, isDarkMode, buttonRef }) => {
   const [activeCategory, setActiveCategory] = useState(null);
+  const [isSubDropdownVisible, setIsSubDropdownVisible] = useState(false);
   const [subDropdownPosition, setSubDropdownPosition] = useState({ top: 0, left: 0 });
   const mainDropdownRef = useRef(null);
   const subDropdownRef = useRef(null);
@@ -39,6 +40,10 @@ const CategorizedDropdown = ({ onSelect, isDarkMode, buttonRef }) => {
       }
 
       setSubDropdownPosition({ top, left });
+      // Delay setting visibility to allow for position calculation
+      setTimeout(() => setIsSubDropdownVisible(true), 50);
+    } else {
+      setIsSubDropdownVisible(false);
     }
   }, [activeCategory, buttonRef]);
 
@@ -64,15 +69,11 @@ const CategorizedDropdown = ({ onSelect, isDarkMode, buttonRef }) => {
             position: 'fixed',
             top: `${subDropdownPosition.top}px`,
             left: `${subDropdownPosition.left}px`,
+            opacity: isSubDropdownVisible ? 1 : 0,
+            transition: 'opacity 0.2s ease-in-out'
           }}
           className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] border rounded shadow-lg`}
         >
-          <button
-            onClick={() => setActiveCategory(null)}
-            className={`w-full text-left px-4 py-2 font-bold hover:bg-[${theme.common.brown}] text-[${isDarkMode ? theme.common.white : theme.common.black}]`}
-          >
-            ← Back
-          </button>
           {categories[activeCategory].items.map((item, index) => (
             <button
               key={index}
@@ -82,6 +83,15 @@ const CategorizedDropdown = ({ onSelect, isDarkMode, buttonRef }) => {
               {item}
             </button>
           ))}
+          <button
+            onClick={() => {
+              setActiveCategory(null);
+              setIsSubDropdownVisible(false);
+            }}
+            className={`w-full text-left px-4 py-2 font-bold hover:bg-[${theme.common.brown}] text-[${isDarkMode ? theme.common.white : theme.common.black}]`}
+          >
+            ← Back
+          </button>
         </div>
       )}
     </div>

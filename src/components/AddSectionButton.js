@@ -8,17 +8,24 @@ import theme from '../theme';
 function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
   const buttonRef = useRef(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [showCustomPrompt, setShowCustomPrompt] = useState(false);
+  const [isCustomPromptVisible, setIsCustomPromptVisible] = useState(false);
   const [customCategory, setCustomCategory] = useState('');
   const [customName, setCustomName] = useState('');
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   useEffect(() => {
     if (isAdding) {
-      const timer = setTimeout(() => setShowDropdown(true), 50);
+      const timer = setTimeout(() => {
+        setShowDropdown(true);
+        // Delay setting visibility to allow for position calculation
+        setTimeout(() => setIsDropdownVisible(true), 50);
+      }, 50);
       return () => clearTimeout(timer);
     } else {
       setShowDropdown(false);
+      setIsDropdownVisible(false);
     }
   }, [isAdding]);
 
@@ -26,6 +33,8 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
     setCustomCategory(category);
     setShowCustomPrompt(true);
     setShowDropdown(false);
+    // Delay setting visibility to allow for position calculation
+    setTimeout(() => setIsCustomPromptVisible(true), 50);
   };
 
   const handleCustomSubmit = (event) => {
@@ -33,6 +42,7 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
     if (customName.trim()) {
       addSection(customCategory, customName.trim(), index);
       setShowCustomPrompt(false);
+      setIsCustomPromptVisible(false);
       setCustomName('');
       setAddingSectionAt(null);
     }
@@ -52,24 +62,29 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
         <DropdownPortal
           isOpen={isAdding}
           buttonRef={buttonRef}
-          onClose={() => setAddingSectionAt(null)}
+          onClose={() => {
+            setAddingSectionAt(null);
+            setIsDropdownVisible(false);
+          }}
           position="bottom-left"
         >
-          <CategorizedDropdown
-            onSelect={(category, item) => {
-              if (item === 'Custom') {
-                handleAddCustomSection(category);
-              } else {
-                addSection(category, item, index);
-              }
-            }}
-            isDarkMode={isDarkMode}
-            buttonRef={buttonRef}
-          />
+          <div className={`transition-opacity duration-200 ${isDropdownVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <CategorizedDropdown
+              onSelect={(category, item) => {
+                if (item === 'Custom') {
+                  handleAddCustomSection(category);
+                } else {
+                  addSection(category, item, index);
+                }
+              }}
+              isDarkMode={isDarkMode}
+              buttonRef={buttonRef}
+            />
+          </div>
         </DropdownPortal>
       )}
       {showCustomPrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-200 ${isCustomPromptVisible ? 'opacity-100' : 'opacity-0'}`}>
           <div className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-6 rounded-lg shadow-lg max-w-md w-full`}>
             <h2 className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] text-xl font-bold mb-4`}>
               Add Custom {customCategory === 'Lyric Sections' ? 'Section' : 'Modifier'}
@@ -88,6 +103,7 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
                   type="button"
                   onClick={() => {
                     setShowCustomPrompt(false);
+                    setIsCustomPromptVisible(false);
                     setCustomName('');
                     setAddingSectionAt(null);
                   }}
