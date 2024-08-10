@@ -26,21 +26,23 @@ function Section({
   isFocusMode,
   dragHandleProps
 }) {
-  const [showModifierDropdown, setShowModifierDropdown] = useState(false);
   const [customModifier, setCustomModifier] = useState('');
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [showMaxModifierWarning, setShowMaxModifierWarning] = useState(false);
-  const modifierButtonRef = useRef(null);
-  const dropdownRef = useRef(null);
-  const settingsButtonRef = useRef(null);
-  const settingsDropdownRef = useRef(null);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const [showCustomSectionPrompt, setShowCustomSectionPrompt] = useState(false);
   const [customSectionName, setCustomSectionName] = useState('');
   const [localContent, setLocalContent] = useState(section.content);
   const textareaRef = useRef(null);
-
+  const [showModifierDropdown, setShowModifierDropdown] = useState(false);
+  const [isModifierDropdownVisible, setIsModifierDropdownVisible] = useState(false);
+  const [isSettingsDropdownVisible, setIsSettingsDropdownVisible] = useState(false);
   const [settingsDropdownPosition, setSettingsDropdownPosition] = useState({ top: 0, left: 0 });
+
+  const modifierButtonRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const settingsButtonRef = useRef(null);
+  const settingsDropdownRef = useRef(null);
 
   // console.log(`Section ${index} type:`, section.type);
   // console.log(`Section ${index} modifier:`, section.modifier);
@@ -133,10 +135,14 @@ function Section({
         }
 
         setDropdownPosition({ top, left });
+        // Only show the dropdown after position is calculated
+        setIsModifierDropdownVisible(true);
       }
     }
 
-    updateDropdownPosition();
+    if (showModifierDropdown) {
+      updateDropdownPosition();
+    }
 
     window.addEventListener('scroll', updateDropdownPosition);
     window.addEventListener('resize', updateDropdownPosition);
@@ -169,10 +175,13 @@ function Section({
         }
 
         setSettingsDropdownPosition({ top, left });
+        setIsSettingsDropdownVisible(true);
       }
     }
 
-    updateSettingsDropdownPosition();
+    if (editingSectionAt === index) {
+      updateSettingsDropdownPosition();
+    }
 
     window.addEventListener('scroll', updateSettingsDropdownPosition);
     window.addEventListener('resize', updateSettingsDropdownPosition);
@@ -238,6 +247,17 @@ function Section({
     }
   };
 
+  const handleModifierButtonClick = () => {
+    setShowModifierDropdown(!showModifierDropdown);
+    setIsModifierDropdownVisible(false);  // Hide dropdown initially
+  };
+
+  const handleSettingsButtonClick = () => {
+    const newEditingSectionAt = editingSectionAt === index ? null : index;
+    setEditingSectionAt(newEditingSectionAt);
+    setIsSettingsDropdownVisible(false);  // Hide dropdown initially
+  };
+
   const handleRemoveModifier = (tagToRemove) => {
     if (section.type === 'StructureModifier' || section.type === 'Verse') {
       const newModifiers = Array.isArray(section.modifier) 
@@ -271,8 +291,12 @@ function Section({
     ReactDOM.createPortal(
       <div 
         ref={dropdownRef}
-        className={`fixed z-50 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}
-        style={{ top: `${dropdownPosition.top}px`, left: `${dropdownPosition.left}px` }}
+        className={`fixed z-50 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg ${isModifierDropdownVisible ? 'opacity-100' : 'opacity-0'}`}
+        style={{ 
+          top: `${dropdownPosition.top}px`, 
+          left: `${dropdownPosition.left}px`,
+          transition: 'opacity 0.2s ease-in-out'
+        }}
       >
         {modifiers.map((modifier) => (
           <button
@@ -354,7 +378,7 @@ function Section({
             <>
               <button
                 ref={settingsButtonRef}
-                onClick={() => setEditingSectionAt(editingSectionAt === index ? null : index)}
+                onClick={handleSettingsButtonClick}
                 className={iconButtonStyle}
               >
                 <Settings size={16} />
@@ -368,7 +392,7 @@ function Section({
               {section.type !== 'Line' && (
                 <button
                   ref={modifierButtonRef}
-                  onClick={() => setShowModifierDropdown(!showModifierDropdown)}
+                  onClick={handleModifierButtonClick}
                   className={iconButtonStyle}
                 >
                   <Tag size={16} />
@@ -428,10 +452,11 @@ function Section({
       {editingSectionAt === index && (
         <div 
           ref={settingsDropdownRef}
-          className={`fixed z-50 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}
+          className={`fixed z-50 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg ${isSettingsDropdownVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{
             top: `${settingsDropdownPosition.top}px`,
             left: `${settingsDropdownPosition.left}px`,
+            transition: 'opacity 0.2s ease-in-out'
           }}
         >
           {sectionTypes.map((type) => (
