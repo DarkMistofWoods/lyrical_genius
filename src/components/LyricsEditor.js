@@ -103,13 +103,26 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
             modifier: { prefix: prefixes, suffix: suffixes }
           });
         } else {
-          const sectionType = parts[parts.length - 1];
-          const modifier = parts.slice(0, -1).join(' ');
-          parsedSections.push({
-            type: capitalizeFirstLetter(sectionType),
-            content: content || '',
-            modifier: modifier || null
-          });
+          // This is either a known section type or a custom type
+          const knownTypes = ['Chorus', 'Pre-Chorus', 'Bridge', 'Hook', 'Line', 'Dialog'];
+          const sectionType = knownTypes.includes(capitalizeFirstLetter(parts[parts.length - 1]))
+            ? capitalizeFirstLetter(parts[parts.length - 1])
+            : 'StructureModifier';
+          
+          if (sectionType === 'StructureModifier') {
+            parsedSections.push({
+              type: 'StructureModifier',
+              content: parts.join(' '),
+              modifier: { prefix: [], suffix: [] }
+            });
+          } else {
+            const modifier = parts.slice(0, -1).join(' ');
+            parsedSections.push({
+              type: sectionType,
+              content: content || '',
+              modifier: modifier || null
+            });
+          }
         }
       }
     }

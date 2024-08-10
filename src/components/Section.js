@@ -43,6 +43,9 @@ function Section({
 
   const [settingsDropdownPosition, setSettingsDropdownPosition] = useState({ top: 0, left: 0 });
 
+  console.log(`Section ${index} type:`, section.type);
+  console.log(`Section ${index} modifier:`, section.modifier);
+
   const iconButtonStyle = `
     w-6 h-6 
     p-1
@@ -192,6 +195,9 @@ function Section({
   };
 
   const handleModifierSelect = (modifier) => {
+    console.log(`Adding modifier to section ${index}:`, modifier);
+    console.log(`Current modifiers for section ${index}:`, section.modifier);
+
     modifier = capitalizeFirstLetter(modifier);
   
     if (section.type === 'StructureModifier') {
@@ -243,6 +249,9 @@ function Section({
   };
 
   const handleRemoveModifier = (tagToRemove) => {
+    console.log(`Removing modifier from section ${index}:`, tagToRemove);
+    console.log(`Current modifiers for section ${index}:`, section.modifier);
+
     if (section.type === 'StructureModifier') {
       const newModifier = {
         prefix: Array.isArray(section.modifier?.prefix) ? section.modifier.prefix.filter(m => m !== tagToRemove) : [],
