@@ -339,7 +339,7 @@ const MoodBoard = ({ isVisible, isEditing }) => {
         />
       ))}
       {isEditing && (
-        <div className={`absolute top-4 left-4 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-4 rounded-lg shadow-lg transition-all duration-300 ${isPanelMinimized ? 'w-12 h-12 overflow-hidden' : 'w-72'} z-50`}>
+        <div className={`absolute top-4 left-4 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-4 rounded-lg shadow-lg transition-all duration-300 ${isPanelMinimized ? 'w-12 h-12 overflow-hidden' : 'w-72'} z-[999]`}>
           <button
             onClick={() => setIsPanelMinimized(!isPanelMinimized)}
             className={`absolute top-2 right-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}
