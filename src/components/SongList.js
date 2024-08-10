@@ -14,8 +14,6 @@ function SongList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredSongs, setFilteredSongs] = useState(songs);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [editingCategoryName, setEditingCategoryName] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [activeSongForCategory, setActiveSongForCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -23,6 +21,21 @@ function SongList() {
   const dropdownRef = useRef(null);
   const [showCategories, setShowCategories] = useState(true);
   const [showStyles, setShowStyles] = useState(true);
+
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+  const editInputRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (editingCategory && editInputRef.current && !editInputRef.current.contains(event.target)) {
+        handleRenameCategory(editingCategory);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [editingCategory]);
 
   useEffect(() => {
     const filtered = songs.filter(song => 
@@ -113,12 +126,12 @@ function SongList() {
   const handleRenameCategory = (oldName) => {
     if (editingCategoryName.trim() && oldName !== editingCategoryName.trim()) {
       dispatch(renameCategory({ oldName, newName: editingCategoryName.trim() }));
-      setEditingCategory(null);
-      setEditingCategoryName('');
       if (selectedCategory === oldName) {
         setSelectedCategory(editingCategoryName.trim());
       }
     }
+    setEditingCategory(null);
+    setEditingCategoryName('');
   };
 
   const handleAssignCategory = (songId, category) => {
@@ -226,6 +239,7 @@ function SongList() {
                   <div key={category} className={`flex items-center rounded m-1 px-1 py-0.5 ${selectedCategory === category ? 'ring-2 ring-[#A68477]' : ''}`} style={{ backgroundColor: categoryColors[category] }}>
                     {editingCategory === category ? (
                       <input
+                        ref={editInputRef}
                         type="text"
                         value={editingCategoryName}
                         onChange={(e) => setEditingCategoryName(e.target.value)}
