@@ -209,7 +209,7 @@ function Section({
       let prefixes = Array.isArray(section.modifier) ? [...section.modifier] : [];
   
       if (prefixes.length < 2) {
-        prefixes.push(modifier);
+        prefixes.unshift(modifier); // Add new modifier to the beginning for StructureModifier
         addModifier(index, prefixes);
       } else {
         setShowMaxModifierWarning(true);
