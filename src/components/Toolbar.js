@@ -34,6 +34,10 @@ function Toolbar({
   const [editingMoodBoardName, setEditingMoodBoardName] = useState('');
   const fileInputRef = useRef(null);
   const [editingElement, setEditingElement] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+  const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 
   const currentMoodBoard = moodBoards.find(board => board.id === currentMoodBoardId);
   const isCurrentMoodBoardEmpty = currentMoodBoard && currentMoodBoard.elements.length === 0;
@@ -174,13 +178,37 @@ function Toolbar({
     }
   };
 
+  const displaySuccessMessage = (message) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
+  };
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`File size (${(file.size / 1024 / 1024).toFixed(2)} MB) exceeds the 2 MB limit. Please choose a smaller file.`);
+        e.target.value = ''; // Clear the file input
+        return;
+      }
+  
+      // Check file type
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        alert(`Invalid file type: ${file.type}. Please upload a JPEG, PNG, or GIF image.`);
+        e.target.value = ''; // Clear the file input
+        return;
+      }
+  
       const reader = new FileReader();
       reader.onload = (event) => {
         setNewElementType('image');
         setNewElementContent(event.target.result);
+        displaySuccessMessage(`File "${file.name}" successfully uploaded!`);
+      };
+      reader.onerror = (error) => {
+        alert(`Error reading file: ${error}`);
+        e.target.value = ''; // Clear the file input
       };
       reader.readAsDataURL(file);
     }
@@ -492,25 +520,32 @@ function Toolbar({
                     className={`w-full p-2 border rounded bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] mb-2`}
                     placeholder="Enter image URL"
                   />
-                  <div className="flex items-center">
-                    <span className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] mr-2`}>Or</span>
-                    <button
-                      onClick={() => fileInputRef.current.click()}
-                      className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-4 py-2 rounded hover:opacity-80 flex items-center`}
-                    >
-                      <Upload size={20} className="mr-2" />
-                      Upload Image
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                    <span className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] ml-2`}>
-                      (JPG, PNG, GIF)
-                    </span>
+                  <div className="flex flex-col items-start">
+                    <div className="flex items-center mb-2">
+                      <span className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] mr-2`}>Or</span>
+                      <button
+                        onClick={() => fileInputRef.current.click()}
+                        className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-4 py-2 rounded hover:opacity-80 flex items-center`}
+                      >
+                        <Upload size={20} className="mr-2" />
+                        Upload Image
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                      <span className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] ml-2`}>
+                        (JPG, PNG, GIF, max 2 MB)
+                      </span>
+                    </div>
+                    {successMessage && (
+                      <div className={`text-green-500 mt-2 ${isDarkMode ? 'bg-green-900' : 'bg-green-100'} p-2 rounded`}>
+                        {successMessage}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

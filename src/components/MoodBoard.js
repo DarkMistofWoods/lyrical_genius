@@ -200,7 +200,7 @@ const MoodBoardElement = ({ element, isEditing, onStartEditing, isSelected, onSe
         <img
           src={element.content}
           alt="Mood board element"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
       )}
       {isEditing && isSelected && (
