@@ -46,7 +46,7 @@ function AddSectionButton({ index, isAdding, setAddingSectionAt, addSection }) {
         className={`absolute z-10 transform -translate-x-1/2 bg-transparent border-2 border-[#A68477] rounded-lg p-1 mt-1 hover:opacity-60`}
         style={{ top: '-10px', left: '50%' }}
       >
-        <Plus size={16} className={`text-[${theme.common.white}]`} />
+        <Plus size={16} className={`text-[${theme.common.brown}]`} />
       </button>
       {showDropdown && (
         <DropdownPortal
