@@ -4,7 +4,7 @@ import { setCurrentSong, addSong, deleteSong, addCategory, deleteCategory, renam
 import { saveSongsToLocalStorage } from '../utils/localStorage';
 import theme from '../theme';
 import ReactDOM from 'react-dom';
-import { Search, X, Plus, Edit2, Trash2, ChevronDown, ChevronUp  } from 'lucide-react';
+import { Search, X, Plus, Edit2, Trash2, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react';
 
 function SongList() {
   const dispatch = useDispatch();
@@ -21,6 +21,8 @@ function SongList() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isCategoryAccordionOpen, setIsCategoryAccordionOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [showCategories, setShowCategories] = useState(true);
+  const [showStyles, setShowStyles] = useState(true);
 
   useEffect(() => {
     const filtered = songs.filter(song => 
@@ -324,40 +326,44 @@ function SongList() {
                   </button>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {song.categories.map((category) => (
-                  <span
-                    key={category}
-                    className={`text-xs rounded px-1 py-0.5 flex items-center cursor-pointer text-[${theme.common.black}]`}
-                    style={{ backgroundColor: categoryColors[category] }}
-                    onClick={(e) => handleCategoryClick(category, e)}
-                  >
-                    {category}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUnassignCategory(song.id, category);
-                      }}
-                      className="ml-1 text-[#0D0C0C] hover:text-[#595859]"
+              {showCategories && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {song.categories.map((category) => (
+                    <span
+                      key={category}
+                      className={`text-xs rounded px-1 py-0.5 flex items-center cursor-pointer text-[${theme.common.black}]`}
+                      style={{ backgroundColor: categoryColors[category] }}
+                      onClick={(e) => handleCategoryClick(category, e)}
                     >
-                      <X size={10} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="text-xs text-gray-400 italic mt-1">
-                {Object.values(song.style).flat().filter(Boolean).map((style, index, array) => (
-                  <React.Fragment key={index}>
-                    <button
-                      onClick={(e) => handleStyleClick(style, e)}
-                      className="hover:underline"
-                    >
-                      {style}
-                    </button>
-                    {index < array.length - 1 && ", "}
-                  </React.Fragment>
-                ))}
-              </div>
+                      {category}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUnassignCategory(song.id, category);
+                        }}
+                        className="ml-1 text-[#0D0C0C] hover:text-[#595859]"
+                      >
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {showStyles && (
+                <div className="text-xs text-gray-400 italic mt-1">
+                  {Object.values(song.style).flat().filter(Boolean).map((style, index, array) => (
+                    <React.Fragment key={index}>
+                      <button
+                        onClick={(e) => handleStyleClick(style, e)}
+                        className="hover:underline"
+                      >
+                        {style}
+                      </button>
+                      {index < array.length - 1 && ", "}
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
               <CategoryDropdown songId={song.id} />
             </li>
           ))}
@@ -369,6 +375,22 @@ function SongList() {
       >
         New Song
       </button>
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => setShowCategories(!showCategories)}
+          className={`flex items-center text-sm text-[${theme.common.white}] hover:text-[${theme.common.brown}]`}
+        >
+          {showCategories ? <EyeOff size={16} className="mr-1" /> : <Eye size={16} className="mr-1" />}
+          {showCategories ? 'Hide Categories' : 'Show Categories'}
+        </button>
+        <button
+          onClick={() => setShowStyles(!showStyles)}
+          className={`flex items-center text-sm text-[${theme.common.white}] hover:text-[${theme.common.brown}]`}
+        >
+          {showStyles ? <EyeOff size={16} className="mr-1" /> : <Eye size={16} className="mr-1" />}
+          {showStyles ? 'Hide Styles' : 'Show Styles'}
+        </button>
+      </div>
       <DeleteConfirmationDialog />
     </div>
   );
