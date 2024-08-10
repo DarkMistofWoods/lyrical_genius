@@ -81,13 +81,12 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       const verseIndex = parts.findIndex(part => part.toLowerCase() === 'verse');
       if (verseIndex !== -1) {
         const verseNumber = parts[verseIndex + 1] ? parseInt(parts[verseIndex + 1], 10) : 1;
-        const prefix = parts.slice(0, verseIndex);
-        const suffix = parts.slice(verseIndex + 2).join(' ');
+        const modifiers = parts.slice(0, verseIndex).concat(parts.slice(verseIndex + 2));
         parsedSections.push({
           type: 'Verse',
           content: content || '',
           verseNumber: verseNumber,
-          modifier: { prefix: prefix || [], suffix: suffix || null }
+          modifier: modifiers
         });
       } else {
         const baseContentIndex = parts.length - 1 - [...parts].reverse().findIndex(part => 
@@ -95,12 +94,11 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
         );
         if (baseContentIndex !== -1 && baseContentIndex < parts.length) {
           const baseContent = parts[baseContentIndex];
-          const prefixes = parts.slice(0, baseContentIndex);
-          const suffixes = parts.slice(baseContentIndex + 1);
+          const modifiers = parts.slice(0, baseContentIndex);
           parsedSections.push({
             type: 'StructureModifier',
             content: capitalizeFirstLetter(baseContent),
-            modifier: { prefix: prefixes, suffix: suffixes }
+            modifier: modifiers
           });
         } else {
           // This is either a known section type or a custom type
@@ -112,15 +110,15 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
           if (sectionType === 'StructureModifier') {
             parsedSections.push({
               type: 'StructureModifier',
-              content: parts.join(' '),
-              modifier: { prefix: [], suffix: [] }
+              content: parts[parts.length - 1],
+              modifier: parts.slice(0, -1)
             });
           } else {
-            const modifier = parts.slice(0, -1).join(' ');
+            const modifiers = parts.slice(0, -1);
             parsedSections.push({
               type: sectionType,
               content: content || '',
-              modifier: modifier || null
+              modifier: modifiers
             });
           }
         }
@@ -133,26 +131,21 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     const formattedSections = newSections.map(section => {
       if (section.type === 'StructureModifier') {
         const baseContent = section.content;
-        const prefixes = section.modifier?.prefix || [];
-        const suffixes = section.modifier?.suffix || [];
-        const formattedContent = [...prefixes, baseContent, ...suffixes].filter(Boolean).join(' ');
+        const modifiers = Array.isArray(section.modifier) ? section.modifier : [];
+        const formattedContent = [...modifiers, baseContent].filter(Boolean).join(' ');
         return `[${formattedContent}]`;
       } else if (section.type === 'Verse') {
         let formattedType = `Verse ${section.verseNumber}`;
-        if (section.modifier?.prefix) {
-          const prefixString = Array.isArray(section.modifier.prefix) ? section.modifier.prefix.join(' ') : section.modifier.prefix;
-          formattedType = `${prefixString} ${formattedType}`;
-        }
-        if (section.modifier?.suffix) {
-          const suffixString = Array.isArray(section.modifier.suffix) ? section.modifier.suffix.join(' ') : section.modifier.suffix;
-          formattedType = `${formattedType} ${suffixString}`;
+        const modifiers = Array.isArray(section.modifier) ? section.modifier : [];
+        if (modifiers.length > 0) {
+          formattedType = `${modifiers.join(' ')} ${formattedType}`;
         }
         return `[${formattedType}]|||${section.content}`;
       } else {
         let formattedType = section.type.toLowerCase();
-        if (section.modifier) {
-          const modifierString = Array.isArray(section.modifier) ? section.modifier.join(' ') : section.modifier;
-          formattedType = `${modifierString} ${formattedType}`;
+        const modifiers = Array.isArray(section.modifier) ? section.modifier : [];
+        if (modifiers.length > 0) {
+          formattedType = `${modifiers.join(' ')} ${formattedType}`;
         }
         return `[${formattedType}]|||${section.content}`;
       }

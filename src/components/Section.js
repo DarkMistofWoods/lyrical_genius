@@ -29,7 +29,6 @@ function Section({
   const [showModifierDropdown, setShowModifierDropdown] = useState(false);
   const [customModifier, setCustomModifier] = useState('');
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
-  const [modifierPosition, setModifierPosition] = useState('prefix');
   const [showMaxModifierWarning, setShowMaxModifierWarning] = useState(false);
   const modifierButtonRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -198,37 +197,31 @@ function Section({
     modifier = capitalizeFirstLetter(modifier);
   
     if (section.type === 'StructureModifier') {
-      let prefixes = Array.isArray(section.modifier?.prefix) ? [...section.modifier.prefix] : [];
-      let suffixes = Array.isArray(section.modifier?.suffix) ? [...section.modifier.suffix] : [];
+      let prefixes = Array.isArray(section.modifier) ? [...section.modifier] : [];
   
-      if (prefixes.length + suffixes.length < 2) {
-        if (modifierPosition === 'prefix') {
-          prefixes.push(modifier);
-        } else if (modifierPosition === 'suffix') {
-          suffixes.push(modifier);
-        }
-        addModifier(index, { prefix: prefixes, suffix: suffixes });
+      if (prefixes.length < 2) {
+        prefixes.push(modifier);
+        addModifier(index, prefixes);
       } else {
         setShowMaxModifierWarning(true);
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
       }
     } else if (section.type === 'Verse') {
-      let prefixes = Array.isArray(section.modifier?.prefix) ? [...section.modifier.prefix] : 
-                     (section.modifier?.prefix ? [section.modifier.prefix] : []);
+      let prefixes = Array.isArray(section.modifier) ? [...section.modifier] : [];
   
       if (prefixes.length < 2) {
         prefixes.push(modifier);
-        addModifier(index, { prefix: prefixes });
+        addModifier(index, prefixes);
       } else {
         setShowMaxModifierWarning(true);
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
       }
     } else {
-      let modifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') : [];
+      let modifiers = Array.isArray(section.modifier) ? [...section.modifier] : [];
   
       if (modifiers.length < 2) {
         modifiers.push(modifier);
-        addModifier(index, modifiers.join(' '));
+        addModifier(index, modifiers);
       } else {
         setShowMaxModifierWarning(true);
         setTimeout(() => setShowMaxModifierWarning(false), 3000);
@@ -246,37 +239,29 @@ function Section({
   };
 
   const handleRemoveModifier = (tagToRemove) => {
-    if (section.type === 'StructureModifier') {
-      const newModifier = {
-        prefix: Array.isArray(section.modifier?.prefix) ? section.modifier.prefix.filter(m => m !== tagToRemove) : [],
-        suffix: Array.isArray(section.modifier?.suffix) ? section.modifier.suffix.filter(m => m !== tagToRemove) : []
-      };
-      removeModifier(index, newModifier);
-    } else if (section.type === 'Verse') {
-      const newPrefixes = Array.isArray(section.modifier?.prefix) 
-        ? section.modifier.prefix.filter(m => m !== tagToRemove)
-        : (section.modifier?.prefix && section.modifier.prefix !== tagToRemove ? [section.modifier.prefix] : []);
-      removeModifier(index, { prefix: newPrefixes });
+    if (section.type === 'StructureModifier' || section.type === 'Verse') {
+      const newModifiers = Array.isArray(section.modifier) 
+        ? section.modifier.filter(m => m !== tagToRemove)
+        : [];
+      removeModifier(index, newModifiers);
     } else {
-      const currentModifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') : [];
-      const newModifiers = currentModifiers.filter(m => m !== tagToRemove);
-      removeModifier(index, newModifiers.join(' '));
+      const newModifiers = Array.isArray(section.modifier) 
+        ? section.modifier.filter(m => m !== tagToRemove)
+        : [];
+      removeModifier(index, newModifiers);
     }
   };
 
   const displayLabel = () => {
     if (section.type === 'StructureModifier') {
       const baseContent = capitalizeFirstLetter(section.content);
-      const prefixes = Array.isArray(section.modifier?.prefix) ? section.modifier.prefix : [];
-      const suffixes = Array.isArray(section.modifier?.suffix) ? section.modifier.suffix : [];
-      return `${prefixes.join(' ')} ${baseContent} ${suffixes.join(' ')}`.trim();
+      const modifiers = Array.isArray(section.modifier) ? section.modifier : [];
+      return `${modifiers.join(' ')} ${baseContent}`.trim();
     } else if (section.type === 'Verse') {
-      const prefixes = Array.isArray(section.modifier?.prefix) ? section.modifier.prefix :
-        (section.modifier?.prefix ? [section.modifier.prefix] : []);
-      return `${prefixes.map(capitalizeFirstLetter).join(' ')} Verse ${section.verseNumber}`.trim();
+      const modifiers = Array.isArray(section.modifier) ? section.modifier : [];
+      return `${modifiers.map(capitalizeFirstLetter).join(' ')} Verse ${section.verseNumber}`.trim();
     } else {
-      const modifiers = typeof section.modifier === 'string' ? section.modifier.split(' ') :
-        (Array.isArray(section.modifier) ? section.modifier : []);
+      const modifiers = Array.isArray(section.modifier) ? section.modifier : [];
       const baseLabel = section.type;
       return `${modifiers.map(capitalizeFirstLetter).join(' ')} ${baseLabel}`.trim();
     }
@@ -289,22 +274,6 @@ function Section({
         className={`fixed z-50 ${isDarkMode ? 'bg-[#595859]' : 'bg-[#F2F2F2]'} border border-[#595859] rounded shadow-lg`}
         style={{ top: `${dropdownPosition.top}px`, left: `${dropdownPosition.left}px` }}
       >
-        {section.type === 'StructureModifier' && (
-          <div className="flex justify-around p-2 border-b border-[#595859]">
-            <button
-              onClick={() => setModifierPosition('prefix')}
-              className={`px-2 py-1 rounded ${modifierPosition === 'prefix' ? 'bg-[#A68477] text-white' : ''}`}
-            >
-              Prefix
-            </button>
-            <button
-              onClick={() => setModifierPosition('suffix')}
-              className={`px-2 py-1 rounded ${modifierPosition === 'suffix' ? 'bg-[#A68477] text-white' : ''}`}
-            >
-              Suffix
-            </button>
-          </div>
-        )}
         {modifiers.map((modifier) => (
           <button
             key={modifier}
@@ -323,10 +292,9 @@ function Section({
             className={`w-full p-1 ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#0D0C0C]'} border border-[#595859] rounded`}
           />
         </form>
-        {section.type === 'StructureModifier' && section.modifier && (
+        {section.modifier && (
           <div className="px-4 py-2">
-            {[...(Array.isArray(section.modifier.prefix) ? section.modifier.prefix : []), 
-              ...(Array.isArray(section.modifier.suffix) ? section.modifier.suffix : [])].map((tag, index) => (
+            {Array.isArray(section.modifier) ? section.modifier.map((tag, index) => (
               <button
                 key={index}
                 onClick={() => handleRemoveModifier(tag)}
@@ -334,34 +302,7 @@ function Section({
               >
                 {tag} <X size={12} className="inline" />
               </button>
-            ))}
-          </div>
-        )}
-        {section.type === 'Verse' && section.modifier && (
-          <div className="px-4 py-2">
-            {(Array.isArray(section.modifier.prefix) ? section.modifier.prefix : 
-              (section.modifier.prefix ? [section.modifier.prefix] : [])).map((prefix, index) => (
-              <button
-                key={index}
-                onClick={() => handleRemoveModifier(prefix)}
-                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-[${theme.common.brown}] text-white hover:bg-red-600`}
-              >
-                {prefix} <X size={12} className="inline" />
-              </button>
-            ))}
-          </div>
-        )}
-        {section.type !== 'StructureModifier' && section.type !== 'Verse' && section.modifier && (
-          <div className="px-4 py-2">
-            {(typeof section.modifier === 'string' ? section.modifier.split(' ') : []).map((tag, index) => (
-              <button
-                key={index}
-                onClick={() => handleRemoveModifier(tag)}
-                className={`inline-block px-2 py-1 m-1 text-xs rounded bg-[${theme.common.brown}] text-white hover:bg-red-600`}
-              >
-                {tag} <X size={12} className="inline" />
-              </button>
-            ))}
+            )) : null}
           </div>
         )}
       </div>,
