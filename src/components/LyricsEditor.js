@@ -346,23 +346,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
 
     return (
       <div className="relative mt-20">
-        <Section
-          section={sections[focusedSectionIndex]}
-          index={focusedSectionIndex}
-          editingSectionAt={editingSectionAt}
-          setEditingSectionAt={setEditingSectionAt}
-          duplicateSection={duplicateSection}
-          changeVerseNumber={changeVerseNumber}
-          removeSection={removeSection}
-          moveSection={moveSection}
-          handleSectionChange={handleSectionChange}
-          sectionsLength={sections.length}
-          changeSectionType={changeSectionType}
-          addModifier={addModifier}
-          removeModifier={removeModifier}
-          isFocusMode={true}
-        />
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mb-4">
           <button
             onClick={() => navigateToSection('prev')}
             className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-3 py-1 rounded text-sm flex items-center ${focusedSectionIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
@@ -380,6 +364,22 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
             <ChevronRight size={16} className="ml-1" />
           </button>
         </div>
+        <Section
+          section={sections[focusedSectionIndex]}
+          index={focusedSectionIndex}
+          editingSectionAt={editingSectionAt}
+          setEditingSectionAt={setEditingSectionAt}
+          duplicateSection={duplicateSection}
+          changeVerseNumber={changeVerseNumber}
+          removeSection={removeSection}
+          moveSection={moveSection}
+          handleSectionChange={handleSectionChange}
+          sectionsLength={sections.length}
+          changeSectionType={changeSectionType}
+          addModifier={addModifier}
+          removeModifier={removeModifier}
+          isFocusMode={true}
+        />
       </div>
     );
   };
@@ -431,81 +431,80 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       )}
 
       {/* Main content area */}
-      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${
-        isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
-      }`}>
-      {isFocusModeActive ? (
-        renderFocusMode()
-      ) : (
-        <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-          <StrictModeDroppable droppableId="lyrics">
-            {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                {sections.length === 0 && (
-                  <div className={`h-8 relative mb-4 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
-                    <AddSectionButton
-                      index={0}
-                      isAdding={addingSectionAt === 0}
-                      setAddingSectionAt={setAddingSectionAt}
-                      addSection={addSection}
-                    />
-                  </div>
-                )}
-                {sections.map((section, index) => (
-                  <Draggable key={section.id} draggableId={section.id} index={index}>
-                    {(provided) => (
-                      <div
-                        ref={(el) => {
-                          provided.innerRef(el);
-                          sectionRefs.current[index] = el;
-                        }}
-                        {...provided.draggableProps}
-                      >
-                        <React.Fragment>
-                          {index === 0 && (
+      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
+        }`}>
+        {isFocusModeActive ? (
+          renderFocusMode()
+        ) : (
+          <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+            <StrictModeDroppable droppableId="lyrics">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {sections.length === 0 && (
+                    <div className={`h-8 relative mb-4 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
+                      <AddSectionButton
+                        index={0}
+                        isAdding={addingSectionAt === 0}
+                        setAddingSectionAt={setAddingSectionAt}
+                        addSection={addSection}
+                      />
+                    </div>
+                  )}
+                  {sections.map((section, index) => (
+                    <Draggable key={section.id} draggableId={section.id} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={(el) => {
+                            provided.innerRef(el);
+                            sectionRefs.current[index] = el;
+                          }}
+                          {...provided.draggableProps}
+                        >
+                          <React.Fragment>
+                            {index === 0 && (
+                              <div className={`h-8 relative mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
+                                <AddSectionButton
+                                  index={0}
+                                  isAdding={addingSectionAt === 0}
+                                  setAddingSectionAt={setAddingSectionAt}
+                                  addSection={addSection}
+                                />
+                              </div>
+                            )}
+                            <Section
+                              section={section}
+                              index={index}
+                              editingSectionAt={editingSectionAt}
+                              setEditingSectionAt={setEditingSectionAt}
+                              duplicateSection={duplicateSection}
+                              changeVerseNumber={changeVerseNumber}
+                              removeSection={removeSection}
+                              handleSectionChange={handleSectionChange}
+                              sectionsLength={sections.length}
+                              changeSectionType={changeSectionType}
+                              addModifier={addModifier}
+                              removeModifier={removeModifier}
+                              dragHandleProps={provided.dragHandleProps}
+                            />
                             <div className={`h-8 relative mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
                               <AddSectionButton
-                                index={0}
-                                isAdding={addingSectionAt === 0}
+                                index={index + 1}
+                                isAdding={addingSectionAt === index + 1}
                                 setAddingSectionAt={setAddingSectionAt}
                                 addSection={addSection}
                               />
                             </div>
-                          )}
-                          <Section
-                            section={section}
-                            index={index}
-                            editingSectionAt={editingSectionAt}
-                            setEditingSectionAt={setEditingSectionAt}
-                            duplicateSection={duplicateSection}
-                            changeVerseNumber={changeVerseNumber}
-                            removeSection={removeSection}
-                            handleSectionChange={handleSectionChange}
-                            sectionsLength={sections.length}
-                            changeSectionType={changeSectionType}
-                            addModifier={addModifier}
-                            removeModifier={removeModifier}
-                            dragHandleProps={provided.dragHandleProps}
-                          />
-                          <div className={`h-8 relative mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
-                            <AddSectionButton
-                              index={index + 1}
-                              isAdding={addingSectionAt === index + 1}
-                              setAddingSectionAt={setAddingSectionAt}
-                              addSection={addSection}
-                            />
-                          </div>
-                        </React.Fragment>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </StrictModeDroppable>
-        </DragDropContext>
-      )}
+                          </React.Fragment>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </StrictModeDroppable>
+          </DragDropContext>
+        )}
       </div>
     </div>
   );
