@@ -422,7 +422,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
           {/* Chevron button for collapsing/expanding */}
           <button
             onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
-            className={`sticky z-50 left-1/2 transform -translate-x-1/2 -mt-3 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
+            className={`sticky z-40 left-1/2 transform -translate-x-1/2 -mt-3 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
             style={{ top: 'auto' }}
           >
             {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
@@ -431,7 +431,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       )}
 
       {/* Main content area */}
-      <div className={`px-4 pt-4 pb-20 transition-all duration-300 ease-in-out ${isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
+      <div className={`px-4 pt-4 pb-20 transition-all overflow-x-hidden duration-300 ease-in-out ${isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
         }`}>
         {isFocusModeActive ? (
           renderFocusMode()

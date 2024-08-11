@@ -23,6 +23,11 @@ function App() {
   const [isEditingMoodBoard, setIsEditingMoodBoard] = useState(false);
   const [isFocusModeActive, setIsFocusModeActive] = useState(false);
 
+  // New state variables for mobile layout
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [isSongListVisible, setIsSongListVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
     const savedSongs = loadSongsFromLocalStorage();
     dispatch(loadSongs(savedSongs));
@@ -31,6 +36,16 @@ function App() {
   useEffect(() => {
     dispatch(loadTheme());
   }, [dispatch]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // Assuming 768px as the breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     document.body.classList.add('overflow-hidden');
@@ -80,42 +95,71 @@ function App() {
     }
   };
 
+  // New toggle functions for mobile layout
+  const togglePreview = () => {
+    if (isMobile) {
+      setIsPreviewVisible(!isPreviewVisible);
+      setIsSongListVisible(false);
+    } else {
+      setIsPreviewCollapsed(!isPreviewCollapsed);
+    }
+  };
+
+  const toggleSongList = () => {
+    if (isMobile) {
+      setIsSongListVisible(!isSongListVisible);
+      setIsPreviewVisible(false);
+    } else {
+      setIsSidebarCollapsed(!isSidebarCollapsed);
+    }
+  };
+
   return (
-    <div className={`min-h-screen bg-[${isDarkMode ? theme.dark.background : theme.light.background}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
+    <div className={`min-h-screen overflow-x-hidden bg-[${isDarkMode ? theme.dark.background : theme.light.background}] text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
       <MoodBoard isVisible={isMoodBoardVisible} isEditing={isEditingMoodBoard} />
-      {!isEditingMoodBoard && <Header isFocusModeActive={isFocusModeActive} />}
-      <div className={`flex ${isEditingMoodBoard ? 'pt-0' : 'pt-4'} pb-16`}>
+      {!isEditingMoodBoard && (
+        <Header 
+          isFocusModeActive={isFocusModeActive} 
+          togglePreview={togglePreview}
+          toggleSongList={toggleSongList}
+          isMobile={isMobile}
+          isPreviewVisible={isPreviewVisible}
+          isSongListVisible={isSongListVisible}
+        />
+      )}
+      <div className={`flex flex-col md:flex-row ${isEditingMoodBoard ? 'pt-0' : 'pt-16'} pb-16`}>
         {/* Sidebar */}
-        {!isEditingMoodBoard && (
-          <div 
-            className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ${
-              isSidebarCollapsed ? 'w-0' : 'w-96'
-            }`}
-          >
-            <div className={`bg-[${theme.common.grey}] h-full rounded-r-lg relative bg-opacity-0`}>
-              <div className={`overflow-y-auto h-full pt-4 transition-opacity duration-300 ${
-                isSidebarCollapsed || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}>
-                <Sidebar />
-              </div>
-              {!isEditingMoodBoard && !isFocusModeActive && (
-                <button
-                  onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                  className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${isSidebarCollapsed ? 'left-2' : 'right-0 translate-x-full'
-                    }`}
-                >
-                  {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-                </button>
-              )}
+        <div 
+          className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-16'} bottom-16 overflow-visible transition-all duration-300
+            ${isMobile ? (isSongListVisible ? 'w-full' : 'w-0') : (isSidebarCollapsed ? 'w-0' : 'w-96')}
+            ${isMobile ? 'z-20' : ''}
+          `}
+        >
+          <div className={`bg-[${theme.common.grey}] h-full rounded-r-lg relative bg-opacity-0`}>
+            <div className={`overflow-y-auto h-full pt-4 transition-opacity duration-300 ${
+              (isMobile ? !isSongListVisible : isSidebarCollapsed) || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}>
+              <Sidebar />
             </div>
+            {!isMobile && !isEditingMoodBoard && !isFocusModeActive && (
+              <button
+                onClick={toggleSongList}
+                className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${isSidebarCollapsed ? '-right-6' : 'right-0 translate-x-full'}`}
+              >
+                {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+              </button>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Main content */}
-        {!isEditingMoodBoard && (
-          <main className={`flex-1 transition-all duration-300 ease-in-out ${
-            isSidebarCollapsed || isFocusModeActive ? 'ml-0' : 'ml-96'
-          } ${isPreviewCollapsed || isFocusModeActive ? 'mr-0' : 'mr-96'}`}>
+        {!isEditingMoodBoard && (!isMobile || (!isPreviewVisible && !isSongListVisible)) && (
+          <main className={`flex-1 transition-all duration-300 ease-in-out
+            ${isMobile ? 'ml-0 mr-0' : `
+              ${isSidebarCollapsed ? 'ml-0' : 'ml-96'}
+              ${isPreviewCollapsed ? 'mr-0' : 'mr-96'}
+            `}
+          `}>
             <div className="max-w-3xl mx-auto px-4">
               <LyricsEditor isEditingMoodBoard={isEditingMoodBoard} isFocusModeActive={isFocusModeActive} />
             </div>
@@ -123,30 +167,28 @@ function App() {
         )}
 
         {/* Preview */}
-        {!isEditingMoodBoard && (
-          <div 
-            className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-[calc(4rem+0.5rem)]'} bottom-16 overflow-visible transition-all duration-300 ${
-              isPreviewCollapsed ? 'w-0' : 'w-96'
-            }`}
-          >
-            <div className={`bg-[${theme.common.grey}] h-full rounded-l-lg relative bg-opacity-0`}>
-              <div className={`overflow-y-auto h-full pt-4 px-4 transition-opacity duration-300 ${
-                isPreviewCollapsed || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}>
-                <LivePreview />
-              </div>
-              {!isEditingMoodBoard && !isFocusModeActive && (
-                <button
-                  onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
-                  className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${isPreviewCollapsed ? 'right-2' : 'left-0 -translate-x-full'
-                    }`}
-                >
-                  {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-                </button>
-              )}
+        <div 
+          className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-16'} bottom-16 overflow-visible transition-all duration-300
+            ${isMobile ? (isPreviewVisible ? 'w-full' : 'w-0') : (isPreviewCollapsed ? 'w-0' : 'w-96')}
+            ${isMobile ? 'z-20' : ''}
+          `}
+        >
+          <div className={`bg-[${theme.common.grey}] h-full rounded-l-lg relative bg-opacity-0`}>
+            <div className={`overflow-y-auto h-full pt-4 px-4 transition-opacity duration-300 ${
+              (isMobile ? !isPreviewVisible : isPreviewCollapsed) || isFocusModeActive ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}>
+              <LivePreview />
             </div>
+            {!isMobile && !isEditingMoodBoard && !isFocusModeActive && (
+              <button
+                onClick={togglePreview}
+                className={`absolute top-1/2 transform -translate-y-1/2 transition-all duration-300 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full ${isPreviewCollapsed ? '-left-6' : 'left-0 -translate-x-full'}`}
+              >
+                {isPreviewCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+              </button>
+            )}
           </div>
-        )}
+        </div>
       </div>
       <Toolbar 
         isMoodBoardVisible={isMoodBoardVisible}
