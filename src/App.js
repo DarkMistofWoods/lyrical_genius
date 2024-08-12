@@ -6,12 +6,15 @@ import LyricsEditor from './components/LyricsEditor';
 import LivePreview from './components/LivePreview';
 import Toolbar from './components/Toolbar';
 import MoodBoard from './components/MoodBoard';
+import Onboarding from './components/Onboarding';
 import { loadSongs } from './store/songSlice';
 import { loadSongsFromLocalStorage } from './utils/localStorage';
 import theme from './theme';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
 import { saveVersion } from './store/songSlice';
 import { loadTheme } from './store/themeSlice';
+
+const TESTING = true; // Set this to false in production
 
 function App() {
   const dispatch = useDispatch();
@@ -27,6 +30,28 @@ function App() {
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [isSongListVisible, setIsSongListVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showHelpIcon, setShowHelpIcon] = useState(false);
+
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+    if (!hasSeenOnboarding || TESTING) {
+      setShowOnboarding(true);
+    } else {
+      setShowHelpIcon(true);
+    }
+  }, []);
+
+  const handleCloseOnboarding = () => {
+    setShowOnboarding(false);
+    setShowHelpIcon(true);
+    localStorage.setItem('hasSeenOnboarding', 'true');
+  };
+
+  const handleOpenOnboarding = () => {
+    setShowOnboarding(true);
+  };
 
   useEffect(() => {
     const savedSongs = loadSongsFromLocalStorage();
@@ -119,12 +144,14 @@ function App() {
       <MoodBoard isVisible={isMoodBoardVisible} isEditing={isEditingMoodBoard} />
       {!isEditingMoodBoard && (
         <Header 
-          isFocusModeActive={isFocusModeActive} 
+          isFocusModeActive={isFocusModeActive}
           togglePreview={togglePreview}
           toggleSongList={toggleSongList}
           isMobile={isMobile}
           isPreviewVisible={isPreviewVisible}
           isSongListVisible={isSongListVisible}
+          showHelpIcon={showHelpIcon}
+          onOpenOnboarding={handleOpenOnboarding}
         />
       )}
       <div className={`flex flex-col md:flex-row ${isEditingMoodBoard ? 'pt-0' : 'pt-16'} pb-16`}>
@@ -198,6 +225,13 @@ function App() {
         isFocusModeActive={isFocusModeActive}
         toggleFocusMode={toggleFocusMode}
       />
+
+      {showOnboarding && (
+        <Onboarding 
+          onClose={handleCloseOnboarding}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </div>
   );
 }

@@ -2,9 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '../store/themeSlice';
 import theme from '../theme';
-import { Menu, Sun, Moon, Eye, List } from 'lucide-react';
+import { Menu, Sun, Moon, Eye, List, HelpCircle } from 'lucide-react';
 
-function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
+function Header({ 
+  isFocusModeActive, 
+  togglePreview, 
+  toggleSongList, 
+  isPreviewVisible, 
+  isSongListVisible,
+  showHelpIcon,
+  onOpenOnboarding
+}) {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const currentTheme = isDarkMode ? theme.dark : theme.light;
@@ -66,12 +74,20 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
           >
             Follow me on Suno: @digital_takeover
           </a>
-          <button 
+          <button
             onClick={() => dispatch(toggleTheme())}
-            className={`bg-${isDarkMode ? 'white' : 'black'} text-${isDarkMode ? 'gray-800' : 'white'} px-4 py-2 rounded-full transition-colors duration-300`}
+            className={`bg-${isDarkMode ? 'white' : 'black'} text-${isDarkMode ? 'gray-800' : 'white'} px-4 py-2 rounded-full transition-colors duration-300 mr-2`}
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
+          {showHelpIcon && (
+            <button
+              onClick={onOpenOnboarding}
+              className={`bg-${isDarkMode ? 'white' : 'black'} text-${isDarkMode ? 'gray-800' : 'white'} px-4 py-2 rounded-full transition-colors duration-300`}
+            >
+              <HelpCircle size={20} />
+            </button>
+          )}
         </div>
       </div>
       
@@ -99,6 +115,14 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
           {isDarkMode ? <Sun size={20} className="inline mr-2" /> : <Moon size={20} className="inline mr-2" />}
           {isDarkMode ? 'Light Mode' : 'Dark Mode'}
         </button>
+        {showHelpIcon && (
+          <button
+            onClick={onOpenOnboarding}
+            className={`w-full text-left py-2 px-4 rounded-2xl bg-[${theme.common.brown}] text-${isDarkMode ? 'white' : 'black'}`}
+          >
+            <HelpCircle size={20} className="inline mr-2" /> Help
+          </button>
+        )}
         <a 
           href="https://suno.com/@digital_takeover" 
           target="_blank" 
