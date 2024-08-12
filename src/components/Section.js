@@ -388,7 +388,7 @@ function Section({
   if (section.type === 'StructureModifier') {
     return (
       <div className={`p-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] flex ${isMobile ? 'flex-col' : 'justify-between items-center'} w-full mb-4 relative z-10`}>
-        <span className={`${isMobile ? 'm-auto' : ''} text-lg`}>{displayLabel()}</span>
+        <span className={`${isMobile ? 'm-auto' : ''} font-bold`}>{displayLabel()}</span>
         {!isFocusMode && (
           <div className={`flex ${isMobile ? 'flex-wrap justify-center' : 'space-x-2'}`}>
             {isMobile ? renderMobileButtons() : (
