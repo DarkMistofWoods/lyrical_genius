@@ -292,7 +292,7 @@ function SongList() {
                     handleAddCategory();
                   }
                 }}
-                className={`bg-transparent border-b border-[${theme.common.brown}] focus:outline-none text-sm mr-2 flex-grow`}
+                className={`bg-transparent border-b border-[${theme.common.brown}] focus:outline-none text-m mr-2 flex-grow`}
               />
               <button
                 onClick={handleAddCategory}
@@ -318,7 +318,7 @@ function SongList() {
               <div className="flex justify-between items-center mb-1">
                 <button
                   onClick={() => handleSelectSong(song)}
-                  className={`text-left truncate flex-grow ${currentSong.id === song.id ? 'font-bold' : ''}`}
+                  className={`text-left text-lg truncate flex-grow ${currentSong.id === song.id ? 'font-bold' : ''}`}
                 >
                   {song.title || 'Untitled'}
                 </button>

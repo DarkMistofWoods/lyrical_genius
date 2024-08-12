@@ -397,7 +397,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
             <input
               type="text"
               placeholder="Song Title"
-              className={`w-full p-2 text-xs sm:text-sm border rounded ${
+              className={`w-full p-2 text-lg sm:text-lg border rounded ${
                 isDarkMode
                   ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
                   : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`

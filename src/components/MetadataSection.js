@@ -107,14 +107,14 @@ function MetadataSection({ currentSong, saveChanges }) {
           values.map(value => (
             <span
               key={`${category}-${value}`}
-              className={`px-2 py-1 text-xs rounded flex items-center bg-[${theme.common.brown}] text-[${theme.common.white}]`}
+              className={`px-2 py-1 text-sm rounded flex items-center bg-[${theme.common.brown}] text-[${theme.common.white}]`}
             >
               {value}
               <button
                 onClick={() => removeStyle(category, value)}
                 className="ml-1 text-[${theme.common.white}] hover:text-[${theme.common.black}]"
               >
-                <X size={12} />
+                <X size={16} />
               </button>
             </span>
           ))

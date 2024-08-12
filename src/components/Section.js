@@ -398,22 +398,22 @@ function Section({
                   onClick={() => setShowModifierDropdown(!showModifierDropdown)}
                   className={iconButtonStyle}
                 >
-                  <Tag size={16} />
+                  <Tag size={20} />
                 </button>
                 <button
                   onClick={() => duplicateSection(index)}
                   className={iconButtonStyle}
                 >
-                  <Copy size={16} />
+                  <Copy size={20} />
                 </button>
                 <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
-                  <GripVertical size={16} />
+                  <GripVertical size={20} />
                 </div>
                 <button
                   onClick={() => removeSection(index)}
                   className={iconButtonStyle}
                 >
-                  <XCircle size={16} />
+                  <XCircle size={20} />
                 </button>
               </>
             )}
@@ -428,7 +428,7 @@ function Section({
     <div data-section-index={index} className={`mb-4 flex flex-col relative bg-[#595859] bg-opacity-30 border-2 border-[#A68477] rounded-lg p-2 ${isMobile ? 'p-3' : ''}`}>
       <div className={`flex ${isMobile ? 'flex-col' : 'justify-between items-start'} mb-2`}>
         <div className={`flex ${isMobile ? 'flex-col' : 'items-center'}`}>
-          <span className={`font-bold ${isMobile ? 'text-lg m-auto' : 'text-sm mr-2'}`}>{displayLabel()}</span>
+          <span className={`font-bold ${isMobile ? 'text-lg m-auto' : 'mr-2'}`}>{displayLabel()}</span>
           {!isFocusMode && !isMobile && (
             <>
               <button
@@ -436,13 +436,13 @@ function Section({
                 onClick={handleSettingsButtonClick}
                 className={iconButtonStyle}
               >
-                <Settings size={16} />
+                <Settings size={20} />
               </button>
               <button
                 onClick={() => duplicateSection(index)}
                 className={iconButtonStyle}
               >
-                <Copy size={16} />
+                <Copy size={20} />
               </button>
               {section.type !== 'Line' && (
                 <button
@@ -450,7 +450,7 @@ function Section({
                   onClick={handleModifierButtonClick}
                   className={iconButtonStyle}
                 >
-                  <Tag size={16} />
+                  <Tag size={20} />
                 </button>
               )}
               {section.type === 'Verse' && (
@@ -477,7 +477,7 @@ function Section({
         {!isFocusMode && !isMobile && (
           <div className="flex items-center">
             <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move mr-1`}>
-              <GripVertical size={16} />
+              <GripVertical size={20} />
             </div>
             <button
               onClick={() => removeSection(index)}
