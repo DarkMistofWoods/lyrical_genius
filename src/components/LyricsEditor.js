@@ -61,6 +61,9 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const updateTimeoutRef = useRef(null);
   const previousSectionsRef = useRef([]);
 
+  // New function to determine if the device is mobile
+  const isMobile = () => window.innerWidth < 768;
+
   const saveChanges = useCallback((updatedSong) => {
     dispatch(updateSong(updatedSong));
     const updatedSongs = songs.map(song =>
@@ -332,11 +335,11 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   const renderFocusMode = () => {
     if (sections.length === 0) {
       return (
-        <div className="text-center py-8">
-          <p>No sections available. Add a section to start editing.</p>
+        <div className="text-center py-4">
+          <p className="text-sm">No sections available. Add a section to start editing.</p>
           <button
             onClick={() => addSection('Lyric Sections', 'Verse', 0)}
-            className={`mt-4 bg-[${theme.common.brown}] text-[${theme.common.white}] px-4 py-2 rounded hover:opacity-80`}
+            className={`mt-2 bg-[${theme.common.brown}] text-[${theme.common.white}] px-3 py-1 rounded text-sm hover:opacity-80`}
           >
             Add Verse
           </button>
@@ -345,23 +348,23 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
     }
 
     return (
-      <div className="relative mt-20">
-        <div className="flex justify-between mb-4">
+      <div className="relative mt-16">
+        <div className="flex justify-between mb-2">
           <button
             onClick={() => navigateToSection('prev')}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-3 py-1 rounded text-sm flex items-center ${focusedSectionIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-2 py-1 rounded text-xs flex items-center ${focusedSectionIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
             disabled={focusedSectionIndex === 0}
           >
-            <ChevronLeft size={16} className="mr-1" />
-            <span className="whitespace-nowrap">Previous Section</span>
+            <ChevronLeft size={12} className="mr-1" />
+            <span className="whitespace-nowrap">Prev</span>
           </button>
           <button
             onClick={() => navigateToSection('next')}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-3 py-1 rounded text-sm flex items-center ${focusedSectionIndex === sections.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
+            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] px-2 py-1 rounded text-xs flex items-center ${focusedSectionIndex === sections.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
             disabled={focusedSectionIndex === sections.length - 1}
           >
-            <span className="whitespace-nowrap">Next Section</span>
-            <ChevronRight size={16} className="ml-1" />
+            <span className="whitespace-nowrap">Next</span>
+            <ChevronRight size={12} className="ml-1" />
           </button>
         </div>
         <Section
@@ -379,6 +382,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
           addModifier={addModifier}
           removeModifier={removeModifier}
           isFocusMode={true}
+          isMobile={isMobile()}
         />
       </div>
     );
@@ -389,11 +393,11 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
       {!isEditingMoodBoard && !isFocusModeActive && (
         <>
           {/* Title input */}
-          <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
+          <div className={`sticky top-16 z-40 bg-[${theme.common.grey}] p-2 sm:p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out`}>
             <input
               type="text"
               placeholder="Song Title"
-              className={`w-full p-2 text-sm border rounded ${
+              className={`w-full p-2 text-xs sm:text-sm border rounded ${
                 isDarkMode
                   ? `bg-[${theme.dark.input}] text-[${theme.common.white}] border-[${theme.common.grey}]`
                   : `bg-[${theme.light.input}] text-[${theme.common.black}] border-[${theme.common.grey}]`
@@ -405,7 +409,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
           </div>
 
           {/* Gap between sections */}
-          <div className="h-16"></div>
+          <div className="h-8 sm:h-16"></div>
 
           {/* Collapsible metadata section */}
           <div
@@ -413,25 +417,25 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
             style={{
               maxHeight: isMetadataCollapsed ? '0' : '1000px',
               opacity: isMetadataCollapsed ? 0 : 1,
-              marginTop: isMetadataCollapsed ? '1rem' : '0',
+              marginTop: isMetadataCollapsed ? '1.5rem' : '2rem',
             }}
           >
-            <MetadataSection currentSong={currentSong} saveChanges={saveChanges} />
+            <MetadataSection currentSong={currentSong} saveChanges={saveChanges} isMobile={isMobile()} />
           </div>
 
           {/* Chevron button for collapsing/expanding */}
           <button
             onClick={() => setIsMetadataCollapsed(!isMetadataCollapsed)}
-            className={`sticky z-40 left-1/2 transform -translate-x-1/2 -mt-3 bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
+            className={`sticky z-40 left-1/2 transform -translate-x-1/2 -mt-2 sm:-mt-3 bg-[${theme.common.brown}] text-[${theme.common.white}] p-1 sm:p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
             style={{ top: 'auto' }}
           >
-            {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+            {isMetadataCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </button>
         </>
       )}
 
       {/* Main content area */}
-      <div className={`px-4 pt-4 pb-20 transition-all overflow-x-hidden duration-300 ease-in-out ${isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-12' : 'mt-4')
+      <div className={`px-2 sm:px-4 pt-2 sm:pt-4 pb-20 transition-all overflow-x-hidden duration-300 ease-in-out ${isEditingMoodBoard ? 'mt-0' : (isMetadataCollapsed ? 'mt-6 sm:mt-12' : 'mt-2 sm:mt-4')
         }`}>
         {isFocusModeActive ? (
           renderFocusMode()
@@ -441,12 +445,13 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {sections.length === 0 && (
-                    <div className={`h-8 relative mb-4 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className={`h-6 sm:h-8 relative mb-2 sm:mb-4 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
                       <AddSectionButton
                         index={0}
                         isAdding={addingSectionAt === 0}
                         setAddingSectionAt={setAddingSectionAt}
                         addSection={addSection}
+                        isMobile={isMobile()}
                       />
                     </div>
                   )}
@@ -462,12 +467,13 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                         >
                           <React.Fragment>
                             {index === 0 && (
-                              <div className={`h-8 relative mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
+                              <div className={`h-6 sm:h-8 relative mb-1 sm:mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
                                 <AddSectionButton
                                   index={0}
                                   isAdding={addingSectionAt === 0}
                                   setAddingSectionAt={setAddingSectionAt}
                                   addSection={addSection}
+                                  isMobile={isMobile()}
                                 />
                               </div>
                             )}
@@ -485,13 +491,15 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                               addModifier={addModifier}
                               removeModifier={removeModifier}
                               dragHandleProps={provided.dragHandleProps}
+                              isMobile={isMobile()}
                             />
-                            <div className={`h-8 relative mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
+                            <div className={`h-6 sm:h-8 relative mb-1 sm:mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
                               <AddSectionButton
                                 index={index + 1}
                                 isAdding={addingSectionAt === index + 1}
                                 setAddingSectionAt={setAddingSectionAt}
                                 addSection={addSection}
+                                isMobile={isMobile()}
                               />
                             </div>
                           </React.Fragment>

@@ -24,7 +24,8 @@ function Section({
   addModifier,
   removeModifier,
   isFocusMode,
-  dragHandleProps
+  dragHandleProps, 
+  isMobile
 }) {
   const [customModifier, setCustomModifier] = useState('');
   const [showMaxModifierWarning, setShowMaxModifierWarning] = useState(false);
