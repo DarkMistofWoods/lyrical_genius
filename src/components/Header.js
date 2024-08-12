@@ -12,6 +12,10 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+  const gradientStyle = isDarkMode
+    ? 'linear-gradient(180deg, rgba(13,12,12,1) 50%, rgba(0,0,0,0) 100%)'
+    : 'linear-gradient(180deg, rgba(242,242,242,1) 50%, rgba(0,0,0,0) 100%)';
+
   return (
     <header className={`
       bg-[${currentTheme.background}] 
@@ -27,7 +31,12 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
       duration-300 
       ease-in-out
       ${isFocusModeActive ? '-translate-y-full' : 'translate-y-0'}
-    `}>
+    `}
+    style={{
+      background: gradientStyle,
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    }}
+    >
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Lyrical Genius (you!)</h1>
         <button 
@@ -58,19 +67,19 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
         <div className="md:hidden mt-4 space-y-2">
           <button 
             onClick={togglePreview}
-            className={`w-full text-left py-2 px-4 rounded bg-[${theme.common.grey}] text-[${currentTheme.text}]`}
+            className={`w-full text-left py-2 px-4 rounded-3xl bg-[${theme.common.brown}] text-[${currentTheme.text}]`}
           >
             <Eye size={20} className="inline mr-2" /> Toggle Preview
           </button>
           <button 
             onClick={toggleSongList}
-            className={`w-full text-left py-2 px-4 rounded bg-[${theme.common.grey}] text-[${currentTheme.text}]`}
+            className={`w-full text-left py-2 px-4 rounded-3xl bg-[${theme.common.brown}] text-[${currentTheme.text}]`}
           >
             <List size={20} className="inline mr-2" /> Toggle Song List
           </button>
           <button 
             onClick={() => dispatch(toggleTheme())}
-            className={`w-full text-left py-2 px-4 rounded bg-[${theme.common.grey}] text-[${currentTheme.text}]`}
+            className={`w-full text-left py-2 px-4 rounded-3xl bg-[${theme.common.brown}] text-[${currentTheme.text}]`}
           >
             {isDarkMode ? <Sun size={20} className="inline mr-2" /> : <Moon size={20} className="inline mr-2" />}
             {isDarkMode ? 'Light Mode' : 'Dark Mode'}
@@ -79,7 +88,7 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
             href="https://suno.com/@digital_takeover" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className={`block py-2 px-4 text-[${currentTheme.text}]`}
+            className={`block py-1 px-4 rounded-3xl bg-[${currentTheme.background}] text-[${currentTheme.text}] border-2 border-[${currentTheme.primary}]`}
           >
             Follow me on Suno: @digital_takeover
           </a>

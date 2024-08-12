@@ -49,7 +49,7 @@ function Section({
   // console.log(`Section ${index} modifier:`, section.modifier);
 
   const iconButtonStyle = `
-    w-6 h-6 
+    w-8 h-8 
     p-1
     mr-1 ml-1
     flex items-center justify-center 
@@ -60,6 +60,7 @@ function Section({
     hover:bg-opacity-100
     hover:text-[${theme.common.white}] 
     transition-colors
+    ${isMobile ? 'text-xl' : ''}
   `;
 
   useEffect(() => {
@@ -331,34 +332,91 @@ function Section({
     )
   );
 
+  const renderMobileButtons = () => (
+    <div className="flex flex-wrap justify-center items-center mt-2 mb-1">
+      <button
+        ref={settingsButtonRef}
+        onClick={handleSettingsButtonClick}
+        className={iconButtonStyle}
+      >
+        <Settings size={20} />
+      </button>
+      <button
+        onClick={() => duplicateSection(index)}
+        className={iconButtonStyle}
+      >
+        <Copy size={20} />
+      </button>
+      {section.type !== 'Line' && (
+        <button
+          ref={modifierButtonRef}
+          onClick={handleModifierButtonClick}
+          className={iconButtonStyle}
+        >
+          <Tag size={20} />
+        </button>
+      )}
+      <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
+        <GripVertical size={20} />
+      </div>
+      <button
+        onClick={() => removeSection(index)}
+        className={iconButtonStyle}
+      >
+        <XCircle size={20} />
+      </button>
+      {section.type === 'Verse' && (
+        <div className="flex items-center mt-2">
+          {verseNumbers.map(num => (
+            <button
+              key={num}
+              onClick={() => changeVerseNumber(index, num)}
+              className={`w-8 h-8 flex items-center justify-center rounded-full ml-1 ${
+                section.verseNumber === num
+                  ? 'bg-[#A68477] text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   if (section.type === 'StructureModifier') {
     return (
-      <div className={`p-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] flex justify-between items-center w-full mb-4 relative z-10`}>
-        <span>{displayLabel()}</span>
+      <div className={`p-2 rounded bg-[${theme.common.brown}] text-[${theme.common.white}] flex ${isMobile ? 'flex-col' : 'justify-between items-center'} w-full mb-4 relative z-10`}>
+        <span className={`${isMobile ? 'm-auto' : ''} text-lg`}>{displayLabel()}</span>
         {!isFocusMode && (
-          <div className="flex space-x-2">
-            <button
-              ref={modifierButtonRef}
-              onClick={() => setShowModifierDropdown(!showModifierDropdown)}
-              className={iconButtonStyle}
-            >
-              <Tag size={16} />
-            </button>
-            <button
-              onClick={() => duplicateSection(index)}
-              className={iconButtonStyle}
-            >
-              <Copy size={16} />
-            </button>
-            <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
-              <GripVertical size={16} />
-            </div>
-            <button
-              onClick={() => removeSection(index)}
-              className={iconButtonStyle}
-            >
-              <XCircle size={16} />
-            </button>
+          <div className={`flex ${isMobile ? 'flex-wrap justify-center' : 'space-x-2'}`}>
+            {isMobile ? renderMobileButtons() : (
+              <>
+                <button
+                  ref={modifierButtonRef}
+                  onClick={() => setShowModifierDropdown(!showModifierDropdown)}
+                  className={iconButtonStyle}
+                >
+                  <Tag size={16} />
+                </button>
+                <button
+                  onClick={() => duplicateSection(index)}
+                  className={iconButtonStyle}
+                >
+                  <Copy size={16} />
+                </button>
+                <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move`}>
+                  <GripVertical size={16} />
+                </div>
+                <button
+                  onClick={() => removeSection(index)}
+                  className={iconButtonStyle}
+                >
+                  <XCircle size={16} />
+                </button>
+              </>
+            )}
           </div>
         )}
         {showModifierDropdown && renderModifierDropdown()}
@@ -367,11 +425,11 @@ function Section({
   }
 
   return (
-    <div data-section-index={index} className="mb-4 flex flex-col relative bg-[#595859] bg-opacity-30 border-2 border-[#A68477] rounded-lg p-1">
-      <div className="flex justify-between items-start mb-1">
-        <div className="flex items-center">
-          <span className="font-bold text-sm mr-2">{displayLabel()}</span>
-          {!isFocusMode && (
+    <div data-section-index={index} className={`mb-4 flex flex-col relative bg-[#595859] bg-opacity-30 border-2 border-[#A68477] rounded-lg p-2 ${isMobile ? 'p-3' : ''}`}>
+      <div className={`flex ${isMobile ? 'flex-col' : 'justify-between items-start'} mb-2`}>
+        <div className={`flex ${isMobile ? 'flex-col' : 'items-center'}`}>
+          <span className={`font-bold ${isMobile ? 'text-lg m-auto' : 'text-sm mr-2'}`}>{displayLabel()}</span>
+          {!isFocusMode && !isMobile && (
             <>
               <button
                 ref={settingsButtonRef}
@@ -401,10 +459,11 @@ function Section({
                     <button
                       key={num}
                       onClick={() => changeVerseNumber(index, num)}
-                      className={`w-6 h-6 flex items-center justify-center rounded-full ml-1 ${section.verseNumber === num
+                      className={`w-6 h-6 flex items-center justify-center rounded-full ml-1 ${
+                        section.verseNumber === num
                           ? 'bg-[#A68477] text-white'
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                      }`}
                     >
                       {num}
                     </button>
@@ -414,7 +473,8 @@ function Section({
             </>
           )}
         </div>
-        {!isFocusMode && (
+        {!isFocusMode && isMobile && renderMobileButtons()}
+        {!isFocusMode && !isMobile && (
           <div className="flex items-center">
             <div {...dragHandleProps} className={`${iconButtonStyle} cursor-move mr-1`}>
               <GripVertical size={16} />
@@ -432,12 +492,13 @@ function Section({
         <textarea
           ref={textareaRef}
           placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
-          className={`w-full p-2 pr-8 border rounded resize-none overflow-hidden ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
-            }`}
+          className={`w-full p-2 pr-8 border rounded resize-none overflow-hidden ${
+            isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
+          } ${isMobile ? 'text-base' : ''}`}
           value={localContent}
           onChange={handleLocalChange}
           onBlur={handleBlur}
-          style={{ minHeight: '24px' }} // Approximately one line of text
+          style={{ minHeight: isMobile ? '100px' : '24px' }}
         ></textarea>
       </div>
       {showMaxModifierWarning && (
