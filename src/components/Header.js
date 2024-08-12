@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '../store/themeSlice';
 import theme from '../theme';
@@ -9,18 +9,30 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const currentTheme = isDarkMode ? theme.dark : theme.light;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+  const handleMobileAction = (action) => {
+    action();
+    setIsMenuOpen(false);
+  };
+
   const gradientStyle = isDarkMode
-    ? 'linear-gradient(180deg, rgba(13,12,12,1) 50%, rgba(0,0,0,0) 100%)'
-    : 'linear-gradient(180deg, rgba(242,242,242,1) 50%, rgba(0,0,0,0) 100%)';
+    ? 'linear-gradient(180deg, rgba(13,12,12,1) 75%, rgba(0,0,0,0) 100%)'
+    : 'linear-gradient(180deg, rgba(242,242,242,1) 75%, rgba(0,0,0,0) 100%)';
 
   return (
     <header className={`
-      bg-[${currentTheme.background}] 
-      text-[${currentTheme.text}] 
-      bg-opacity-45 
       p-4 
       fixed 
       top-0 
@@ -38,10 +50,10 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
     }}
     >
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold">Lyrical Genius (you!)</h1>
+        <h1 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Lyrical Genius (you!)</h1>
         <button 
           onClick={toggleMenu}
-          className="md:hidden"
+          className={`md:hidden ${isDarkMode ? 'text-white' : 'text-gray-800'}`}
         >
           <Menu size={24} />
         </button>
@@ -50,50 +62,52 @@ function Header({ isFocusModeActive, togglePreview, toggleSongList }) {
             href="https://suno.com/@digital_takeover" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="mr-4 hover:underline"
+            className={`mr-4 hover:underline ${isDarkMode ? 'text-white' : 'text-gray-800'}`}
           >
             Follow me on Suno: @digital_takeover
           </a>
           <button 
             onClick={() => dispatch(toggleTheme())}
-            className={`bg-[${isDarkMode ? theme.common.white : theme.common.black}] text-[${isDarkMode ? theme.common.black : theme.common.white}] px-4 py-2 rounded-full`}
+            className={`bg-${isDarkMode ? 'white' : 'black'} text-${isDarkMode ? 'gray-800' : 'white'} px-4 py-2 rounded-full transition-colors duration-300`}
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
         </div>
       </div>
       
-      {isMenuOpen && (
-        <div className="md:hidden mt-4 space-y-2">
-          <button 
-            onClick={togglePreview}
-            className={`w-full text-left py-2 px-4 rounded-3xl bg-[${theme.common.brown}] text-[${currentTheme.text}]`}
-          >
-            <Eye size={20} className="inline mr-2" /> Toggle Preview
-          </button>
-          <button 
-            onClick={toggleSongList}
-            className={`w-full text-left py-2 px-4 rounded-3xl bg-[${theme.common.brown}] text-[${currentTheme.text}]`}
-          >
-            <List size={20} className="inline mr-2" /> Toggle Song List
-          </button>
-          <button 
-            onClick={() => dispatch(toggleTheme())}
-            className={`w-full text-left py-2 px-4 rounded-3xl bg-[${theme.common.brown}] text-[${currentTheme.text}]`}
-          >
-            {isDarkMode ? <Sun size={20} className="inline mr-2" /> : <Moon size={20} className="inline mr-2" />}
-            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-          </button>
-          <a 
-            href="https://suno.com/@digital_takeover" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className={`block py-1 px-4 rounded-3xl bg-[${currentTheme.background}] text-[${currentTheme.text}] border-2 border-[${currentTheme.primary}]`}
-          >
-            Follow me on Suno: @digital_takeover
-          </a>
-        </div>
-      )}
+      <div 
+        className={`md:hidden mt-4 space-y-2 overflow-hidden transition-all duration-300 ease-in-out ${
+          isMenuOpen ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <button 
+          onClick={() => handleMobileAction(togglePreview)}
+          className={`w-full text-left py-2 px-4 rounded-2xl bg-[${theme.common.brown}] text-${isDarkMode ? 'white' : 'black'}`}
+        >
+          <Eye size={20} className="inline mr-2" /> Toggle Preview
+        </button>
+        <button 
+          onClick={() => handleMobileAction(toggleSongList)}
+          className={`w-full text-left py-2 px-4 rounded-2xl bg-[${theme.common.brown}] text-${isDarkMode ? 'white' : 'black'}`}
+        >
+          <List size={20} className="inline mr-2" /> Toggle Song List
+        </button>
+        <button 
+          onClick={() => dispatch(toggleTheme())}
+          className={`w-full text-left py-2 px-4 rounded-2xl bg-[${theme.common.brown}] text-${isDarkMode ? 'white' : 'black'}`}
+        >
+          {isDarkMode ? <Sun size={20} className="inline mr-2" /> : <Moon size={20} className="inline mr-2" />}
+          {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+        </button>
+        <a 
+          href="https://suno.com/@digital_takeover" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className={`block py-1 border-2 rounded-3xl px-4 border-[${theme.common.brown}] text-${isDarkMode ? 'white' : 'black'}`}
+        >
+          Follow me on Suno: @digital_takeover
+        </a>
+      </div>
     </header>
   );
 }
