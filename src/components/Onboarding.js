@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { X, ChevronRight, ChevronLeft, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import theme from '../theme';
+import GuidedTour from './GuidedTour';
 
 const FAQ = ({ isDarkMode }) => {
   const [openQuestion, setOpenQuestion] = useState(null);
@@ -9,7 +10,7 @@ const FAQ = ({ isDarkMode }) => {
   const questions = [
     {
       question: "What is Lyrical Genius?",
-      answer: "Lyrical Genius is an open-source comprehensive songwriting tool that provides an intuitive interface for composing lyrics, managing your songs, and visualizing your creative process. It was made specifically with Suno users in mind, and provides features tailored to maximizing quality of output. Lyrical Genius is not affiliated with Suno in any way."
+      answer: "Lyrical Genius is an open-source comprehensive songwriting tool that provides an intuitive interface for composing lyrics, managing your songs, and visualizing your creative process. It was made specifically with Suno users in mind, and provides features tailored to maximizing quality of output, but it is by no means exclusive to AI-generated music. Lyrical Genius is not affiliated with Suno in any way."
     },
     {
       question: "How do I create new song lyrics?",
@@ -17,7 +18,7 @@ const FAQ = ({ isDarkMode }) => {
     },
     {
       question: "What is a mood board?",
-      answer: "A mood board is a visual tool in Lyrical Genius that allows you to collect and arrange images, colors, and text that inspire your songwriting process and nestle them into the background of your lyrics editor."
+      answer: "A mood board is a visual tool in Lyrical Genius that allows you to collect and arrange images, colors, and text that inspire your songwriting process and nestle them into the background of your masterpieces-to-be."
     },
     {
       question: "Can I categorize my songs?",
@@ -66,10 +67,65 @@ const FAQ = ({ isDarkMode }) => {
   );
 };
 
+const SecurityAndPhilosophy = ({ isDarkMode }) => {
+  const points = [
+    {
+      title: "Local Storage Only",
+      content: "All your data is stored locally on your device. We don't have servers, so your lyrics stay private and secure."
+    },
+    {
+      title: "Open Source",
+      content: "Lyrical Genius is open source, meaning you can inspect the code to ensure it does what we say it does.",
+      link: {
+        text: "View the code",
+        url: "https://github.com/DarkMistofWoods/lyrical_genius"
+      }
+    },
+    {
+      title: "No Tracking",
+      content: "We don't track your usage or collect any personal information. Your identity and the creative process behind it is yours alone."
+    },
+    {
+      title: "Empowering Creativity",
+      content: "The philosophy of Lyrical Genius is to provide tools that enhance your creative process without getting in the way. We believe in empowering songwriters of all levels."
+    },
+    {
+      title: "Community Driven",
+      content: "As an open-source project, we welcome contributions and feedback from the community to continually improve Lyrical Genius."
+    }
+  ];
+
+  return (
+    <div className="mt-4">
+      {points.map((point, index) => (
+        <div key={index} className="mb-4">
+          <h4 className={`font-semibold mb-1 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
+            {point.title}
+          </h4>
+          <p className={`text-sm text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
+            {point.content}
+            {point.link && (
+              <a 
+                href={point.link.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={`ml-1 text-[${theme.common.brown}] hover:underline`}
+              >
+                {point.link.text}
+              </a>
+            )}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const Onboarding = ({ onClose, isDarkMode }) => {
   const [step, setStep] = useState(0);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isContentVisible, setIsContentVisible] = useState(false);
+  const [showGuidedTour, setShowGuidedTour] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -86,6 +142,11 @@ const Onboarding = ({ onClose, isDarkMode }) => {
       title: "Welcome to Lyrical Genius",
       content: "Lyrical Genius is your ideal environment for songwriting. It provides a streamlined interface for composing lyrics, managing your songs, and visualizing your creative process. Effortlessly take your lyrics into your favorite AI music software and watch them come to life.",
       component: <FAQ isDarkMode={isDarkMode} />
+    },
+    {
+      title: "Security and Philosophy",
+      content: "For Lyrical Genius to be truly genius, it needs to prioritize your privacy, security, and creative freedom. Here's what you need to know:",
+      component: <SecurityAndPhilosophy isDarkMode={isDarkMode} />
     },
     {
       title: "Would you like a guided tour?",
@@ -115,17 +176,6 @@ const Onboarding = ({ onClose, isDarkMode }) => {
     }
   };
 
-  const handleStartTour = () => {
-    // Implement the guided tour logic here
-    console.log("Starting guided tour");
-    onClose();
-  };
-
-  const handleSkipTour = () => {
-    console.log("Skipping guided tour");
-    onClose();
-  };
-
   const handleClose = () => {
     setIsContentVisible(false);
     setTimeout(() => {
@@ -133,6 +183,18 @@ const Onboarding = ({ onClose, isDarkMode }) => {
       setTimeout(onClose, 300);
     }, 300);
   };
+
+  const handleStartTour = () => {
+    setShowGuidedTour(true);
+  };
+
+  const handleSkipTour = () => {
+    onClose();
+  };
+
+  if (showGuidedTour) {
+    return <GuidedTour onClose={onClose} isDarkMode={isDarkMode} />;
+  }
 
   return (
     <div className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out ${
@@ -155,6 +217,7 @@ const Onboarding = ({ onClose, isDarkMode }) => {
         <p className={`mb-6 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
           {steps[step].content}
         </p>
+
         {steps[step].component}
         <div className="flex justify-between mt-6">
           {step > 0 && (
@@ -183,11 +246,11 @@ const Onboarding = ({ onClose, isDarkMode }) => {
                 Start Tour
               </button>
               <button
-                  onClick={handleClose}
-                  className={`px-4 py-2 bg-[${theme.common.grey}] text-[${theme.common.white}] rounded hover:opacity-80 transition-opacity duration-200`}
-                >
-                  Skip Tour
-                </button>
+                onClick={handleSkipTour}
+                className={`px-4 py-2 bg-[${theme.common.grey}] text-[${theme.common.white}] rounded hover:opacity-80 transition-opacity duration-200`}
+              >
+                Skip Tour
+              </button>
             </div>
           )}
         </div>
