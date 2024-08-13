@@ -9,23 +9,27 @@ const FAQ = ({ isDarkMode }) => {
   const questions = [
     {
       question: "What is Lyrical Genius?",
-      answer: "Lyrical Genius is a comprehensive songwriting tool that provides an intuitive interface for composing lyrics, managing your songs, and visualizing your creative process."
+      answer: "Lyrical Genius is an open-source comprehensive songwriting tool that provides an intuitive interface for composing lyrics, managing your songs, and visualizing your creative process. It was made specifically with Suno users in mind, and provides features tailored to maximizing quality of output. Lyrical Genius is not affiliated with Suno in any way."
     },
     {
-      question: "How do I create a new song?",
-      answer: "You can create a new song by clicking the 'New Song' button in the sidebar. This will open a blank canvas for you to start writing your lyrics."
+      question: "How do I create new song lyrics?",
+      answer: "You can create a new song by clicking the 'New Song' button in the sidebar. This will open a blank canvas for you to start adding sections and writing your lyrics."
     },
     {
-      question: "What is a Mood Board?",
-      answer: "A Mood Board is a visual tool in Lyrical Genius that allows you to collect and arrange images, colors, and text that inspire your songwriting process."
+      question: "What is a mood board?",
+      answer: "A mood board is a visual tool in Lyrical Genius that allows you to collect and arrange images, colors, and text that inspire your songwriting process and nestle them into the background of your lyrics editor."
     },
     {
       question: "Can I categorize my songs?",
       answer: "Yes, you can create custom categories and assign them to your songs for easy organization and retrieval."
     },
     {
+      question: "How do I write good lyrics?",
+      answer: "Start with emotion, not perfection. Write about what you feel most deeply right now, whether it's joy, sadness, anger, or confusion. Don't worry about crafting the perfect lyric or melody yet – just let your emotions guide your keystrokes. Trust your voice, embrace your unique experiences, and keep writing – your lyrical genius is waiting to be discovered."
+    },
+    {
       question: "Is my data saved automatically?",
-      answer: "Yes, Lyrical Genius automatically saves your work as you write, ensuring you never lose your creative ideas."
+      answer: "Yes, Lyrical Genius automatically saves your work locally as you write, ensuring you never lose your creative ideas."
     }
   ];
 
@@ -64,21 +68,23 @@ const FAQ = ({ isDarkMode }) => {
 
 const Onboarding = ({ onClose, isDarkMode }) => {
   const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState('right');
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+  const [isContentVisible, setIsContentVisible] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Trigger the fade-in animation after a short delay
-    const timer = setTimeout(() => setIsVisible(true), 50);
-    return () => clearTimeout(timer);
+    const overlayTimer = setTimeout(() => setIsOverlayVisible(true), 50);
+    const contentTimer = setTimeout(() => setIsContentVisible(true), 100);
+    return () => {
+      clearTimeout(overlayTimer);
+      clearTimeout(contentTimer);
+    };
   }, []);
 
   const steps = [
     {
       title: "Welcome to Lyrical Genius",
-      content: "Lyrical Genius is your ideal environment for songwriting. It provides a streamlined interface for composing lyrics, managing your songs, and visualizing your creative process.",
+      content: "Lyrical Genius is your ideal environment for songwriting. It provides a streamlined interface for composing lyrics, managing your songs, and visualizing your creative process. Effortlessly take your lyrics into your favorite AI music software and watch them come to life.",
       component: <FAQ isDarkMode={isDarkMode} />
     },
     {
@@ -89,24 +95,22 @@ const Onboarding = ({ onClose, isDarkMode }) => {
 
   const handleNext = () => {
     if (step < steps.length - 1) {
-      setDirection('right');
-      setIsTransitioning(true);
+      setIsContentVisible(false);
       setTimeout(() => {
         setStep(step + 1);
-        setIsTransitioning(false);
+        setIsContentVisible(true);
       }, 300);
     } else {
-      onClose();
+      handleClose();
     }
   };
-
+  
   const handlePrev = () => {
     if (step > 0) {
-      setDirection('left');
-      setIsTransitioning(true);
+      setIsContentVisible(false);
       setTimeout(() => {
         setStep(step - 1);
-        setIsTransitioning(false);
+        setIsContentVisible(true);
       }, 300);
     }
   };
@@ -122,21 +126,25 @@ const Onboarding = ({ onClose, isDarkMode }) => {
     onClose();
   };
 
+  const handleClose = () => {
+    setIsContentVisible(false);
+    setTimeout(() => {
+      setIsOverlayVisible(false);
+      setTimeout(onClose, 300);
+    }, 300);
+  };
+
   return (
     <div className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out ${
-      isVisible ? 'bg-opacity-50' : 'bg-opacity-0'
+      isOverlayVisible ? 'bg-opacity-50' : 'bg-opacity-0'
     } flex items-center justify-center z-50`}>
       <div 
         className={`bg-[${isDarkMode ? theme.dark.background : theme.light.background}] p-6 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out ${
-          isTransitioning 
-            ? (direction === 'right' ? 'translate-x-full opacity-0' : '-translate-x-full opacity-0') 
-            : 'translate-x-0 opacity-100'
-        } ${
-          isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          isContentVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
       >
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className={`absolute top-2 right-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}] transition-colors duration-200 hover:text-[${theme.common.brown}]`}
         >
           <X size={24} />
@@ -175,11 +183,11 @@ const Onboarding = ({ onClose, isDarkMode }) => {
                 Start Tour
               </button>
               <button
-                onClick={handleSkipTour}
-                className={`px-4 py-2 bg-[${theme.common.grey}] text-[${theme.common.white}] rounded hover:opacity-80 transition-opacity duration-200`}
-              >
-                Skip Tour
-              </button>
+                  onClick={handleClose}
+                  className={`px-4 py-2 bg-[${theme.common.grey}] text-[${theme.common.white}] rounded hover:opacity-80 transition-opacity duration-200`}
+                >
+                  Skip Tour
+                </button>
             </div>
           )}
         </div>
