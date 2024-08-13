@@ -140,7 +140,7 @@ const Onboarding = ({ onClose, isDarkMode }) => {
   const steps = [
     {
       title: "Welcome to Lyrical Genius",
-      content: "Lyrical Genius is your ideal environment for songwriting. It provides a streamlined interface for composing lyrics, managing your songs, and visualizing your creative process. Effortlessly take your lyrics into your favorite AI music software and watch them come to life.",
+      content: "Lyrical Genius is your ideal environment for songwriting. It provides a streamlined interface for composing lyrics, managing your songs, and visualizing your creative process. Effortlessly take your lyrics into production or your favorite AI music software and watch them come to life.",
       component: <FAQ isDarkMode={isDarkMode} />
     },
     {
