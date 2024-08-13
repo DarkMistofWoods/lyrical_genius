@@ -122,4 +122,4 @@ This project is licensed under the MIT license.
 
 ## Contact
 
-Project Link: [https://github.com/darkmistofwoods/lyrical-genius](https://github.com/darkmistofwoods/lyrical-genius)
+Project Link: [https://github.com/darkmistofwoods/lyrical_genius](https://github.com/DarkMistofWoods/lyrical_genius)
