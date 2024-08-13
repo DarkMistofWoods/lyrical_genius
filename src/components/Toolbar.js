@@ -232,11 +232,11 @@ function Toolbar({
 
   return (
     <>
-      <div className={`fixed bottom-0 left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-45 border-t border-[${theme.common.grey}] p-2 flex justify-center items-center z-50`}>
+      <div className={`toolbar fixed bottom-0 left-0 right-0 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-45 border-t border-[${theme.common.grey}] p-2 flex justify-center items-center z-50`}>
         <div className="flex space-x-4">
           <button
             onClick={handleUndo}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded transition-opacity ${isUndoAvailable ? 'hover:opacity-80' : 'opacity-50 cursor-not-allowed'}`}
+            className={`undo bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded transition-opacity ${isUndoAvailable ? 'hover:opacity-80' : 'opacity-50 cursor-not-allowed'}`}
             title={isUndoAvailable ? "Undo" : "No actions to undo"}
             disabled={!isUndoAvailable}
           >
@@ -244,35 +244,35 @@ function Toolbar({
           </button>
           <button
             onClick={() => handlePanelClick('tools')}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'tools' ? 'opacity-60' : ''}`}
+            className={`tools bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'tools' ? 'opacity-60' : ''}`}
             title="Tools"
           >
             <Wrench size={20} />
           </button>
           <button
             onClick={() => handlePanelClick('feedback')}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'feedback' ? 'opacity-60' : ''}`}
+            className={`feedback bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'feedback' ? 'opacity-60' : ''}`}
             title="Feedback"
           >
             <MessageSquare size={20} />
           </button>
           <button
             onClick={toggleFocusMode}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isFocusModeActive ? 'opacity-60' : ''}`}
+            className={`focus bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${isFocusModeActive ? 'opacity-60' : ''}`}
             title={isFocusModeActive ? "Exit Focus Mode" : "Enter Focus Mode"}
           >
             <Sparkle size={20} />
           </button>
           <button
             onClick={() => handlePanelClick('versionControl')}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'versionControl' ? 'opacity-60' : ''}`}
+            className={`version bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'versionControl' ? 'opacity-60' : ''}`}
             title="Version Control"
           >
             <GitBranch size={20} />
           </button>
           <button
             onClick={() => handlePanelClick('moodBoard')}
-            className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'moodBoard' ? 'opacity-60' : ''}`}
+            className={`moodboard bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity ${openPanel === 'moodBoard' ? 'opacity-60' : ''}`}
             title="Mood Board"
           >
             <Image size={20} />

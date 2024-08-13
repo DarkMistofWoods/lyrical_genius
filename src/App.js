@@ -157,7 +157,7 @@ function App() {
       <div className={`flex flex-col md:flex-row ${isEditingMoodBoard ? 'pt-0' : 'pt-16'} pb-16`}>
         {/* Sidebar */}
         <div 
-          className={`fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-16'} bottom-16 overflow-visible transition-all duration-300
+          className={`sidebar fixed left-0 ${isEditingMoodBoard ? 'top-0' : 'top-16'} bottom-16 overflow-visible transition-all duration-300
             ${isMobile ? (isSongListVisible ? 'w-full' : 'w-0') : (isSidebarCollapsed ? 'w-0' : 'w-96')}
             ${isMobile ? 'z-20' : ''}
           `}
@@ -181,7 +181,7 @@ function App() {
 
         {/* Main content */}
         {!isEditingMoodBoard && (!isMobile || (!isPreviewVisible && !isSongListVisible)) && (
-          <main className={`flex-1 transition-all duration-300 ease-in-out
+          <main className={`lyrics-editor flex-1 transition-all duration-300 ease-in-out
             ${isMobile ? 'ml-0 mr-0' : `
               ${isSidebarCollapsed ? 'ml-0' : 'ml-96'}
               ${isPreviewCollapsed ? 'mr-0' : 'mr-96'}
@@ -195,7 +195,7 @@ function App() {
 
         {/* Preview */}
         <div 
-          className={`fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-16'} bottom-16 overflow-visible transition-all duration-300
+          className={`live-preview fixed right-0 ${isEditingMoodBoard ? 'top-0' : 'top-16'} bottom-16 overflow-visible transition-all duration-300
             ${isMobile ? (isPreviewVisible ? 'w-full' : 'w-0') : (isPreviewCollapsed ? 'w-0' : 'w-96')}
             ${isMobile ? 'z-20' : ''}
           `}
@@ -224,6 +224,7 @@ function App() {
         setIsEditingMoodBoard={setIsEditingMoodBoard}
         isFocusModeActive={isFocusModeActive}
         toggleFocusMode={toggleFocusMode}
+        className="toolbar"
       />
 
       {showOnboarding && (
