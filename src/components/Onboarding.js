@@ -79,7 +79,7 @@ const SecurityAndPhilosophy = ({ isDarkMode }) => {
     },
     {
       title: "Open Source",
-      content: "Lyrical Genius is open source, meaning you can inspect the code to ensure it does what we say it does.",
+      content: "Lyrical Genius is open sourced under the MIT license, meaning you can inspect the code to ensure it does what we say it does.",
       link: {
         text: "View the code",
         url: "https://github.com/DarkMistofWoods/lyrical_genius"
