@@ -429,7 +429,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
             className={`sticky z-40 left-1/2 transform -translate-x-1/2 -mt-2 sm:-mt-3 bg-[${theme.common.brown}] text-[${theme.common.white}] p-1 sm:p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
             style={{ top: 'auto' }}
           >
-            {isMetadataCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+            {isMetadataCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
           </button>
         </>
       )}
