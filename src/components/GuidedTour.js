@@ -2,7 +2,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronRight, ChevronLeft, X } from 'lucide-react';
 import theme from '../theme';
 
-const GuidedTour = ({ onClose, isDarkMode }) => {
+const GuidedTour = ({ 
+  onClose, 
+  isDarkMode, 
+  isSidebarCollapsed, 
+  isPreviewCollapsed, 
+  setIsSidebarCollapsed, 
+  setIsPreviewCollapsed,
+  dispatch 
+}) => {
   const [step, setStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [tourSteps, setTourSteps] = useState([]);
@@ -60,6 +68,14 @@ const GuidedTour = ({ onClose, isDarkMode }) => {
   }, [step, tourSteps]);
 
   useEffect(() => {
+    // Open sidebar and preview if they're closed
+    if (isSidebarCollapsed) {
+      setIsSidebarCollapsed(false);
+    }
+    if (isPreviewCollapsed) {
+      setIsPreviewCollapsed(false);
+    }
+
     setIsVisible(true);
     const steps = [
       {
@@ -119,7 +135,7 @@ const GuidedTour = ({ onClose, isDarkMode }) => {
       },
     ];
     setTourSteps(steps);
-  }, []);
+  }, [isSidebarCollapsed, isPreviewCollapsed, setIsSidebarCollapsed, setIsPreviewCollapsed]);
 
   useEffect(() => {
     updatePositions();

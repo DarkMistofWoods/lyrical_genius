@@ -125,7 +125,14 @@ const SecurityAndPhilosophy = ({ isDarkMode }) => {
   );
 };
 
-const Onboarding = ({ onClose, isDarkMode }) => {
+const Onboarding = ({
+  onClose, 
+  isDarkMode, 
+  isSidebarCollapsed, 
+  isPreviewCollapsed, 
+  setIsSidebarCollapsed, 
+  setIsPreviewCollapsed
+}) => {
   const [step, setStep] = useState(0);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isContentVisible, setIsContentVisible] = useState(false);
@@ -192,7 +199,14 @@ const Onboarding = ({ onClose, isDarkMode }) => {
 
   const handleStartTour = () => {
     if (!isMobile()) {
-      setShowGuidedTour(true);
+      // Open sidebar and preview if they're closed
+      if (isSidebarCollapsed) {
+        setIsSidebarCollapsed(false);
+      }
+      if (isPreviewCollapsed) {
+        setIsPreviewCollapsed(false);
+      }
+      setTimeout(() => setShowGuidedTour(true), 300);
     }
   };
 
@@ -201,7 +215,17 @@ const Onboarding = ({ onClose, isDarkMode }) => {
   };
 
   if (showGuidedTour) {
-    return <GuidedTour onClose={onClose} isDarkMode={isDarkMode} />;
+    return (
+      <GuidedTour 
+        onClose={onClose} 
+        isDarkMode={isDarkMode}
+        isSidebarCollapsed={isSidebarCollapsed}
+        isPreviewCollapsed={isPreviewCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+        setIsPreviewCollapsed={setIsPreviewCollapsed}
+        dispatch={dispatch}
+      />
+    );
   }
 
   return (

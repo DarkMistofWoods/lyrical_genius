@@ -231,6 +231,11 @@ function App() {
         <Onboarding 
           onClose={handleCloseOnboarding}
           isDarkMode={isDarkMode}
+          isSidebarCollapsed={isSidebarCollapsed}
+          isPreviewCollapsed={isPreviewCollapsed}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
+          setIsPreviewCollapsed={setIsPreviewCollapsed}
+          dispatch={dispatch}
         />
       )}
     </div>
