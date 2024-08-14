@@ -14,7 +14,7 @@ const FAQ = ({ isDarkMode }) => {
   const questions = [
     {
       question: "What is Lyrical Genius?",
-      answer: "Lyrical Genius is an open-source comprehensive songwriting tool that provides an intuitive interface for composing lyrics, managing your songs, and visualizing your creative process. It was made specifically with Suno users in mind, and provides features tailored to maximizing quality of output, but it is by no means exclusive to AI-generated music. Lyrical Genius is not affiliated with Suno in any way."
+      answer: "Lyrical Genius is an open-source comprehensive songwriting tool that provides an interface for composing lyrics, managing your songs, and visualizing your creative process. It was made specifically with Suno users in mind, and provides features tailored to maximizing quality of output, but it is by no means exclusive to AI-generated music. Lyrical Genius is not affiliated with Suno in any way."
     },
     {
       question: "How do I create new song lyrics?",
