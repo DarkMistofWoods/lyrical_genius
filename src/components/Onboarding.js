@@ -4,6 +4,10 @@ import { X, ChevronRight, ChevronLeft, HelpCircle, ChevronDown, ChevronUp } from
 import theme from '../theme';
 import GuidedTour from './GuidedTour';
 
+const isMobile = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+};
+
 const FAQ = ({ isDarkMode }) => {
   const [openQuestion, setOpenQuestion] = useState(null);
 
@@ -150,10 +154,12 @@ const Onboarding = ({ onClose, isDarkMode }) => {
     },
     {
       title: "Would you like a guided tour?",
-      content: "We can walk you through the main features of Lyrical Genius. This tour is optional and can be accessed later via the help icon next to the theme toggle.",
+      content: isMobile() 
+        ? "The guided tour is not yet available on mobile devices. You can explore the app on your own or check back on a desktop for a full tour."
+        : "We can walk you through the main features of Lyrical Genius. This tour is optional and can be accessed later via the help icon next to the theme toggle.",
     },
   ];
-
+  
   const handleNext = () => {
     if (step < steps.length - 1) {
       setIsContentVisible(false);
@@ -185,7 +191,9 @@ const Onboarding = ({ onClose, isDarkMode }) => {
   };
 
   const handleStartTour = () => {
-    setShowGuidedTour(true);
+    if (!isMobile()) {
+      setShowGuidedTour(true);
+    }
   };
 
   const handleSkipTour = () => {
@@ -239,17 +247,19 @@ const Onboarding = ({ onClose, isDarkMode }) => {
             </button>
           ) : (
             <div className="ml-auto">
-              <button
-                onClick={handleStartTour}
-                className={`px-4 py-2 bg-[${theme.common.brown}] text-[${theme.common.white}] rounded hover:opacity-80 transition-opacity duration-200 mr-2`}
-              >
-                Start Tour
-              </button>
+              {!isMobile() && (
+                <button
+                  onClick={handleStartTour}
+                  className={`px-4 py-2 bg-[${theme.common.brown}] text-[${theme.common.white}] rounded hover:opacity-80 transition-opacity duration-200 mr-2`}
+                >
+                  Start Tour
+                </button>
+              )}
               <button
                 onClick={handleSkipTour}
                 className={`px-4 py-2 bg-[${theme.common.grey}] text-[${theme.common.white}] rounded hover:opacity-80 transition-opacity duration-200`}
               >
-                Skip Tour
+                {isMobile() ? 'Got It' : 'Skip Tour'}
               </button>
             </div>
           )}
