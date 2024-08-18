@@ -58,6 +58,11 @@ function MetadataSection({ currentSong, saveChanges }) {
     }
   };
 
+  const handleCustomStyleSubmit = (e) => {
+    e.preventDefault();
+    addCustomStyle();
+  };
+
   const addCustomStyle = () => {
     if (customStyle.trim()) {
       const newStyle = JSON.parse(JSON.stringify(currentSong.style)); // Deep clone
@@ -151,21 +156,23 @@ function MetadataSection({ currentSong, saveChanges }) {
                   ))}
                 </select>
               </div>
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  placeholder="Add custom style"
-                  value={customStyle}
-                  onChange={(e) => setCustomStyle(e.target.value)}
-                  className={`flex-grow p-2 text-sm bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] rounded-l border-r border-[${theme.common.grey}]`}
-                />
-                <button
-                  onClick={addCustomStyle}
-                  className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-r hover:opacity-80 flex items-center justify-center`}
-                >
-                  <Plus size={20} />
-                </button>
-              </div>
+              <form onSubmit={handleCustomStyleSubmit}>
+                <div className="flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Add custom style"
+                    value={customStyle}
+                    onChange={(e) => setCustomStyle(e.target.value)}
+                    className={`flex-grow p-2 text-sm bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] rounded-l border-r border-[${theme.common.grey}]`}
+                  />
+                  <button
+                    type="submit"
+                    className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-r hover:opacity-80 flex items-center justify-center`}
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
+              </form>
             </div>
             {filteredOptions.map((categoryGroup, index) => (
               <div key={index}>
