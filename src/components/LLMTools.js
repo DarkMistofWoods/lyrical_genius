@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { X, RefreshCcwDot, Shuffle, BookA, SquareUser, AtSign, Globe, Briefcase, Search } from 'lucide-react';
+import { X, RefreshCcwDot, Shuffle, BookA, SquareUser, AtSign, Globe, Search, Link } from 'lucide-react';
 import theme from '../theme';
 
 const CLOUDFLARE_WORKER_URL = 'https://lyrical-genius.zetleader.workers.dev/';
@@ -52,7 +52,7 @@ const LLMTools = ({ selectedTool, onClose }) => {
         },
         { 
             name: 'synonymGenerator', 
-            icon: Briefcase, 
+            icon: Link, 
             prompt: "Please find five words synonymous with '{search term}' that would be considered relevant. Results should match or be similar to the part of speech of the provided term. Include only the words and a short description for each; nothing extraneous. Use the following format:\n[\"{word}\", \"{description}\"],\n[\"{word}\", \"{description}\"],\n...",
             description: "Find synonyms for your input word, matching the original part of speech."
         },
@@ -107,15 +107,15 @@ const LLMTools = ({ selectedTool, onClose }) => {
     };
 
     const validateSearchTerm = (term) => {
-        // Allow letters, numbers, and spaces, with a maximum length of 20 characters
-        return term.length <= 20 && /^[a-zA-Z0-9\s]+$/.test(term);
+        // Allow letters, numbers, and spaces, with a maximum length of 30 characters
+        return term.length <= 30 && /^[a-zA-Z0-9\s]+$/.test(term);
     };
 
     const handleSearch = async () => {
         if (!searchTerm.trim()) return;
 
         if (!validateSearchTerm(searchTerm)) {
-            setError('Invalid search term. Must be 20 characters or less and contain only letters and numbers.');
+            setError('Invalid search term. Must be 30 characters or less and contain only letters and numbers.');
             return;
         }
 
@@ -292,8 +292,8 @@ const LLMTools = ({ selectedTool, onClose }) => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Enter search term (max 20 chars)"
-                    maxLength={20}
+                    placeholder="Enter search term (max 30 chars)"
+                    maxLength={30}
                     className={`flex-grow p-2 rounded-l bg-[${isDarkMode ? theme.dark.input : theme.light.input}] text-[${isDarkMode ? theme.dark.text : theme.light.text}] border-r border-[${theme.common.grey}]`}
                 />
                 <button
