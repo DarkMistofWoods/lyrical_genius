@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { Search, BookA, MessageCircle, AtSign, Globe } from 'lucide-react';
+import { X, RefreshCcwDot, Search, BookA, MessageCircle, AtSign, Globe } from 'lucide-react';
 import theme from '../theme';
 
 const CLOUDFLARE_WORKER_URL = 'https://lyrical-genius.zetleader.workers.dev/';
@@ -38,22 +38,34 @@ const LLMTools = ({ selectedTool, onClose }) => {
 
     const formatResults = (rawResults) => {
         try {
+            // Split the raw results into lines
             const lines = rawResults.trim().split('\n');
-
+            
             return lines.map(line => {
+                // Remove any trailing commas
                 line = line.replace(/,\s*$/, '');
-
+                
+                // Try to parse the line as JSON
                 try {
                     const parsed = JSON.parse(line);
-                    return parsed.map(item => item.replace(/^"|"$/g, '').trim());
+                    // If parsing succeeds, return the parsed array
+                    return Array.isArray(parsed) ? parsed.map(item => item.toString().trim()) : [parsed.toString().trim()];
                 } catch (lineError) {
-                    console.error('Error parsing line:', lineError);
-                    return [line];
+                    // If parsing fails, try to extract content from square brackets
+                    const bracketMatch = line.match(/\[(.*?)\]/);
+                    if (bracketMatch) {
+                        // Split the content by comma and trim each item
+                        return bracketMatch[1].split(',').map(item => item.replace(/^["']|["']$/g, '').trim());
+                    } else {
+                        // If no brackets, just return the line as a single item
+                        return [line.trim()];
+                    }
                 }
             });
         } catch (error) {
             console.error('Error parsing results:', error);
-            return rawResults.split('\n').map(line => [line.replace(/^"|"$/g, '').trim()]).filter(item => item[0]);
+            // If all else fails, split by newline and return each line as an item
+            return rawResults.split('\n').map(line => [line.trim()]).filter(item => item[0]);
         }
     };
 
@@ -68,6 +80,18 @@ const LLMTools = ({ selectedTool, onClose }) => {
         if (!validateSearchTerm(searchTerm)) {
             setError('Invalid search term. Must be 20 characters or less and contain only letters and numbers.');
             return;
+        }
+
+        const currentTime = Date.now();
+        if (currentTime - lastRequestTime < TIME_WINDOW) {
+            if (requestCount >= MAX_REQUESTS) {
+                setError(`Rate limit exceeded. Please wait before making another request.`);
+                return;
+            }
+            setRequestCount(prevCount => prevCount + 1);
+        } else {
+            setRequestCount(1);
+            setLastRequestTime(currentTime);
         }
 
         setIsLoading(true);
@@ -93,7 +117,7 @@ const LLMTools = ({ selectedTool, onClose }) => {
             const data = await response.json();
             const formattedResults = formatResults(data.choices[0].message.content);
             setResults(formattedResults);
-            setExecutedSearchTerm(searchTerm);  // Store the executed search term
+            setExecutedSearchTerm(searchTerm);
         } catch (err) {
             setError('An error occurred while fetching results. Please try again.');
             console.error('Error fetching results:', err);
@@ -169,16 +193,17 @@ const LLMTools = ({ selectedTool, onClose }) => {
     };
 
     return (
-        <div className={`p-4 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] rounded-lg shadow-lg max-w-md w-full`}>
-            <div className="flex justify-between items-center mb-4">
+        <div className={`p-4 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] rounded-lg shadow-lg max-w-lg w-full`}>
+            <div className={`flex justify-between items-center mb-4 border-2 border-[${theme.common.brown}] rounded-md p-1 pl-2`}>
                 <h2 className={`text-lg font-bold text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
                     {selectedToolData.name.charAt(0).toUpperCase() + selectedToolData.name.slice(1).replace(/([A-Z])/g, ' $1').trim()}
                 </h2>
+                <h3 className={`text-sm font-semibold text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>This tool is powered by AI.</h3>
                 <button
                     onClick={onClose}
-                    className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}] hover:text-[${theme.common.brown}]`}
+                    className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-r hover:opacity-80`}
                 >
-                    &times;
+                    <X size={15} />
                 </button>
             </div>
             <div className="flex mb-4">
@@ -196,7 +221,7 @@ const LLMTools = ({ selectedTool, onClose }) => {
                     disabled={isLoading}
                     className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded-r hover:opacity-80 transition-opacity ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    <Search size={20} />
+                    <RefreshCcwDot size={20} />
                 </button>
             </div>
             {isLoading && <p className={`text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>Loading...</p>}
