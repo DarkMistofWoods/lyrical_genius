@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { X, RefreshCcwDot, Shuffle, BookA, SquareUser, AtSign, Globe } from 'lucide-react';
+import { X, RefreshCcwDot, Shuffle, BookA, SquareUser, AtSign, Globe, Briefcase, Search } from 'lucide-react';
 import theme from '../theme';
 
 const CLOUDFLARE_WORKER_URL = 'https://lyrical-genius.zetleader.workers.dev/';
@@ -25,6 +25,8 @@ const LLMTools = ({ selectedTool, onClose }) => {
         { name: 'metaphorGenerator', icon: SquareUser, prompt: "Please generate 5 metaphors related to the term '{search term}'. Include only the metaphors; nothing extraneous. Use the following format:\n[\"{metaphor}\"],\n[\"{metaphor}\"],\n..." },
         { name: 'simileGenerator', icon: AtSign, prompt: "Please generate 5 similes that compare the term '{search term}' to something else and would be considered relevant in modern culture. The simile should include the given term. Include only the similes; nothing extraneous. Use the following format:\n[\"{simile}\"],\n[\"{simile}\"],\n..." },
         { name: 'culturalReferenceSearch', icon: Globe, prompt: "Please find 5 well-known, modern cultural references (people, organizations, stereotypes, cultural terms, analogies, sayings, etc.) relating to the subject in and around '{search term}' that would be considered relevant. The references must be from the previous ten years and must not be related to anything political. Include only the information and a short description for each; nothing extraneous. Use the following format:\n[\"{reference}\", \"{brief explanation}\"],\n[\"{reference}\", \"{brief explanation}\"],\n..." },
+        { name: 'synonymGenerator', icon: Briefcase, prompt: "Please find five words synonymous with '{search term}' that would be considered relevant. Results should match or be similar to the part of speech of the provided term. Include only the words and a short description for each; nothing extraneous. Use the following format:\n[\"{word}\", \"{description}\"],\n[\"{word}\", \"{description}\"],\n..." },
+        { name: 'wordFinder', icon: Search, prompt: "Please find five words that most closely match the description that is '{search term}'. Include only the words and their brief definitions; nothing extraneous. Use the following format:\n[\"{word}\", \"{definition}\"],\n[\"{word}\", \"{definition}\"],\n..." },
     ];
 
     const selectedToolData = tools.find(tool => tool.name === selectedTool);
@@ -165,11 +167,21 @@ const LLMTools = ({ selectedTool, onClose }) => {
                     </div>
                 );
             case 'metaphorGenerator':
-            case 'simileGenerator':
-                const toolName = selectedTool === 'metaphorGenerator' ? 'Metaphors' : 'Similes';
                 return (
                     <div>
-                        <h3 className={`text-lg font-semibold mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>{toolName} for "{executedSearchTerm}":</h3>
+                        <h3 className={`text-lg font-semibold mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>Metaphors for "{executedSearchTerm}":</h3>
+                        <ul className={`list-disc pl-5 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
+                            {results.map((result, index) => (
+                                <li key={index}>{result[0]}</li>
+                            ))}
+                        </ul>
+                        <h3 className={`text-sm font-semibold mt-4 mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>See something you don't like? Try searching again.</h3>
+                    </div>
+                );
+            case 'simileGenerator':
+                return (
+                    <div>
+                        <h3 className={`text-lg font-semibold mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>Similes for "{executedSearchTerm}":</h3>
                         <ul className={`list-disc pl-5 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
                             {results.map((result, index) => (
                                 <li key={index}>{result[0]}</li>
@@ -182,6 +194,32 @@ const LLMTools = ({ selectedTool, onClose }) => {
                 return (
                     <div>
                         <h3 className={`text-lg font-semibold mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>Cultural References for "{executedSearchTerm}":</h3>
+                        {results.map((result, index) => (
+                            <div key={index} className="mb-3">
+                                <p className={`font-semibold text-[${theme.common.brown}]`}>{result[0]}</p>
+                                <p className={`ml-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>{result[1]}</p>
+                            </div>
+                        ))}
+                        <h3 className={`text-sm font-semibold mt-4 mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>See something you don't like? Try searching again.</h3>
+                    </div>
+                );
+            case 'synonymGenerator':
+                return (
+                    <div>
+                        <h3 className={`text-lg font-semibold mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>Synonyms for "{executedSearchTerm}":</h3>
+                        {results.map((result, index) => (
+                            <div key={index} className="mb-3">
+                                <p className={`font-semibold text-[${theme.common.brown}]`}>{result[0]}</p>
+                                <p className={`ml-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>{result[1]}</p>
+                            </div>
+                        ))}
+                        <h3 className={`text-sm font-semibold mt-4 mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>See something you don't like? Try searching again.</h3>
+                    </div>
+                );
+            case 'wordFinder':
+                return (
+                    <div>
+                        <h3 className={`text-lg font-semibold mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>Words matching "{executedSearchTerm}":</h3>
                         {results.map((result, index) => (
                             <div key={index} className="mb-3">
                                 <p className={`font-semibold text-[${theme.common.brown}]`}>{result[0]}</p>

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Undo, Wrench, MessageSquare, Sparkle, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Shuffle, SquareUser, AtSign, LayoutPanelTop, BookA, Globe } from 'lucide-react';
+import { Undo, Wrench, MessageSquare, Sparkle, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Shuffle, SquareUser, AtSign, LayoutPanelTop, BookA, Globe, Link, Search } from 'lucide-react';
 import theme from '../theme';
 import { undo } from '../store/songSlice';
 import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
@@ -271,49 +271,63 @@ function Toolbar({
         </div>
 
         {openPanel === 'tools' && (
-          <div
-            className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}
-            style={{ left: 'calc(50% - 16px)' }}
-          >
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={() => handleLLMToolSelect('dictionary')}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Dictionary"
-              >
-                <BookA size={20} />
-              </button>
-              <button
-                onClick={() => handleLLMToolSelect('rhymeFinder')}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Rhyme Finder"
-              >
-                <Shuffle size={20} />
-              </button>
-              <button
-                onClick={() => handleLLMToolSelect('metaphorGenerator')}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Metaphor Generator"
-              >
-                <SquareUser size={20} />
-              </button>
-              <button
-                onClick={() => handleLLMToolSelect('simileGenerator')}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Simile Generator"
-              >
-                <AtSign size={20} />
-              </button>
-              <button
-                onClick={() => handleLLMToolSelect('culturalReferenceSearch')}
-                className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
-                title="Cultural Reference Search"
-              >
-                <Globe size={20} />
-              </button>
-            </div>
+        <div
+          className={`absolute bottom-full left-1/2 transform -translate-x-1/2 bg-[${isDarkMode ? theme.dark.background : theme.light.background}] bg-opacity-50 p-2 rounded-lg shadow-lg mb-2 mx-4 max-w-2xl w-full`}
+          style={{ left: 'calc(50% - 16px)' }}
+        >
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => handleLLMToolSelect('dictionary')}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Dictionary"
+            >
+              <BookA size={20} />
+            </button>
+            <button
+              onClick={() => handleLLMToolSelect('wordFinder')}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Word Finder"
+            >
+              <Search size={20} />
+            </button>
+            <button
+              onClick={() => handleLLMToolSelect('synonymGenerator')}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Synonym Generator"
+            >
+              <Link size={20} />
+            </button>
+            <button
+              onClick={() => handleLLMToolSelect('rhymeFinder')}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Rhyme Finder"
+            >
+              <Shuffle size={20} />
+            </button>
+            <button
+              onClick={() => handleLLMToolSelect('metaphorGenerator')}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Metaphor Generator"
+            >
+              <SquareUser size={20} />
+            </button>
+            <button
+              onClick={() => handleLLMToolSelect('simileGenerator')}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Simile Generator"
+            >
+              <AtSign size={20} />
+            </button>
+            <button
+              onClick={() => handleLLMToolSelect('culturalReferenceSearch')}
+              className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
+              title="Cultural Reference Search"
+            >
+              <Globe size={20} />
+            </button>
           </div>
-        )}
+        </div>
+      )}
 
         {selectedLLMTool && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
