@@ -60,6 +60,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
 
   const updateTimeoutRef = useRef(null);
   const previousSectionsRef = useRef([]);
+  const [sectionsLoaded, setSectionsLoaded] = useState(false);
 
   // New function to determine if the device is mobile
   const isMobile = () => window.innerWidth < 768;
@@ -294,16 +295,19 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
   useEffect(() => {
     if (currentSong.lyrics) {
       const parsedSections = parseLyrics(currentSong.lyrics);
-      // Ensure each section has a unique id
       const sectionsWithIds = parsedSections.map((section, index) => ({
         ...section,
         id: section.id || `section-${Date.now()}-${index}`
       }));
       setSections(sectionsWithIds);
       previousSectionsRef.current = sectionsWithIds;
+      
+      // Set a small timeout to ensure the DOM has updated
+      setTimeout(() => setSectionsLoaded(true), 0);
     } else {
       setSections([]);
       previousSectionsRef.current = [];
+      setSectionsLoaded(true);
     }
   }, [currentSong.id, currentSong.lyrics, parseLyrics]);
 
@@ -383,6 +387,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
           removeModifier={removeModifier}
           isFocusMode={true}
           isMobile={isMobile()}
+          sectionsLoaded={sectionsLoaded}
         />
       </div>
     );
@@ -492,6 +497,7 @@ function LyricsEditor({ isEditingMoodBoard, isFocusModeActive }) {
                               removeModifier={removeModifier}
                               dragHandleProps={provided.dragHandleProps}
                               isMobile={isMobile()}
+                              sectionsLoaded={sectionsLoaded}
                             />
                             <div className={`h-6 sm:h-8 relative mb-1 sm:mb-2 transition-opacity duration-300 ${isAddButtonVisible ? 'opacity-100' : 'opacity-0'}`}>
                               <AddSectionButton

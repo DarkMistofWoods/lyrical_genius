@@ -25,7 +25,8 @@ function Section({
   removeModifier,
   isFocusMode,
   dragHandleProps, 
-  isMobile
+  isMobile,
+  sectionsLoaded  // Add this line
 }) {
   const [customModifier, setCustomModifier] = useState('');
   const [showMaxModifierWarning, setShowMaxModifierWarning] = useState(false);
@@ -121,14 +122,22 @@ function Section({
   const adjustTextareaHeight = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto'; // Reset height to auto
-      textarea.style.height = `${Math.max(textarea.scrollHeight, 24)}px`; // Set new height (24px is approx. one line)
+      // Reset the height to auto
+      textarea.style.height = 'auto';
+      // Set the height to the scrollHeight
+      textarea.style.height = `${textarea.scrollHeight}px`;
+      // If it's mobile and the content is empty, set a minimum height
+      if (isMobile && !textarea.value.trim()) {
+        textarea.style.height = '100px';
+      }
     }
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
-    adjustTextareaHeight();
-  }, [localContent, adjustTextareaHeight]);
+    if (sectionsLoaded) {
+      adjustTextareaHeight();
+    }
+  }, [localContent, adjustTextareaHeight, isMobile, sectionsLoaded]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -492,9 +501,8 @@ function Section({
         <textarea
           ref={textareaRef}
           placeholder={`Enter your ${section.type.toLowerCase()} lyrics here...`}
-          className={`w-full p-2 pr-8 border rounded resize-none overflow-hidden ${
-            isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
-          } ${isMobile ? 'text-base' : ''}`}
+          className={`w-full p-2 pr-8 border rounded resize-none overflow-hidden ${isDarkMode ? 'bg-[#403E3F] text-[#F2F2F2] border-[#595859]' : 'bg-[#F2F2F2] text-[#0D0C0C] border-[#595859]'
+            } ${isMobile ? 'text-base' : ''}`}
           value={localContent}
           onChange={handleLocalChange}
           onBlur={handleBlur}
