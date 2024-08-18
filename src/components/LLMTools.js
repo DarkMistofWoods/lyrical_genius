@@ -20,13 +20,48 @@ const LLMTools = ({ selectedTool, onClose }) => {
     const [lastRequestTime, setLastRequestTime] = useState(0);
 
     const tools = [
-        { name: 'dictionary', icon: BookA, prompt: "Please find English definitions for the term '{search term}'. Include only the term and the varying definitions; nothing extraneous. Use the following format:\n[\"{definition}\", \"{part of speech}\"],\n[\"{definition}\", \"{part of speech}\"],\n..." },
-        { name: 'rhymeFinder', icon: Shuffle, prompt: "Please find ten English words that rhyme with '{search term}' (be sure to include rhymes that are perfect, near-perfect, assonant, and vary in number of syllables) and would be considered relevant in modern culture. Include only the words that rhyme, sorted in order of increasing syllables; nothing extraneous. Use the following format:\n[\"{rhyming word}\"],\n[\"{rhyming word}\"],\n..." },
-        { name: 'metaphorGenerator', icon: SquareUser, prompt: "Please generate 5 metaphors related to the term '{search term}'. Include only the metaphors; nothing extraneous. Use the following format:\n[\"{metaphor}\"],\n[\"{metaphor}\"],\n..." },
-        { name: 'simileGenerator', icon: AtSign, prompt: "Please generate 5 similes that compare the term '{search term}' to something else and would be considered relevant in modern culture. The simile should include the given term. Include only the similes; nothing extraneous. Use the following format:\n[\"{simile}\"],\n[\"{simile}\"],\n..." },
-        { name: 'culturalReferenceSearch', icon: Globe, prompt: "Please find 5 well-known, modern cultural references (people, organizations, stereotypes, cultural terms, analogies, sayings, etc.) relating to the subject in and around '{search term}' that would be considered relevant. The references must be from the previous ten years and must not be related to anything political. Include only the information and a short description for each; nothing extraneous. Use the following format:\n[\"{reference}\", \"{brief explanation}\"],\n[\"{reference}\", \"{brief explanation}\"],\n..." },
-        { name: 'synonymGenerator', icon: Briefcase, prompt: "Please find five words synonymous with '{search term}' that would be considered relevant. Results should match or be similar to the part of speech of the provided term. Include only the words and a short description for each; nothing extraneous. Use the following format:\n[\"{word}\", \"{description}\"],\n[\"{word}\", \"{description}\"],\n..." },
-        { name: 'wordFinder', icon: Search, prompt: "Please find five words that most closely match the description that is '{search term}'. Include only the words and their brief definitions; nothing extraneous. Use the following format:\n[\"{word}\", \"{definition}\"],\n[\"{word}\", \"{definition}\"],\n..." },
+        { 
+            name: 'dictionary', 
+            icon: BookA, 
+            prompt: "Please find English definitions for the term '{search term}'. Include only the term and the varying definitions; nothing extraneous. Use the following format:\n[\"{definition}\", \"{part of speech}\"],\n[\"{definition}\", \"{part of speech}\"],\n...",
+            description: "Look up definitions and parts of speech for any word."
+        },
+        { 
+            name: 'rhymeFinder', 
+            icon: Shuffle, 
+            prompt: "Please find ten English words that rhyme with '{search term}' (be sure to include rhymes that are perfect, near-perfect, assonant, and vary in number of syllables) and would be considered relevant in modern culture. Include only the words that rhyme, sorted in order of increasing syllables; nothing extraneous. Use the following format:\n[\"{rhyming word}\"],\n[\"{rhyming word}\"],\n...",
+            description: "Find words that rhyme with your input, including perfect, near-perfect, and assonant rhymes."
+        },
+        { 
+            name: 'metaphorGenerator', 
+            icon: SquareUser, 
+            prompt: "Please generate 5 metaphors related to the term '{search term}'. The result must be metaphors, not similes (it should not be a comparison). Include only the metaphors; nothing extraneous. Use the following format:\n[\"{metaphor}\"],\n[\"{metaphor}\"],\n...",
+            description: "Generate creative metaphors related to your input word or phrase."
+        },
+        { 
+            name: 'simileGenerator', 
+            icon: AtSign, 
+            prompt: "Please generate 5 similes that compare the term '{search term}' to something else and would be considered relevant in modern culture. The simile should include the given term. Include only the similes; nothing extraneous. Use the following format:\n[\"{simile}\"],\n[\"{simile}\"],\n...",
+            description: "Create similes that compare your input to other concepts or objects."
+        },
+        { 
+            name: 'culturalReferenceSearch', 
+            icon: Globe, 
+            prompt: "Please find 5 well-known, modern cultural references (people, organizations, stereotypes, cultural terms, analogies, sayings, etc.) relating to the subject in and around '{search term}' that would be considered relevant. The references must be from the previous ten years and must not be related to anything political. Include only the information and a short description for each; nothing extraneous. Use the following format:\n[\"{reference}\", \"{brief explanation}\"],\n[\"{reference}\", \"{brief explanation}\"],\n...",
+            description: "Discover recent cultural references related to your input term."
+        },
+        { 
+            name: 'synonymGenerator', 
+            icon: Briefcase, 
+            prompt: "Please find five words synonymous with '{search term}' that would be considered relevant. Results should match or be similar to the part of speech of the provided term. Include only the words and a short description for each; nothing extraneous. Use the following format:\n[\"{word}\", \"{description}\"],\n[\"{word}\", \"{description}\"],\n...",
+            description: "Find synonyms for your input word, matching the original part of speech."
+        },
+        { 
+            name: 'wordFinder', 
+            icon: Search, 
+            prompt: "Please find five words that most closely match the description that is '{search term}'. Include only the words and their brief definitions; nothing extraneous. Use the following format:\n[\"{word}\", \"{definition}\"],\n[\"{word}\", \"{definition}\"],\n...",
+            description: "Discover words that match a given description or concept."
+        },
     ];
 
     const selectedToolData = tools.find(tool => tool.name === selectedTool);
@@ -248,6 +283,9 @@ const LLMTools = ({ selectedTool, onClose }) => {
                     <X size={15} />
                 </button>
             </div>
+            <p className={`mb-4 text-sm text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>
+                {selectedToolData.description}
+            </p>
             <div className="flex mb-4">
                 <input
                     type="text"
