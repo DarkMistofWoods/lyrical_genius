@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { X, RefreshCcwDot, Search, BookA, MessageCircle, AtSign, Globe } from 'lucide-react';
+import { X, RefreshCcwDot, Shuffle, BookA, SquareUser, AtSign, Globe } from 'lucide-react';
 import theme from '../theme';
 
 const CLOUDFLARE_WORKER_URL = 'https://lyrical-genius.zetleader.workers.dev/';
@@ -21,10 +21,10 @@ const LLMTools = ({ selectedTool, onClose }) => {
 
     const tools = [
         { name: 'dictionary', icon: BookA, prompt: "Please find English definitions for the term '{search term}'. Include only the term and the varying definitions; nothing extraneous. Use the following format:\n[\"{definition}\", \"{part of speech}\"],\n[\"{definition}\", \"{part of speech}\"],\n..." },
-        { name: 'rhymeFinder', icon: Search, prompt: "Please find ten English words that rhyme with '{search term}' (be sure to include rhymes that are perfect, near-perfect, assonant, and vary in number of syllables) and would be considered relevant in modern culture. Include only the words that rhyme, sorted in order of increasing syllables; nothing extraneous. Use the following format:\n[\"{rhyming word}\"],\n[\"{rhyming word}\"],\n..." },
-        { name: 'metaphorGenerator', icon: MessageCircle, prompt: "Please generate 5 metaphors related to the term '{search term}'. Include only the metaphors; nothing extraneous. Use the following format:\n[\"{metaphor}\"],\n[\"{metaphor}\"],\n..." },
+        { name: 'rhymeFinder', icon: Shuffle, prompt: "Please find ten English words that rhyme with '{search term}' (be sure to include rhymes that are perfect, near-perfect, assonant, and vary in number of syllables) and would be considered relevant in modern culture. Include only the words that rhyme, sorted in order of increasing syllables; nothing extraneous. Use the following format:\n[\"{rhyming word}\"],\n[\"{rhyming word}\"],\n..." },
+        { name: 'metaphorGenerator', icon: SquareUser, prompt: "Please generate 5 metaphors related to the term '{search term}'. Include only the metaphors; nothing extraneous. Use the following format:\n[\"{metaphor}\"],\n[\"{metaphor}\"],\n..." },
         { name: 'simileGenerator', icon: AtSign, prompt: "Please generate 5 similes that compare the term '{search term}' to something else and would be considered relevant in modern culture. The simile should include the given term. Include only the similes; nothing extraneous. Use the following format:\n[\"{simile}\"],\n[\"{simile}\"],\n..." },
-        { name: 'culturalReferenceSearch', icon: Globe, prompt: "Find 5 well-known, modern cultural references (people, organizations, stereotypes, cultural terms, analogies, sayings, etc.) relating to the subject in and around '{search term}' that would be considered relevant. The references must be from the previous ten years and must not be related to anything political. Include only the information and a short description for each; nothing extraneous. Use the following format:\n[\"{reference}\", \"{brief explanation}\"],\n[\"{reference}\", \"{brief explanation}\"],\n..." },
+        { name: 'culturalReferenceSearch', icon: Globe, prompt: "Please find 5 well-known, modern cultural references (people, organizations, stereotypes, cultural terms, analogies, sayings, etc.) relating to the subject in and around '{search term}' that would be considered relevant. The references must be from the previous ten years and must not be related to anything political. Include only the information and a short description for each; nothing extraneous. Use the following format:\n[\"{reference}\", \"{brief explanation}\"],\n[\"{reference}\", \"{brief explanation}\"],\n..." },
     ];
 
     const selectedToolData = tools.find(tool => tool.name === selectedTool);

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Undo, Wrench, MessageSquare, Sparkle, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Search, MessageCircle, AtSign, LayoutPanelTop, BookA, Globe } from 'lucide-react';
+import { Undo, Wrench, MessageSquare, Sparkle, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Shuffle, SquareUser, AtSign, LayoutPanelTop, BookA, Globe } from 'lucide-react';
 import theme from '../theme';
 import { undo } from '../store/songSlice';
 import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
@@ -288,14 +288,14 @@ function Toolbar({
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Rhyme Finder"
               >
-                <Search size={20} />
+                <Shuffle size={20} />
               </button>
               <button
                 onClick={() => handleLLMToolSelect('metaphorGenerator')}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Metaphor Generator"
               >
-                <MessageCircle size={20} />
+                <SquareUser size={20} />
               </button>
               <button
                 onClick={() => handleLLMToolSelect('simileGenerator')}
