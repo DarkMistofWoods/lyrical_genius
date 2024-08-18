@@ -119,8 +119,8 @@ const GuidedTour = ({
         position: 'bottom',
       },
       {
-        target: '.version',
-        content: 'This is the version control button. \nIf you want to make some drastic changes to the structure of your lyrics without losing what you had previously, you can create a version here.',
+        target: '.songTemplates',
+        content: 'This is the song templates button. \nIf you like the structure and styles of your current song, you can save them as a template for a new song.',
         position: 'bottom',
       },
       {
