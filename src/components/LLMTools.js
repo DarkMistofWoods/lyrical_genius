@@ -147,6 +147,7 @@ const LLMTools = ({ selectedTool, onClose }) => {
                                 <p className={`ml-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>{result[0]}</p>
                             </div>
                         ))}
+                        <h3 className={`text-sm font-semibold mt-4 mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>See something you don't like? Try searching again.</h3>
                     </div>
                 );
             case 'rhymeFinder':
@@ -160,6 +161,7 @@ const LLMTools = ({ selectedTool, onClose }) => {
                                 </span>
                             ))}
                         </div>
+                        <h3 className={`text-sm font-semibold mt-4 mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>See something you don't like? Try searching again.</h3>
                     </div>
                 );
             case 'metaphorGenerator':
@@ -173,6 +175,7 @@ const LLMTools = ({ selectedTool, onClose }) => {
                                 <li key={index}>{result[0]}</li>
                             ))}
                         </ul>
+                        <h3 className={`text-sm font-semibold mt-4 mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>See something you don't like? Try searching again.</h3>
                     </div>
                 );
             case 'culturalReferenceSearch':
@@ -185,6 +188,7 @@ const LLMTools = ({ selectedTool, onClose }) => {
                                 <p className={`ml-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>{result[1]}</p>
                             </div>
                         ))}
+                        <h3 className={`text-sm font-semibold mt-4 mb-2 text-[${isDarkMode ? theme.dark.text : theme.light.text}]`}>See something you don't like? Try searching again.</h3>
                     </div>
                 );
             default:
