@@ -13,12 +13,10 @@ const createNewSong = () => ({
     mood: [],
     custom: []
   },
-  categories: [],
-  versions: []
+  categories: []
 });
 
 const MAX_HISTORY_LENGTH = 20;
-const MAX_VERSIONS = 5;
 
 const initialState = {
   songs: loadSongsFromLocalStorage(),
@@ -123,7 +121,6 @@ export const songSlice = createSlice({
       state.historyIndex = 0;
     },
     undo: (state) => {
-      // Perform two undo steps at once
       if (state.historyIndex > 1) {
         state.historyIndex -= 2;
         state.currentSong = state.history[state.historyIndex];
@@ -133,7 +130,6 @@ export const songSlice = createSlice({
         }
         saveSongsToLocalStorage(state.songs);
       } else if (state.historyIndex === 1) {
-        // If we're at the second item, just go back to the first
         state.historyIndex = 0;
         state.currentSong = state.history[0];
         const index = state.songs.findIndex(song => song.id === state.currentSong.id);
@@ -142,9 +138,7 @@ export const songSlice = createSlice({
         }
         saveSongsToLocalStorage(state.songs);
       }
-      // If historyIndex is 0, do nothing as we're already at the start
     },
-    // New reducers for category management
     addCategory: (state, action) => {
       if (!state.categories.includes(action.payload)) {
         state.categories.push(action.payload);
@@ -153,7 +147,6 @@ export const songSlice = createSlice({
         saveCategoryColorsToLocalStorage(state.categoryColors);
       }
     },
-
     deleteCategory: (state, action) => {
       state.categories = state.categories.filter(category => category !== action.payload);
       delete state.categoryColors[action.payload];
@@ -167,7 +160,6 @@ export const songSlice = createSlice({
       saveCategoriesToLocalStorage(state.categories);
       saveCategoryColorsToLocalStorage(state.categoryColors);
     },
-
     renameCategory: (state, action) => {
       const { oldName, newName } = action.payload;
       const index = state.categories.findIndex(category => category === oldName);
@@ -214,73 +206,6 @@ export const songSlice = createSlice({
         saveSongsToLocalStorage(state.songs);
       }
     },
-
-    saveVersion: (state, action) => {
-      const { songId } = action.payload;
-      const song = state.songs.find(s => s.id === songId);
-      if (song) {
-        const newVersion = {
-          title: song.title,
-          lyrics: song.lyrics,
-          style: song.style,
-          timestamp: Date.now()
-        };
-        song.versions.unshift(newVersion);
-        if (song.versions.length > MAX_VERSIONS) {
-          song.versions = song.versions.slice(0, MAX_VERSIONS);
-        }
-        if (state.currentSong.id === songId) {
-          state.currentSong.versions = song.versions;
-        }
-        saveSongsToLocalStorage(state.songs);
-      }
-    },
-
-    saveCurrentVersion: (state) => {
-      const song = state.currentSong;
-      const newVersion = {
-        title: song.title,
-        lyrics: song.lyrics,
-        style: song.style,
-        timestamp: Date.now()
-      };
-      song.versions.unshift(newVersion);
-      if (song.versions.length > MAX_VERSIONS) {
-        song.versions = song.versions.slice(0, MAX_VERSIONS);
-      }
-      const songIndex = state.songs.findIndex(s => s.id === song.id);
-      if (songIndex !== -1) {
-        state.songs[songIndex] = song;
-      }
-      saveSongsToLocalStorage(state.songs);
-    },
-
-    removeVersion: (state, action) => {
-      const { songId, versionIndex } = action.payload;
-      const song = state.songs.find(s => s.id === songId);
-      if (song && song.versions[versionIndex]) {
-        song.versions.splice(versionIndex, 1);
-        if (state.currentSong.id === songId) {
-          state.currentSong.versions = song.versions;
-        }
-        saveSongsToLocalStorage(state.songs);
-      }
-    },
-
-    revertToVersion: (state, action) => {
-      const { songId, versionIndex } = action.payload;
-      const song = state.songs.find(s => s.id === songId);
-      if (song && song.versions[versionIndex]) {
-        const version = song.versions[versionIndex];
-        song.title = version.title;
-        song.lyrics = version.lyrics;
-        song.style = version.style;
-        if (state.currentSong.id === songId) {
-          state.currentSong = { ...song };
-        }
-        saveSongsToLocalStorage(state.songs);
-      }
-    },
   }
 });
 
@@ -298,11 +223,7 @@ export const {
   deleteCategory,
   renameCategory,
   assignSongToCategory,
-  unassignSongFromCategory,
-  saveVersion,
-  saveCurrentVersion,
-  removeVersion,
-  revertToVersion
+  unassignSongFromCategory
 } = songSlice.actions;
 
 export default songSlice.reducer;
