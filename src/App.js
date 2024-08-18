@@ -13,7 +13,7 @@ import theme from './theme';
 import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
 import { loadTheme } from './store/themeSlice';
 
-const TESTING = true; // Set this to false in production
+const TESTING = false; // Set this to false in production
 
 function App() {
   const dispatch = useDispatch();
