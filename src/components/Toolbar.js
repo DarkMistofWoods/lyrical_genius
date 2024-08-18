@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Undo, Wrench, MessageSquare, Sparkle, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Search, MessageCircle, AtSign, Book, LayoutPanelTop } from 'lucide-react';
+import { Undo, Wrench, MessageSquare, Sparkle, Image, Edit, Eye, RefreshCw, SwitchCamera, Plus, Type, Upload, Bold, Italic, Underline, Trash2, Check, X, Search, MessageCircle, AtSign, LayoutPanelTop, BookA, Globe } from 'lucide-react';
 import theme from '../theme';
 import { undo } from '../store/songSlice';
 import { addElement, resetCurrentMoodBoard, updateElementContent, addMoodBoard, removeMoodBoard, renameMoodBoard, switchMoodBoard } from '../store/moodBoardSlice';
+import LLMTools from './LLMTools';
 
 function Toolbar({
   isMoodBoardVisible,
@@ -47,6 +48,8 @@ function Toolbar({
   // Check if undo is available
   const isUndoAvailable = historyIndex > 0;
 
+  const [selectedLLMTool, setSelectedLLMTool] = useState(null);
+
   const handleUndo = () => {
     if (isUndoAvailable) {
       dispatch(undo());
@@ -63,6 +66,11 @@ function Toolbar({
 
   const handleToolsClick = () => {
     setIsToolsOpen(!isToolsOpen);
+    setSelectedLLMTool(null);
+  };
+
+  const handleLLMToolSelect = (toolName) => {
+    setSelectedLLMTool(toolName);
   };
 
   const handleFeedbackClick = () => {
@@ -269,36 +277,50 @@ function Toolbar({
           >
             <div className="flex justify-center space-x-4">
               <button
+                onClick={() => handleLLMToolSelect('dictionary')}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Dictionary"
               >
-                <Book size={20} />
+                <BookA size={20} />
               </button>
               <button
+                onClick={() => handleLLMToolSelect('rhymeFinder')}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Rhyme Finder"
               >
                 <Search size={20} />
               </button>
               <button
+                onClick={() => handleLLMToolSelect('metaphorGenerator')}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Metaphor Generator"
               >
                 <MessageCircle size={20} />
               </button>
               <button
+                onClick={() => handleLLMToolSelect('simileGenerator')}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Simile Generator"
               >
                 <AtSign size={20} />
               </button>
               <button
+                onClick={() => handleLLMToolSelect('culturalReferenceSearch')}
                 className={`bg-[${theme.common.brown}] text-[${theme.common.white}] p-2 rounded hover:opacity-80 transition-opacity`}
                 title="Cultural Reference Search"
               >
-                <Book size={20} />
+                <Globe size={20} />
               </button>
             </div>
+          </div>
+        )}
+
+        {selectedLLMTool && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+            <LLMTools
+              selectedTool={selectedLLMTool}
+              onClose={() => setSelectedLLMTool(null)}
+            />
           </div>
         )}
 
