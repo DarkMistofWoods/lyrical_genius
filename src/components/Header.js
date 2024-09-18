@@ -67,12 +67,12 @@ function Header({
         </button>
         <div className="hidden md:flex items-center">
           <a 
-            href="https://suno.com/@digital_takeover" 
+            href="https://suno.com/@time_janitor" 
             target="_blank" 
             rel="noopener noreferrer" 
             className={`mr-4 hover:underline ${isDarkMode ? 'text-white' : 'text-gray-800'}`}
           >
-            Follow me on Suno: @digital_takeover
+            Follow me on Suno: @time_janitor
           </a>
           <button
             onClick={() => dispatch(toggleTheme())}
