@@ -223,7 +223,23 @@ function SongList() {
           </button>
         )}
       </div>
-      <div className="mb-4">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => setShowCategories(!showCategories)}
+          className={`flex items-center text-sm text-[${theme.common.white}] hover:text-[${theme.common.brown}]`}
+        >
+          {showCategories ? <EyeOff size={16} className="mr-1" /> : <Eye size={16} className="mr-1" />}
+          {showCategories ? 'Hide Categories' : 'Show Categories'}
+        </button>
+        <button
+          onClick={() => setShowStyles(!showStyles)}
+          className={`flex items-center text-sm text-[${theme.common.white}] hover:text-[${theme.common.brown}]`}
+        >
+          {showStyles ? <EyeOff size={16} className="mr-1" /> : <Eye size={16} className="mr-1" />}
+          {showStyles ? 'Hide Styles' : 'Show Styles'}
+        </button>
+      </div>
+      <div className="mt-2">
         <button
           onClick={toggleCategoryAccordion}
           className={`flex items-center justify-between w-full p-2 bg-[${theme.common.grey}] rounded-t`}
@@ -389,22 +405,6 @@ function SongList() {
       >
         New Song
       </button>
-      <div className="flex justify-between items-center">
-        <button
-          onClick={() => setShowCategories(!showCategories)}
-          className={`flex items-center text-sm text-[${theme.common.white}] hover:text-[${theme.common.brown}]`}
-        >
-          {showCategories ? <EyeOff size={16} className="mr-1" /> : <Eye size={16} className="mr-1" />}
-          {showCategories ? 'Hide Categories' : 'Show Categories'}
-        </button>
-        <button
-          onClick={() => setShowStyles(!showStyles)}
-          className={`flex items-center text-sm text-[${theme.common.white}] hover:text-[${theme.common.brown}]`}
-        >
-          {showStyles ? <EyeOff size={16} className="mr-1" /> : <Eye size={16} className="mr-1" />}
-          {showStyles ? 'Hide Styles' : 'Show Styles'}
-        </button>
-      </div>
       <DeleteConfirmationDialog />
     </div>
   );
